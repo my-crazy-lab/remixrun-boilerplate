@@ -21,7 +21,8 @@ module.exports = {
   },
 
   // Base config
-  extends: ["eslint:recommended"],
+  extends: ["eslint:recommended", "@remix-run/eslint-config",
+    "@remix-run/eslint-config/jest-testing-library",],
 
   overrides: [
     // React
