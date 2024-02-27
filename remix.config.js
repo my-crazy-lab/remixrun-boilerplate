@@ -1,5 +1,3 @@
 /** @type {import('@remix-run/dev').AppConfig} */
-module.exports = {
-  ignoredRouteFiles: ["**/*.css"],
-  serverModuleFormat: "cjs",
-};
+export const ignoredRouteFiles = ["**/*.css"];
+export const serverModuleFormat = "esm";

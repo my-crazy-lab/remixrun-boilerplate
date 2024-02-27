@@ -22,6 +22,10 @@ import styles from "./tailwind.css";
 import { Button } from "@/components/ui/button";
 import { mongodb } from "./utils/db.server";
 
+import { useChangeLanguage } from "remix-i18next/react";
+import { useTranslation } from "react-i18next";
+import i18next from "~/i18next.server";
+
 export const action = async () => {
   const contact = await createEmptyContact();
   return redirect(`/contacts/${contact.id}/edit`);
@@ -32,11 +36,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const q = url.searchParams.get("q");
   const contacts = await getContacts(q);
 
- let db = await mongodb.db("db");
-  let collection = await db.collection("task");
-  let tasks= await collection.find({}).limit(10).toArray();
+  const db = await mongodb.db("db");
+  const collection = await db.collection("task");
+  const tasks = await collection.find({}).limit(10).toArray();
 
-  return json({tasks, contacts, q });
+  const locale = await i18next.getLocale(request);
+
+  return json({ tasks, contacts, q, locale });
 };
 
 export const links: LinksFunction = () => {
@@ -48,12 +54,19 @@ export const links: LinksFunction = () => {
   ];
 };
 
+export const handle = { i18n: "common" };
+
 export default function App() {
-  const {tasks, contacts, q } = useLoaderData<typeof loader>();
+  const { tasks, locale, contacts, q } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
-console.log(tasks, "demo")
+  console.log("check connect db", tasks);
+
+  // use when have language right to left display
+  // const { i18n } = useTranslation() as any;
+  useChangeLanguage(locale);
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
