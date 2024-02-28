@@ -1,6 +1,6 @@
-import { MongoClient, BSON } from "mongodb";
+import { MongoClient, BSON, Db } from "mongodb";
 
-let connectionString = process.env.CONNECTION_STRING || "";
+let connectionString = process.env.URI_APP || "";
 
 if (!connectionString) {
   throw new Error(
@@ -16,19 +16,19 @@ else
     (m, p) => `appName=remix|${p}`,
   );
 
-let mongodb: MongoClient;
+let mongodb: Db;
 
 declare global {
   var __db: MongoClient | undefined;
 }
 
 if (process.env.NODE_ENV === "production") {
-  mongodb = new MongoClient(connectionString);
+  mongodb = new MongoClient(connectionString).db(process.env.DB_APP);
 } else {
   if (!global.__db) {
     global.__db = new MongoClient(connectionString);
   }
-  mongodb = global.__db;
+  mongodb = global.__db.db(process.env.DB_APP);
 }
 
 let ObjectId = BSON.ObjectId;

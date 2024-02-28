@@ -23,7 +23,6 @@ import { Button } from "@/components/ui/button";
 import { mongodb } from "./utils/db.server";
 
 import { useChangeLanguage } from "remix-i18next/react";
-import { useTranslation } from "react-i18next";
 import i18next from "~/i18next.server";
 
 export const action = async () => {
@@ -36,8 +35,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const q = url.searchParams.get("q");
   const contacts = await getContacts(q);
 
-  const db = await mongodb.db("db");
-  const collection = await db.collection("task");
+  const collection = await mongodb.collection("task");
   const tasks = await collection.find({}).limit(10).toArray();
 
   const locale = await i18next.getLocale(request);
@@ -59,10 +57,7 @@ export const handle = { i18n: "common" };
 export default function App() {
   const { tasks, locale, contacts, q } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
-  console.log("check connect db", tasks);
 
-  // use when have language right to left display
-  // const { i18n } = useTranslation() as any;
   useChangeLanguage(locale);
 
   return (
