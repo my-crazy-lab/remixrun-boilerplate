@@ -1,39 +1,54 @@
 import { Button } from "@/components/ui/button";
-import { useActionData, useLoaderData, useRouteError } from "@remix-run/react";
+import { useActionData, useLoaderData } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/components/ui/use-toast";
 
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { Form } from "@remix-run/react";
-import { authenticator, verifyAndSendCode } from "~/services/auth.server";
+import {
+  authenticator,
+  isVerificationCodeExpired,
+} from "~/services/auth.server";
 import { json, redirect } from "@remix-run/node";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useEffect } from "react";
+import { commitSession, getSession } from "~/services/session.server";
 
-export async function action({ request }: ActionFunctionArgs) {
-  try {
-    const formData = await request.formData();
-    const { username, password } = Object.fromEntries(formData);
-
-    const verificationToken = await verifyAndSendCode({ username, password });
-
-    return redirect(`/verification-code/${verificationToken}`);
-  } catch (error: any) {
-    return json({ error: error.message });
-  }
+export async function action({ request, params }: ActionFunctionArgs) {
+    return await authenticator.authenticate("user-pass", request, {
+      successRedirect: "/",
+      failureRedirect: `/verification-code/${params.token}`,
+      throwOnError: true,
+    });
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  return await authenticator.isAuthenticated(request, {
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  const isExpired = await isVerificationCodeExpired({ token: params.token });
+  if (isExpired) return redirect("/sign-in");
+
+  await authenticator.isAuthenticated(request, {
     successRedirect: "/",
   });
+  const session = await getSession(request.headers.get("cookie"));
+  const error = session.get(authenticator.sessionErrorKey);
+
+  return json(
+    { error },
+    {
+      headers: {
+        "Set-Cookie": await commitSession(session), // You must commit the session whenever you read a flash
+      },
+    },
+  );
 }
 
 export default function Screen() {
   const { t } = useTranslation();
-
   const error = useActionData<any>();
+const data  = useLoaderData<any>();
+
+console.log(data)
 
   useEffect(() => {
     if (error?.error) {
@@ -63,31 +78,19 @@ export default function Screen() {
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">Login</h1>
             <p className="text-sm text-muted-foreground">
-              Enter your email below to create your account
+              Open your gmail and verify your code.
             </p>
           </div>
           <div className="grid gap-6">
             <Form method="post">
               <div className="grid gap-2">
                 <div className="grid gap-1">
-                  <Label className="sr-only" htmlFor="email">
-                    Email
+                  <Label className="sr-only" htmlFor="verificationCode">
+                    Verification code
                   </Label>
-                  <Input name="username" required placeholder="User name" />
+                  <Input name="code" required placeholder="Verification code" />
                 </div>
-                <div className="grid gap-1">
-                  <Label className="sr-only" htmlFor="password">
-                    Password
-                  </Label>
-                  <Input
-                    required
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                  />
-                </div>
-
-                <Button>Login</Button>
+                <Button>Verify</Button>
               </div>
             </Form>
           </div>

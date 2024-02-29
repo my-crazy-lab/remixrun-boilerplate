@@ -4,8 +4,10 @@ function verifyDotEnv(): {
   MAIL_URL: string;
   PLAIN_TEXT: string;
   SALT_ROUND: string;
+  MAIL_FROM: string;
+  DOMAIN_BTASKEE_BE: string;
 } {
-  const env = process.env;
+  const env: any = process.env;
 
   if (!env.URI_APP) {
     throw new Error(
@@ -29,6 +31,14 @@ function verifyDotEnv(): {
     throw new Error(
       "Missing SALT_ROUND in .env\nUse the SALT_ROUND to set the cost factor when hash password",
     );
+  }
+  if (!env.MAIL_FROM) {
+    throw new Error(
+      "Missing MAIL_FORM in .env\nUse the MAIL_FORM to set host email sending authentication code.",
+    );
+  }
+  if (!env.DOMAIN_BTASKEE_BE) {
+    throw new Error("Missing DOMAIN_BTASKEE_BE  .env");
   }
 
   return env;
