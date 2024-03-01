@@ -4,7 +4,7 @@ import {
   Form,
   Outlet,
   useLoaderData,
-  useNavigation,
+  useNavigation,useOutletContext
 } from "@remix-run/react";
 
 import type { LoaderFunctionArgs } from "@remix-run/node";
@@ -16,28 +16,24 @@ import { Button } from "@/components/ui/button";
 import { authenticator } from "~/services/auth.server";
 
 export const action = async () => {
-  console.log("action contacts");
   const contact = await createEmptyContact();
   return redirect(`/contacts/${contact.id}/edit`);
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  console.log("loader contacts!");
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
   const contacts = await getContacts(q);
 
-  const user = await authenticator.isAuthenticated(request, {
-    failureRedirect: "/sign-innnn",
-  });
-
-  return json({ contacts, q, user });
+  return json({ contacts, q});
 };
 
 export default function App() {
-  const { contacts, user, q } = useLoaderData<typeof loader>();
+  const { contacts, q } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
-  console.log(user);
+  const outletData = useOutletContext();
+  console.log(outletData);
+
   return (
     <>
       <div id="sidebar">
