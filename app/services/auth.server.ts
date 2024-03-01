@@ -22,7 +22,10 @@ export const authenticator = new Authenticator<any>(sessionStorage, {
 });
 
 export function hashPassword(password: string) {
-  return bcrypt.hash(dotenv.PLAIN_TEXT + password, dotenv.SALT_ROUND);
+  return bcrypt.hashSync(
+    `${dotenv.PLAIN_TEXT}${password}`,
+    Number(dotenv.SALT_ROUND),
+  );
 }
 function compareHash({ password, hash }: { password: string; hash: string }) {
   return bcrypt.compare(dotenv.PLAIN_TEXT + password, hash);
@@ -87,7 +90,14 @@ export async function isVerificationCodeExpired({ token }: { token: string }) {
   return !account?._id;
 }
 
-export async function isResetPassExpired() {}
+export async function isResetPassExpired({ token }: { token: string }) {
+  const account = await mongodb.collection("accounts").findOne({
+    "resetPassword.token": token,
+    "resetPassword.expired": { $gt: momentTz().toDate() },
+  });
+
+  return !account?._id;
+}
 
 export async function verifyCode({ code }: { code: string }) {
   const isExpired = await mongodb.collection("accounts").findOne({
@@ -97,9 +107,16 @@ export async function verifyCode({ code }: { code: string }) {
     throw new Error("Verification code expired !");
   }
 
-  const account = await mongodb.collection("accounts").findOne({
-    "verification.code": code,
-  });
+  const account = await mongodb.collection("accounts").findOneAndUpdate(
+    {
+      "verification.code": code,
+    },
+    {
+      $set: {
+        "verification.expired": momentTz().toDate(),
+      },
+    },
+  );
   if (!account?._id) {
     throw new Error("Code incorrect!");
   }
@@ -123,7 +140,7 @@ export async function resetPassword({ email }: { email: string }) {
     },
   );
   if (!account?._id) {
-    return false;
+    throw new Error("Email incorrect !");
   }
 
   await sendEmail({
@@ -141,26 +158,26 @@ export async function changePassword({
   token: string;
   newPassword: string;
 }) {
-  if (!newPassword || !token) return false;
+  if (!newPassword || !token) throw new Error("Not accept");
+
+  const hashedPassword = await hashPassword(newPassword);
 
   const account = await mongodb.collection("accounts").findOneAndUpdate(
     {
-      "resetPassword.expired": { $lt: momentTz().toDate() },
+      "resetPassword.expired": { $gt: momentTz().toDate() },
       "resetPassword.token": token,
     },
     {
       $set: {
-        "services.password.bcrypt": hashPassword(newPassword),
+        "services.password.bcrypt": hashedPassword,
         "resetPassword.expired": momentTz().toDate(),
       },
     },
   );
 
   if (!account?._id) {
-    return false;
+    throw new Error("This link expired !");
   }
-
-  return account;
 }
 
 // Tell the Authenticator to use the form strategy
@@ -174,7 +191,7 @@ authenticator.use(
     const user = await verifyCode({
       code,
     });
-
+    console.log("login done");
     // the type of this user must match the type you pass to the Authenticator
     // the strategy will automatically inherit the type if you instantiate
     // directly inside the `use` method

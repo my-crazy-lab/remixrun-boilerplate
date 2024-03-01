@@ -5,7 +5,11 @@ import { toast } from "@/components/ui/use-toast";
 
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { Form } from "@remix-run/react";
-import { authenticator, verifyAndSendCode } from "~/services/auth.server";
+import {
+  authenticator,
+  resetPassword,
+  verifyAndSendCode,
+} from "~/services/auth.server";
 import { json, redirect } from "@remix-run/node";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -14,32 +18,30 @@ import { useEffect } from "react";
 export async function action({ request }: ActionFunctionArgs) {
   try {
     const formData = await request.formData();
-    const { username, password } = Object.fromEntries(formData);
+    const { email } = Object.fromEntries(formData);
 
-    const verificationToken = await verifyAndSendCode({ username, password });
+    await resetPassword({ email });
 
-    return redirect(`/verification-code/${verificationToken}`);
+    return json({ isSent: true });
   } catch (error: any) {
     return json({ error: error.message });
   }
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  return await authenticator.isAuthenticated(request, {
-    successRedirect: "/",
-  });
+  return null;
 }
 
 export default function Screen() {
   const { t } = useTranslation();
 
-  const error = useActionData<any>();
+  const actionData = useActionData<any>();
 
   useEffect(() => {
-    if (error?.error) {
-      toast({ description: error.error });
+    if (actionData?.error) {
+      toast({ description: actionData.error });
     }
-  }, [error?.error]);
+  }, [actionData?.error]);
 
   return (
     <div className="container relative hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -51,9 +53,9 @@ export default function Screen() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;This library has saved me countless hours of work and
-              helped me deliver stunning designs to my clients faster than ever
-              before.&rdquo;
+              &ldquo;Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+              Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Ut enim ad minim veniam, quis nostrud exercitation.&rdquo;
             </p>
           </blockquote>
         </div>
@@ -61,35 +63,32 @@ export default function Screen() {
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">Login</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Send email
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Enter your email below to create your account
+              No worries, we will send you reset instructions.
             </p>
           </div>
           <div className="grid gap-6">
-            <Form method="post">
-              <div className="grid gap-2">
-                <div className="grid gap-1">
-                  <Label className="sr-only" htmlFor="email">
-                    Email
-                  </Label>
-                  <Input name="username" required placeholder="User name" />
+            {actionData?.isSent ? (
+              "Check your mail"
+            ) : (
+              <Form method="post">
+                <div className="grid gap-2">
+                  <div className="grid gap-1">
+                    <Label className="sr-only">Email</Label>
+                    <Input
+                      required
+                      name="email"
+                      type="email"
+                      placeholder="name@btaskee.com"
+                    />
+                  </div>
+                  <Button>Send</Button>
                 </div>
-                <div className="grid gap-1">
-                  <Label className="sr-only" htmlFor="password">
-                    Password
-                  </Label>
-                  <Input
-                    required
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                  />
-                </div>
-
-                <Button>Login</Button>
-              </div>
-            </Form>
+              </Form>
+            )}
           </div>
         </div>
       </div>

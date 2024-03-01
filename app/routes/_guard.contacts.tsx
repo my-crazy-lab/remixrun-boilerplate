@@ -16,17 +16,19 @@ import { Button } from "@/components/ui/button";
 import { authenticator } from "~/services/auth.server";
 
 export const action = async () => {
+  console.log("action contacts");
   const contact = await createEmptyContact();
   return redirect(`/contacts/${contact.id}/edit`);
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  console.log("loader contacts!");
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
   const contacts = await getContacts(q);
 
   const user = await authenticator.isAuthenticated(request, {
-    failureRedirect: "/sign-in",
+    failureRedirect: "/sign-innnn",
   });
 
   return json({ contacts, q, user });
@@ -40,7 +42,6 @@ export default function App() {
     <>
       <div id="sidebar">
         <h1>Remix Contacts</h1>
-        <Button>Click me</Button>
         <div>
           <Form id="search-form" role="search">
             <input

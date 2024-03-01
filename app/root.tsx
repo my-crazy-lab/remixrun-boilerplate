@@ -16,6 +16,16 @@ import { Toaster } from "@/components/ui/toaster";
 
 import { useChangeLanguage } from "remix-i18next/react";
 import i18next from "~/i18next.server";
+import { authenticator } from "./services/auth.server";
+
+export const action = async ({ request }) => {
+  const formData = await request.formData();
+  const { _action } = Object.fromEntries(formData);
+  if (_action === "logout") {
+    await authenticator.logout(request, { redirectTo: "/sign-in" });
+  }
+  return null;
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const locale = await i18next.getLocale(request);
