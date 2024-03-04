@@ -20,7 +20,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     return redirect(`/verification-code/${verificationToken}`);
   } catch (error: any) {
-    return json({ error: error.message });
+    return error;
   }
 }
 
@@ -32,12 +32,14 @@ export default function Screen() {
   const { t } = useTranslation();
 
   const error = useActionData<any>();
-
+  console.log(error);
+  /*
   useEffect(() => {
     if (error?.error) {
       toast({ description: error.error });
     }
   }, [error?.error]);
+*/
 
   return (
     <>

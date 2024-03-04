@@ -45,42 +45,42 @@ export default function Screen() {
     }
   }, [actionData?.error]);
 
-  return(
-  <>
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Reset Password
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              You are a step away from accessing your account!
-            </p>
-          </div>
-          <div className="grid gap-6">
-            <Form method="post">
-              <div className="grid gap-2">
-                <div className="grid gap-1">
-                  <Label className="sr-only">New Password</Label>
-                  <Input
-                    required
-                    type="password"
-                    name="newPassword"
-                    placeholder="New Password"
-                  />
-                </div>
-                <div className="grid gap-1">
-                  <Label className="sr-only">Re-enter New Password</Label>
-                  <Input
-                    required
-                    type="password"
-                    name="reEnterPassword"
-                    placeholder="Re-enter New Password"
-                  />
-                </div>
+  return (
+    <>
+      <div className="flex flex-col space-y-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Reset Password
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          You are a step away from accessing your account!
+        </p>
+      </div>
+      <div className="grid gap-6">
+        <Form method="post">
+          <div className="grid gap-2">
+            <div className="grid gap-1">
+              <Label className="sr-only">New Password</Label>
+              <Input
+                required
+                type="password"
+                name="newPassword"
+                placeholder="New Password"
+              />
+            </div>
+            <div className="grid gap-1">
+              <Label className="sr-only">Re-enter New Password</Label>
+              <Input
+                required
+                type="password"
+                name="reEnterPassword"
+                placeholder="Re-enter New Password"
+              />
+            </div>
 
-                <Button>Reset</Button>
-              </div>
-            </Form>
+            <Button>Reset</Button>
           </div>
-        </>
+        </Form>
+      </div>
+    </>
   );
 }

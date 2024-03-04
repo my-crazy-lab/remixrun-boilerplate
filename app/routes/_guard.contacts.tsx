@@ -4,7 +4,8 @@ import {
   Form,
   Outlet,
   useLoaderData,
-  useNavigation,useOutletContext
+  useNavigation,
+  useOutletContext,
 } from "@remix-run/react";
 
 import type { LoaderFunctionArgs } from "@remix-run/node";
@@ -25,7 +26,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const q = url.searchParams.get("q");
   const contacts = await getContacts(q);
 
-  return json({ contacts, q});
+  return json({ contacts, q });
 };
 
 export default function App() {

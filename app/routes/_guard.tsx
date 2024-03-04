@@ -20,13 +20,13 @@ import {
 import { Input } from "@/components/ui/input";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
-const user =  await authenticator.isAuthenticated(request, {
+  const user = await authenticator.isAuthenticated(request, {
     failureRedirect: "/sign-in",
   });
   const session = await getSession(request.headers.get("cookie"));
 
   return json(
-    {user},
+    { user },
     {
       headers: {
         "Set-Cookie": await commitSession(session), // You must commit the session whenever you read a flash
@@ -37,7 +37,7 @@ const user =  await authenticator.isAuthenticated(request, {
 
 export default function Screen() {
   const { t } = useTranslation();
-const loaderData= useLoaderData();
+  const loaderData = useLoaderData();
 
   return (
     <div className="hidden flex-col md:flex">
@@ -109,10 +109,8 @@ const loaderData= useLoaderData();
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Form method="post">
-                    <button name="_action" value="logout" type="submit">
-                      Logout
-                    </button>
+                  <Form method="post" action="/logout">
+                    <button type="submit">Logout</button>
                   </Form>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -122,7 +120,7 @@ const loaderData= useLoaderData();
       </div>
       <div className="flex-1 space-y-4 p-8 pt-6">
         <h2 className="text-3xl font-bold tracking-tight">Hello there!</h2>
-        <Outlet context={loaderData}/>
+        <Outlet context={loaderData} />
       </div>
     </div>
   );

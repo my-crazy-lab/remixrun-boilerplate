@@ -44,35 +44,33 @@ export default function Screen() {
   }, [actionData?.error]);
 
   return (
-  <>
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Send email
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              No worries, we will send you reset instructions.
-            </p>
-          </div>
-          <div className="grid gap-6">
-            {actionData?.isSent ? (
-              "Check your mail"
-            ) : (
-              <Form method="post">
-                <div className="grid gap-2">
-                  <div className="grid gap-1">
-                    <Label className="sr-only">Email</Label>
-                    <Input
-                      required
-                      name="email"
-                      type="email"
-                      placeholder="name@btaskee.com"
-                    />
-                  </div>
-                  <Button>Send</Button>
-                </div>
-              </Form>
-            )}
-          </div>
-        </>
+    <>
+      <div className="flex flex-col space-y-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Send email</h1>
+        <p className="text-sm text-muted-foreground">
+          No worries, we will send you reset instructions.
+        </p>
+      </div>
+      <div className="grid gap-6">
+        {actionData?.isSent ? (
+          "Check your mail"
+        ) : (
+          <Form method="post">
+            <div className="grid gap-2">
+              <div className="grid gap-1">
+                <Label className="sr-only">Email</Label>
+                <Input
+                  required
+                  name="email"
+                  type="email"
+                  placeholder="name@btaskee.com"
+                />
+              </div>
+              <Button>Send</Button>
+            </div>
+          </Form>
+        )}
+      </div>
+    </>
   );
 }

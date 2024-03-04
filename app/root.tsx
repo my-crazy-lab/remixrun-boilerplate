@@ -6,6 +6,7 @@ import {
   ScrollRestoration,
   Outlet,
   useLoaderData,
+  ClientLoaderFunctionArgs,
 } from "@remix-run/react";
 
 import type { LoaderFunctionArgs, LinksFunction } from "@remix-run/node";
@@ -16,22 +17,29 @@ import { Toaster } from "@/components/ui/toaster";
 
 import { useChangeLanguage } from "remix-i18next/react";
 import i18next from "~/i18next.server";
-import { authenticator } from "./services/auth.server";
-
-export const action = async ({ request }) => {
-  const formData = await request.formData();
-  const { _action } = Object.fromEntries(formData);
-  if (_action === "logout") {
-    await authenticator.logout(request, { redirectTo: "/sign-in" });
-  }
-  return null;
-};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  console.log("loader server");
   const locale = await i18next.getLocale(request);
 
   return json({ locale });
 };
+
+let clientCache: {
+  locale?: string;
+} = {};
+export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
+  console.log("loader client");
+  if (clientCache.locale) {
+    return { locale: clientCache.locale };
+  }
+
+  const dataServerLoader: any = await serverLoader();
+  clientCache.locale = dataServerLoader?.locale;
+
+  return { locale: clientCache.locale };
+}
+clientLoader.hydrate = true;
 
 export const links: LinksFunction = () => {
   return [
@@ -47,6 +55,7 @@ export const handle = { i18n: "common" };
 export default function App() {
   const { locale } = useLoaderData<typeof loader>();
   useChangeLanguage(locale);
+  console.log(locale, "locale");
 
   return (
     <html lang={locale}>

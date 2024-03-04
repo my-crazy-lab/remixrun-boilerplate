@@ -9,11 +9,7 @@ import { dotenv } from "./dotenv.server";
 import { getFutureTimeFromToday, momentTz } from "~/utils/helpers.server";
 import { sendEmail } from "./mail.server";
 import { v4 as uuidv4 } from "uuid";
-
-interface User {
-  username: string;
-  password: string;
-}
+import { json } from "@remix-run/node";
 
 // Create an instance of the authenticator, pass a generic with what
 // strategies will return and will store in the session
@@ -24,20 +20,26 @@ export const authenticator = new Authenticator<any>(sessionStorage, {
 export function hashPassword(password: string) {
   return bcrypt.hashSync(
     `${dotenv.PLAIN_TEXT}${password}`,
-    Number(dotenv.SALT_ROUND),
+    dotenv.SALT_ROUND,
   );
 }
 function compareHash({ password, hash }: { password: string; hash: string }) {
   return bcrypt.compare(dotenv.PLAIN_TEXT + password, hash);
 }
 
-export async function verifyAndSendCode({ password, username }: User) {
+export async function verifyAndSendCode({
+  password,
+  username,
+}: {
+  password: string;
+  username: string;
+}) {
   const usersCol = mongodb.collection("accounts");
 
   const user = await usersCol.findOne({ username });
 
   if (!user) {
-    throw new Error("User not found !");
+    throw json({ message: "User not found !" }, { status: 404 });
   }
   const verified = await compareHash({
     password,

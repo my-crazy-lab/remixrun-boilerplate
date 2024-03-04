@@ -2,10 +2,10 @@ import { Outlet } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { authenticator} from "~/services/auth.server";
+import { authenticator } from "~/services/auth.server";
 
 export async function action({ request, params }: ActionFunctionArgs) {
-return null
+  return null;
 }
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -36,10 +36,9 @@ export default function Screen() {
       </div>
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <Outlet/>
+          <Outlet />
         </div>
       </div>
     </div>
   );
 }
-
