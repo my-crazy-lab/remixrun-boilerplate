@@ -1,6 +1,7 @@
 import { MongoClient, BSON, Db } from "mongodb";
+import { dotenv } from "~/services/dotenv.server";
 
-let connectionString = process.env.URI_APP || "";
+let connectionString = dotenv.URI_APP;
 
 if (!connectionString) {
   throw new Error(

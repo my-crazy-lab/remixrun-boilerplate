@@ -8,7 +8,8 @@
     "dev": "remix dev -c \"node server.mjs\"",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve build",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "deploy": "cross-env NODE_ENV=production node server.mjs"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.0.4",
@@ -26,6 +27,7 @@
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "i18next": "^23.10.0",
     "i18next-browser-languagedetector": "^7.2.0",
@@ -40,6 +42,7 @@
     "nodemailer": "^6.9.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.0",
     "react-i18next": "^14.0.5",
     "remix-auth": "^3.6.0",
     "remix-auth-form": "^1.4.0",
@@ -61,6 +64,7 @@
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "autoprefixer": "^10.4.17",
+    "cross-env": "^7.0.3",
     "eslint": "^8.47.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
