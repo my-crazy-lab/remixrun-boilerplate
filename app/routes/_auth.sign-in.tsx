@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { Link, useActionData } from "@remix-run/react";
+import { Link, useActionData, useNavigation } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 import { Form } from "@remix-run/react";
 import { useEffect } from "react";
 import { verifyAndSendCode } from "~/services/auth.server";
@@ -17,29 +17,24 @@ export async function action({ request }: ActionFunctionArgs) {
     const { username, password } = Object.fromEntries(formData);
 
     const verificationToken = await verifyAndSendCode({ username, password });
-
     return redirect(`/verification-code/${verificationToken}`);
   } catch (error: any) {
     return error;
   }
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  return null;
-}
-
 export default function Screen() {
   const { t } = useTranslation();
 
   const error = useActionData<any>();
-  console.log(error);
-  /*
+
   useEffect(() => {
-    if (error?.error) {
-      toast({ description: error.error });
+    if (error?.message) {
+      toast({ description: error.message });
     }
-  }, [error?.error]);
-*/
+  }, [error?.message]);
+
+  const navigation = useNavigation();
 
   return (
     <>
@@ -69,8 +64,20 @@ export default function Screen() {
                 placeholder="Password"
               />
             </div>
-            <Link className="text-end underline italic mb-8" to={'/reset-password'}>Forgot password?</Link>
-            <Button>Login</Button>
+            <Link
+              className="text-end underline italic mb-8"
+              to={"/reset-password"}
+            >
+              Forgot password?
+            </Link>
+            <Button
+              disabled={
+                navigation.formAction === "/sign-in" &&
+                navigation.state !== "idle"
+              }
+            >
+              Login
+            </Button>
           </div>
         </Form>
       </div>

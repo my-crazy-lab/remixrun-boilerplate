@@ -18,10 +18,7 @@ export const authenticator = new Authenticator<any>(sessionStorage, {
 });
 
 export function hashPassword(password: string) {
-  return bcrypt.hashSync(
-    `${dotenv.PLAIN_TEXT}${password}`,
-    dotenv.SALT_ROUND,
-  );
+  return bcrypt.hashSync(`${dotenv.PLAIN_TEXT}${password}`, dotenv.SALT_ROUND);
 }
 function compareHash({ password, hash }: { password: string; hash: string }) {
   return bcrypt.compare(dotenv.PLAIN_TEXT + password, hash);
