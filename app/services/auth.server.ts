@@ -31,7 +31,7 @@ export async function verifyAndSendCode({
   password: string;
   username: string;
 }) {
-  const usersCol = mongodb.collection("accounts");
+  const usersCol = mongodb.collection("users");
 
   const user = await usersCol.findOne({ username });
 
@@ -55,7 +55,7 @@ export async function sendVerificationCode({ email }: { email: string }) {
   ).toString();
   const token = uuidv4();
 
-  const accountsCol = mongodb.collection("accounts");
+  const accountsCol = mongodb.collection("users");
   await accountsCol.updateOne(
     {
       email,
@@ -81,7 +81,7 @@ export async function sendVerificationCode({ email }: { email: string }) {
 }
 
 export async function isVerificationCodeExpired({ token }: { token: string }) {
-  const account = await mongodb.collection("accounts").findOne({
+  const account = await mongodb.collection("users").findOne({
     "verification.token": token,
     "verification.expired": { $gt: momentTz().toDate() },
   });
@@ -90,7 +90,7 @@ export async function isVerificationCodeExpired({ token }: { token: string }) {
 }
 
 export async function isResetPassExpired({ token }: { token: string }) {
-  const account = await mongodb.collection("accounts").findOne({
+  const account = await mongodb.collection("users").findOne({
     "resetPassword.token": token,
     "resetPassword.expired": { $gt: momentTz().toDate() },
   });
@@ -99,14 +99,14 @@ export async function isResetPassExpired({ token }: { token: string }) {
 }
 
 export async function verifyCode({ code }: { code: string }) {
-  const isExpired = await mongodb.collection("accounts").findOne({
+  const isExpired = await mongodb.collection("users").findOne({
     "verification.expired": { $gt: momentTz().toDate() },
   });
   if (!isExpired?._id) {
     throw new Error("Verification code expired !");
   }
 
-  const account = await mongodb.collection("accounts").findOneAndUpdate(
+  const account = await mongodb.collection("users").findOneAndUpdate(
     {
       "verification.code": code,
     },
@@ -125,7 +125,7 @@ export async function verifyCode({ code }: { code: string }) {
 export async function resetPassword({ email }: { email: string }) {
   const resetToken = uuidv4();
 
-  const account = await mongodb.collection("accounts").findOneAndUpdate(
+  const account = await mongodb.collection("users").findOneAndUpdate(
     {
       email,
     },
@@ -161,7 +161,7 @@ export async function changePassword({
 
   const hashedPassword = await hashPassword(newPassword);
 
-  const account = await mongodb.collection("accounts").findOneAndUpdate(
+  const account = await mongodb.collection("users").findOneAndUpdate(
     {
       "resetPassword.expired": { $gt: momentTz().toDate() },
       "resetPassword.token": token,

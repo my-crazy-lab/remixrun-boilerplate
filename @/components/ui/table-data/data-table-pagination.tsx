@@ -5,7 +5,6 @@ import {
   DoubleArrowRightIcon,
 } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
-
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,13 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SetURLSearchParams } from "react-router-dom";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  setSearchParams: SetURLSearchParams;
 }
+
+export const defaultPageSize = [3, 10, 20, 30, 40, 50] as const;
+export type PageSizeClient = (typeof defaultPageSize)[number];
 
 export function DataTablePagination<TData>({
   table,
+  setSearchParams,
 }: DataTablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between px-2">
@@ -34,6 +39,10 @@ export function DataTablePagination<TData>({
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
+              setSearchParams((params) => {
+                params.set("pageSize", value);
+                return params;
+              });
               table.setPageSize(Number(value));
             }}
           >
@@ -41,7 +50,7 @@ export function DataTablePagination<TData>({
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
+              {defaultPageSize.map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
@@ -57,7 +66,13 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => table.setPageIndex(0)}
+            onClick={() => {
+              table.setPageIndex(0);
+              setSearchParams((params) => {
+                params.set("pageIndex", "0");
+                return params;
+              });
+            }}
             disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to first page</span>
@@ -66,7 +81,14 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={() => table.previousPage()}
+            onClick={() => {
+              setSearchParams((params) => {
+                const old = Number(params.get("pageIndex"));
+                params.set("pageIndex", (old - 1).toString());
+                return params;
+              });
+              table.previousPage();
+            }}
             disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to previous page</span>
@@ -75,7 +97,14 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={() => table.nextPage()}
+            onClick={() => {
+              table.nextPage();
+              setSearchParams((params) => {
+                const old = Number(params.get("pageIndex"));
+                params.set("pageIndex", (old + 1).toString());
+                return params;
+              });
+            }}
             disabled={!table.getCanNextPage()}
           >
             <span className="sr-only">Go to next page</span>
@@ -84,7 +113,13 @@ export function DataTablePagination<TData>({
           <Button
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            onClick={() => {
+              table.setPageIndex(table.getPageCount() - 1);
+              setSearchParams((params) => {
+                params.set("pageIndex", (table.getPageCount() - 1).toString());
+                return params;
+              });
+            }}
             disabled={!table.getCanNextPage()}
           >
             <span className="sr-only">Go to last page</span>

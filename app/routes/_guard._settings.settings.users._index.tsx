@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "@remix-run/react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -23,6 +24,7 @@ import { DataTableRowActions } from "@/components/ui/table-data/data-table-row-a
 import {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
   SortingState,
   VisibilityState,
   flexRender,
@@ -35,7 +37,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
-
 import {
   Table,
   TableBody,
@@ -44,61 +45,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Badge } from "@/components/ui/badge";
-import { DataTablePagination } from "@/components/ui/table-data/data-table-pagination";
+import {
+  DataTablePagination,
+  defaultPageSize,
+} from "@/components/ui/table-data/data-table-pagination";
 import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
-
-const dataUser = [
-  {
-    _id: "R5pRgZqKyhTKRX2Ng",
-    city: [
-      "Hồ Chí Minh",
-      "Hà Nội",
-      "Đà Nẵng",
-      "Bình Dương",
-      "Đồng Nai",
-      "Cần Thơ",
-      "Hải Phòng",
-      "Lâm Đồng",
-      "Khánh Hòa",
-      "Bangkok",
-    ],
-    isoCode: "VN",
-    services: "",
-    username: "myquyen.le",
-    emails: "xnguyen9a101@gmail.com",
-    ipAddress: "127.0.0.1",
-    profile: {
-      language: "vi",
-      timezone: "Asia/Ho_Chi_Minh",
-    },
-    teams: ["customer-service", "tasker", "marketing"],
-  },
-  {
-    _id: "ebxuQxvqjcsnonTkY",
-    username: "admin",
-    emails: "xnguyen9a10@gmail.com",
-    email: "xnguyen9a10@gmail.com",
-    city: [
-      "Hồ Chí Minh",
-      "Hà Nội",
-      "Đà Nẵng",
-      "Bình Dương",
-      "Đồng Nai",
-      "Cần Thơ",
-      "Hải Phòng",
-      "Lâm Đồng",
-      "Khánh Hòa",
-      "Bangkok",
-    ],
-    districts: [],
-    voiceCallStatus: "INACTIVE",
-    ipAddress: "127.0.0.1",
-    isoCode: "VN",
-    teams: ["customer-service", "tasker", "marketing"],
-  },
-];
+import { LoaderFunctionArgs, json } from "@remix-run/node";
+import { getTotalUsers, getUsers } from "~/services/settings.server";
+import {
+  useLoaderData,
+  useLocation,
+  useSearchParams,
+  useSubmit,
+} from "@remix-run/react";
+import {
+  findClosest,
+  getPageSieAndPageIndex,
+  getSkipAndLimit,
+} from "~/utils/helpers";
 
 const columns: ColumnDef<any>[] = [
   {
@@ -137,22 +102,22 @@ const columns: ColumnDef<any>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "emails",
+    accessorKey: "email",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Emails" />
+      <DataTableColumnHeader column={column} title="Email" />
     ),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("emails")}
+            {row.getValue("email")}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "city",
+    accessorKey: "cities",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="City" />
     ),
@@ -161,7 +126,7 @@ const columns: ColumnDef<any>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {row
-              ?.getValue("city")
+              ?.getValue("cities")
               .map((e: any, index: number) => <Badge key={index}>{e}</Badge>)}
           </span>
         </div>
@@ -175,14 +140,39 @@ const columns: ColumnDef<any>[] = [
   },
 ];
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const total = await getTotalUsers();
+  const { limit, skip } = getSkipAndLimit(
+    getPageSieAndPageIndex({
+      total,
+      pageSize: Number(url.searchParams.get("pageSize")) || 0,
+      pageIndex: Number(url.searchParams.get("pageIndex")) || 0,
+    }),
+  );
+
+  const users = await getUsers({
+    skip,
+    limit,
+    projection: { cities: 1, username: 1, email: 1 },
+  });
+  return json({ users, total });
+};
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  total: number;
+  pagination: PaginationState;
+  setSearchParams: any;
 }
 
-function DataTable<TData, TValue>({
+function BtaskeeTable<TData, TValue>({
   columns,
   data,
+  total,
+  pagination,
+  setSearchParams,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -200,7 +190,9 @@ function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination: pagination,
     },
+    rowCount: total,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -238,8 +230,8 @@ function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            {table.getCoreRowModel().rows?.length ? (
+              table.getCoreRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
@@ -267,12 +259,15 @@ function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table} setSearchParams={setSearchParams} />
     </div>
   );
 }
 
-export default function UsersPage() {
+export default function Screen() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const loaderData = useLoaderData();
+
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
       <div className="flex items-center justify-between space-y-2">
@@ -423,7 +418,18 @@ export default function UsersPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <DataTable data={dataUser} columns={columns} />
+
+      <BtaskeeTable
+        total={loaderData?.total || 0}
+        data={loaderData?.users || []}
+        columns={columns}
+        pagination={getPageSieAndPageIndex({
+          total: loaderData?.total || 0,
+          pageSize: Number(searchParams.get("pageSize") || 0),
+          pageIndex: Number(searchParams.get("pageIndex") || 0),
+        })}
+        setSearchParams={setSearchParams}
+      />
     </div>
   );
 }

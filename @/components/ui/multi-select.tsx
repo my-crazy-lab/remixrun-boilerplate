@@ -25,13 +25,13 @@ export type OptionType = {
 interface MultiSelectProps {
   options: OptionType[];
   className?: string;
-  isDisplayAllOption: boolean;
+  isDisplayAllOptions: boolean;
 }
 
 function MultiSelect({
   options,
   className,
-  isDisplayAllOption,
+  isDisplayAllOptions,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -39,20 +39,20 @@ function MultiSelect({
   const [selected, setSelected] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    if (isDisplayAllOption) {
+    if (isDisplayAllOptions) {
       if (selected.length === options.length) {
         setAllSelected(true);
       } else {
         setAllSelected(false);
       }
     }
-  }, [isDisplayAllOption, selected, options]);
+  }, [isDisplayAllOptions, selected, options]);
 
   const handleUnselect = (item: string) => {
     setSelected(selected.filter((i) => i !== item));
   };
 
-  const handleisDisplayAllOption = () => {
+  const handleisDisplayAllOptions = () => {
     if (allSelected && selected) {
       setSelected([]);
     } else {
@@ -109,7 +109,7 @@ function MultiSelect({
           <CommandInput placeholder="Search ..." />
           <CommandEmpty>No item found.</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
-            <CommandItem onSelect={handleisDisplayAllOption}>
+            <CommandItem onSelect={handleisDisplayAllOptions}>
               {allSelected ? "Unselect All" : "Select All"}
             </CommandItem>
             {options.map((option) => (
