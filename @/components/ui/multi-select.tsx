@@ -25,13 +25,14 @@ export type OptionType = {
 interface MultiSelectProps {
   options: OptionType[];
   className?: string;
-  isDisplayAllOptions: boolean;
+  isDisplayAllOptions?: boolean;
 }
 
 function MultiSelect({
   options,
   className,
   isDisplayAllOptions,
+  ...props
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 

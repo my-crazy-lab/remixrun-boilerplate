@@ -48,7 +48,7 @@ export async function createNewUser({
     username,
     email,
     cities,
-    "services.password.bcrypt": passwordHashed,
+    services: { password: { bcrypt: passwordHashed } },
   });
 
   const groupCol = mongodb.collection("groups");
@@ -111,4 +111,23 @@ export async function getGroups({
   const total = await groupCol.count({});
 
   return { total, groups };
+}
+
+export async function getGroupsByUser({ projection, userId }: any) {
+  const groupCol = mongodb.collection("groups");
+  const groups = await groupCol
+    .find({ users: userId }, { projection })
+    .toArray();
+  return groups;
+}
+
+export async function createRole({ name, permissions }: any) {
+  const roleCol = mongodb.collection("roles");
+  await roleCol.insertOne({
+    ...newRecordCommonField,
+    name,
+    slug: name.toLocaleLowerCase().split(" ").join("-"),
+    permissions,
+  });
+  return { message: "Successful" };
 }

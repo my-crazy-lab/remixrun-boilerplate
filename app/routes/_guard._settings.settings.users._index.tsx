@@ -51,8 +51,13 @@ import {
   defaultPageSize,
 } from "@/components/ui/table-data/data-table-pagination";
 import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
-import { LoaderFunctionArgs, json } from "@remix-run/node";
-import { getTotalUsers, getUsers } from "~/services/settings.server";
+import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import {
+  createNewUser,
+  getGroupsByUser,
+  getTotalUsers,
+  getUsers,
+} from "~/services/settings.server";
 import {
   useLoaderData,
   useLocation,
@@ -64,6 +69,8 @@ import {
   getPageSieAndPageIndex,
   getSkipAndLimit,
 } from "~/utils/helpers";
+import { getSession } from "~/services/session.server";
+import { useForm } from "react-hook-form";
 
 const columns: ColumnDef<any>[] = [
   {
@@ -140,9 +147,30 @@ const columns: ColumnDef<any>[] = [
   },
 ];
 
+export const action = async ({ request }: ActionFunctionArgs) => {
+  try {
+    const formData = await request.formData();
+    const { username, email, password, cities, groupIds } =
+      Object.fromEntries(formData);
+
+    await createNewUser({
+      username,
+      password,
+      email,
+      cities: JSON.parse(cities),
+      groupsIds: JSON.parse(groupIds),
+    });
+
+    return null;
+  } catch (error: any) {
+    return error;
+  }
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const total = await getTotalUsers();
+
   const { limit, skip } = getSkipAndLimit(
     getPageSieAndPageIndex({
       total,
@@ -156,7 +184,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     limit,
     projection: { cities: 1, username: 1, email: 1 },
   });
-  return json({ users, total });
+  const session = await getSession(request.headers.get("cookie"));
+  const groups = await getGroupsByUser({
+    userId: session.get("user").userId,
+    projection: { name: 1 },
+  });
+  return json({ users, total, groups });
 };
 
 interface DataTableProps<TData, TValue> {
@@ -267,6 +300,37 @@ function BtaskeeTable<TData, TValue>({
 export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData();
+  console.log(loaderData);
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<any>({
+    defaultValues: {
+      email: "",
+      password: "",
+      cities: ["HCM", "HN"],
+      groupIds: [],
+      username: "",
+    },
+  });
+  const submit = useSubmit();
+
+  const onSubmit = (data: any) => {
+    console.log(data, "submit form");
+
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    formData.append("cities", JSON.stringify(data.cities));
+    formData.append("groupIds", JSON.stringify(data.groupIds));
+    formData.append("username", data.username);
+
+    submit(formData, { method: "post" });
+  };
+  console.log(errors);
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -284,137 +348,89 @@ export default function Screen() {
             <Button variant="outline">Add new user</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[560px]">
-            <DialogHeader>
-              <DialogTitle>New user</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
-                  Username
-                </Label>
-                <Input
-                  id="username"
-                  className="col-span-3"
-                  placeholder="Username"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  className="col-span-3"
-                  placeholder="Email"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="password" className="text-right">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  className="col-span-3"
-                  placeholder="Password"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Teams</Label>
-                <div className="col-span-3">
-                  <MultiSelect
-                    isDisplayAllOptions
-                    options={[
-                      {
-                        value: "next.js",
-                        label: "Next.js",
-                      },
-                      {
-                        value: "sveltekit",
-                        label: "SvelteKit",
-                      },
-                      {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
-                      },
-                      {
-                        value: "remix",
-                        label: "Remix",
-                      },
-                    ]}
-                    className="w-[360px]"
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <DialogHeader>
+                <DialogTitle>New user</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="username" className="text-right">
+                    Username
+                  </Label>
+                  <Input
+                    {...register("username" as const, {
+                      required: true,
+                    })}
+                    id="username"
+                    className="col-span-3"
+                    placeholder="Username"
                   />
                 </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Citys</Label>
-                <div className="col-span-2">
-                  <MultiSelect
-                    isDisplayAllOptions
-                    options={[
-                      {
-                        value: "next.js",
-                        label: "Next.js",
-                      },
-                      {
-                        value: "sveltekit",
-                        label: "SvelteKit",
-                      },
-                      {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
-                      },
-                      {
-                        value: "remix",
-                        label: "Remix",
-                      },
-                    ]}
-                    className="w-[360px]"
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="email" className="text-right">
+                    Email
+                  </Label>
+                  <Input
+                    {...register("email" as const, {
+                      required: true,
+                    })}
+                    id="email"
+                    type="email"
+                    className="col-span-3"
+                    placeholder="Email"
                   />
                 </div>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="VN">Vietnam</SelectItem>
-                    <SelectItem value="TH">Thailand</SelectItem>
-                    <SelectItem value="ID">Indo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Groups</Label>
-                <div className="col-span-3">
-                  <MultiSelect
-                    isDisplayAllOptions
-                    options={[
-                      {
-                        value: "next.js",
-                        label: "Next.js",
-                      },
-                      {
-                        value: "sveltekit",
-                        label: "SvelteKit",
-                      },
-                      {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
-                      },
-                      {
-                        value: "remix",
-                        label: "Remix",
-                      },
-                    ]}
-                    className="w-[360px]"
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="password" className="text-right">
+                    Password
+                  </Label>
+                  <Input
+                    {...register("password" as const, {
+                      required: true,
+                    })}
+                    autoComplete="off"
+                    id="password"
+                    type="password"
+                    className="col-span-3"
+                    placeholder="Password"
                   />
                 </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Cities</Label>
+                  <div className="col-span-3">
+                    <MultiSelect
+                      isDisplayAllOptions
+                      options={[
+                        {
+                          value: "HCM",
+                          label: "Ho Chi Minh",
+                        },
+                        {
+                          value: "HN",
+                          label: "Hanoi",
+                        },
+                      ]}
+                      className="w-[360px]"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Groups</Label>
+                  <div className="col-span-3">
+                    <MultiSelect
+                      options={loaderData?.groups?.map((e) => ({
+                        value: e._id,
+                        label: e.name,
+                      }))}
+                      className="w-[360px]"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Save changes</Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="submit">Save changes</Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
