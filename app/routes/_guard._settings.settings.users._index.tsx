@@ -3,6 +3,7 @@ import { useNavigate } from "@remix-run/react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -70,7 +71,7 @@ import {
   getSkipAndLimit,
 } from "~/utils/helpers";
 import { getSession } from "~/services/session.server";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 const columns: ColumnDef<any>[] = [
   {
@@ -305,18 +306,25 @@ export default function Screen() {
   const {
     register,
     control,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<any>({
     defaultValues: {
       email: "",
       password: "",
-      cities: ["HCM", "HN"],
+      cities: [],
       groupIds: [],
       username: "",
     },
   });
   const submit = useSubmit();
+  const [open, setOpen] = React.useState<boolean>(false);
+
+  const onCloseAndReset = () => {
+    setOpen(false);
+    reset();
+  };
 
   const onSubmit = (data: any) => {
     console.log(data, "submit form");
@@ -329,8 +337,8 @@ export default function Screen() {
     formData.append("username", data.username);
 
     submit(formData, { method: "post" });
+    onCloseAndReset();
   };
-  console.log(errors);
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -343,7 +351,15 @@ export default function Screen() {
             Here&apos;s a list of your users!
           </p>
         </div>
-        <Dialog>
+        <Dialog
+          open={open}
+          onOpenChange={(open) => {
+            if (!open) {
+              reset();
+            }
+            setOpen(open);
+          }}
+        >
           <DialogTrigger asChild>
             <Button variant="outline">Add new user</Button>
           </DialogTrigger>
@@ -398,19 +414,31 @@ export default function Screen() {
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label className="text-right">Cities</Label>
                   <div className="col-span-3">
-                    <MultiSelect
-                      isDisplayAllOptions
-                      options={[
-                        {
-                          value: "HCM",
-                          label: "Ho Chi Minh",
-                        },
-                        {
-                          value: "HN",
-                          label: "Hanoi",
-                        },
-                      ]}
-                      className="w-[360px]"
+                    <Controller
+                      control={control}
+                      name="cities"
+                      render={({ field: { onChange, value } }) => (
+                        <MultiSelect
+                          selected={value}
+                          setSelected={onChange}
+                          isDisplayAllOptions
+                          options={[
+                            {
+                              value: "HCM",
+                              label: "Ho Chi Minh",
+                            },
+                            {
+                              value: "HN",
+                              label: "Hanoi",
+                            },
+                            {
+                              value: "DT",
+                              label: "Dong Thap",
+                            },
+                          ]}
+                          className="w-[360px]"
+                        />
+                      )}
                     />
                   </div>
                 </div>

@@ -26,18 +26,21 @@ interface MultiSelectProps {
   options: OptionType[];
   className?: string;
   isDisplayAllOptions?: boolean;
+  selected?: string[];
+  setSelected?: any;
 }
 
 function MultiSelect({
   options,
   className,
   isDisplayAllOptions,
-  ...props
+  selected = [],
+  setSelected,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
   const [allSelected, setAllSelected] = React.useState(false);
-  const [selected, setSelected] = React.useState<string[]>([]);
+  // const [selected, setSelected] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     if (isDisplayAllOptions) {
