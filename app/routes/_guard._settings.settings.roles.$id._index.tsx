@@ -7,10 +7,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import _ from "lodash";
 import { ArrowBigLeftDashIcon } from "lucide-react";
 
@@ -1101,50 +1098,49 @@ const teams = ['account', 'cs', 'manager']
 
 export default function RolesDetail() {
   return (
-    <Card className="p-4">
+    <>
       <CardHeader className="font-bold text-xl flex-row flex justify-between items-center px-0">
         <div className="flex items-center"><ArrowBigLeftDashIcon className="cursor-pointer mr-2 h-4" /> Role detail</div>
         <Button>Edit</Button>
       </CardHeader>
-      <p>Teams</p>
-      <div className="flex gap-2 mt-2 cursor-pointer">
-        {teams.map((team: any, index: number) => <Badge key={index} className="rounded-md">{team}</Badge>)}
-      </div>
-      <p className="mt-4">Role</p>
-      <Input className="mt-2" value="Role name"></Input>
-      <Separator className="my-4" />
-      {_.map(actionPermissions, (actionPermission: any) => (
-        <Accordion type="single" collapsible>
-          <AccordionItem value={actionPermission.module}>
-            <AccordionTrigger>
-              {actionPermission?.module?.toUpperCase()} features
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {_.map(actionPermission.actions, (action) => (
-                  <div key={action._id} className="my-2">
-                    <Label
-                      htmlFor={action._id}
-                      className="block text-base font-medium text-gray-700"
-                    >
-                      {action.name}
-                    </Label>
-                    <div className="mt-1 flex items-center gap-2">
-                      <Switch id={action._id} />
-                      <Label
-                        className="text-sm text-gray-500"
-                        htmlFor={action._id}
-                      >
-                        {action.description}
-                      </Label>
+      <Card className="p-4">
+        <h3 className="font-semibold">Teams</h3>
+        <div className="flex gap-2 mt-2 cursor-pointer">
+          {teams.map((team: any, index: number) => <Badge key={index} className="rounded-md">{team}</Badge>)}
+        </div>
+        <h3 className="font-semibold mt-4">Role name</h3>
+        <p className="">Role name</p>
+        <ScrollArea className="h-72 mt-4 rounded-md border">
+          <div className="p-4">
+            {_.map(actionPermissions, (actionPermission: any) => (
+              <Accordion type="single" collapsible>
+                <AccordionItem value={actionPermission.module}>
+                  <AccordionTrigger>
+                    {actionPermission?.module?.toUpperCase()} features
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+                      {_.map(actionPermission.actions, (action) => (
+                        <div key={action._id} className="my-2">
+                          <div className="mt-1 flex items-center gap-2">
+                            <Badge
+                              variant="outline"
+                              className="text-sm text-gray-500"
+                            >
+                              {action.name}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      ))}
-    </Card>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            ))}
+          </div>
+        </ScrollArea>
+      </Card>
+    </>
+
   );
 }

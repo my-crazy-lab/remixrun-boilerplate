@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -8,270 +8,122 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { DataTableColumnHeader } from "@/components/ui/table-data/data-table-column-header";
-import { DataTableRowActions } from "@/components/ui/table-data/data-table-row-actions";
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import * as React from "react";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import { Badge } from "@/components/ui/badge";
-import { DataTablePagination } from "@/components/ui/table-data/data-table-pagination";
-import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
-
-const dataUser = [
+const dataGroups = [
   {
-    _id: "R5pRgZqKyhTKRX2Ng",
-    city: [
-      "Hồ Chí Minh",
-      "Hà Nội",
-      "Đà Nẵng",
-      "Bình Dương",
-      "Đồng Nai",
-      "Cần Thơ",
-      "Hải Phòng",
-      "Lâm Đồng",
-      "Khánh Hòa",
-      "Bangkok",
+    "_id": "bZLhevo2qKduQdjcG",
+    "name": "Admin",
+    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has",
+    "users": [
+      {
+        "_id": "R5pRgZqKyhTKRX2Ng"
+      }
     ],
-    isoCode: "VN",
-    services: "",
-    username: "myquyen.le",
-    emails: "xnguyen9a101@gmail.com",
-    ipAddress: "127.0.0.1",
-    profile: {
-      language: "vi",
-      timezone: "Asia/Ho_Chi_Minh",
-    },
-    teams: ["customer-service", "tasker", "marketing"],
+    "roles": [
+      {
+        "_id": "super-user"
+      }
+    ]
   },
   {
-    _id: "ebxuQxvqjcsnonTkY",
-    username: "admin",
-    emails: "xnguyen9a10@gmail.com",
-    email: "xnguyen9a10@gmail.com",
-    city: [
-      "Hồ Chí Minh",
-      "Hà Nội",
-      "Đà Nẵng",
-      "Bình Dương",
-      "Đồng Nai",
-      "Cần Thơ",
-      "Hải Phòng",
-      "Lâm Đồng",
-      "Khánh Hòa",
-      "Bangkok",
+    "_id": "F8PiavHetxb4pNzos",
+    "name": "Tasker Recruitment",
+    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has",
+    "users": [
+      {
+        "_id": ""
+      },
+      {
+        "_id": ""
+      }
     ],
-    districts: [],
-    voiceCallStatus: "INACTIVE",
-    ipAddress: "127.0.0.1",
-    isoCode: "VN",
-    teams: ["customer-service", "tasker", "marketing"],
+    "roles": [
+      {
+        "_id": "tasker"
+      }
+    ]
   },
+  {
+    "_id": "etkkyCdobSm783E3y",
+    "name": "Group 1",
+    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has no meaningful content. It starts with and continues with nonsensical Latin-like words. nonsensical Latin-like words. nonsensical Latin-like words. ",
+    "users": [
+      {
+        "_id": "KfhstepwgsNR2Z69M"
+      }
+    ],
+    "roles": [
+      {
+        "_id": "role-1"
+      },
+      {
+        "_id": "role-2"
+      }
+    ]
+  },
+  {
+    "_id": "v82pw5dWGE6dzrQwz",
+    "name": "Accounting",
+    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has",
+    "users": [
+      {
+        "_id": "TFnqfX3G3Z3SQDR7w"
+      }
+    ],
+    "roles": [
+      {
+        "_id": "role-1"
+      },
+      {
+        "_id": "role-2"
+      }
+    ],
+    "teams": [
+      "Tasker",
+      "CS",
+      "Marketing"
+    ]
+  },
+  {
+    "_id": "NGjzPAYry5dxCR55t",
+    "name": "employee update",
+    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has no meaningful content. It starts with and continues with nonsensical Latin-like words.",
+    "users": [
+      {
+        "_id": "TFnqfX3G3Z3SQDR7w"
+      },
+      {
+        "_id": "KfhstepwgsNR2Z69M"
+      }
+    ],
+    "roles": [
+      {
+        "_id": "role-1"
+      },
+      {
+        "_id": "role-2"
+      }
+    ],
+    "teams": [
+      "Tasker"
+    ]
+  },
+
 ];
 
-const columns: ColumnDef<any>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-[2px]"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-[2px]"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "username",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="UserName" />
-    ),
-    cell: ({ row }) => (
-      <div className="w-[80px]">{row.getValue("username")}</div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "emails",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Emails" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("emails")}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "city",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="City" />
-    ),
-    cell: ({ row }: any) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
-            {row.getValue("city").map((e: any, index: number) => (
-              <Badge key={index}>{e}</Badge>
-            ))}
-          </span>
-        </div>
-      );
-    },
-  },
 
-  {
-    id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
-  },
-];
-
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-}
-
-function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-    },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-  });
-
-  return (
-    <div className="space-y-4">
-      <DataTableToolbar column="username" table={table} />
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <DataTablePagination table={table} />
-    </div>
-  );
-}
-
-export default function UsersPage() {
+export default function GroupPage() {
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Users management
+            Groups
           </h2>
           <p className="text-muted-foreground">
             Here&apos;s a list of your users!
@@ -381,7 +233,39 @@ export default function UsersPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <DataTable data={dataUser} columns={columns} />
+      <div className="grid grid-cols-3 gap-4">
+        {dataGroups.map((data) => {
+          return (
+            <Card>
+              <CardHeader className="font-semibold text-lg flex flex-row justify-between items-center">
+                {data.name}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+                    >
+                      <DotsHorizontalIcon className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[160px]">
+                    <DropdownMenuItem>Delete</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      Duplicate
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </CardHeader>
+              <CardContent className="text-gray">
+                {data.description}
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
     </div>
   );
 }
