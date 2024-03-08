@@ -1,27 +1,37 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "@remix-run/react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MultiSelect } from "@/components/ui/multi-select";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { DataTableColumnHeader } from "@/components/ui/table-data/data-table-column-header";
+import {
+  DataTablePagination
+} from "@/components/ui/table-data/data-table-pagination";
 import { DataTableRowActions } from "@/components/ui/table-data/data-table-row-actions";
+import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
+import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import {
+  useLoaderData,
+  useSearchParams,
+  useSubmit
+} from "@remix-run/react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -38,21 +48,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import * as React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-  DataTablePagination,
-  defaultPageSize,
-} from "@/components/ui/table-data/data-table-pagination";
-import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import { Controller, useForm } from "react-hook-form";
+import { getSession } from "~/services/session.server";
 import {
   createNewUser,
   getGroupsByUser,
@@ -60,18 +57,9 @@ import {
   getUsers,
 } from "~/services/settings.server";
 import {
-  useLoaderData,
-  useLocation,
-  useSearchParams,
-  useSubmit,
-} from "@remix-run/react";
-import {
-  findClosest,
   getPageSieAndPageIndex,
-  getSkipAndLimit,
+  getSkipAndLimit
 } from "~/utils/helpers";
-import { getSession } from "~/services/session.server";
-import { Controller, useForm } from "react-hook-form";
 
 const columns: ColumnDef<any>[] = [
   {
@@ -254,9 +242,9 @@ function BtaskeeTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}

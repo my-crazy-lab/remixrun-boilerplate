@@ -1,6 +1,7 @@
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function Screen() {
   const dataUser = {
@@ -30,11 +31,17 @@ export default function Screen() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium">Profile</h3>
-        <p className="text-sm text-muted-foreground">
-          This is how others will see you on the site.
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="grid">
+          <h3 className="text-lg font-medium">Profile</h3>
+          <p className="text-sm text-muted-foreground">
+            This is how others will see you on the site.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline">Change password</Button>
+          <Button>Edit profile</Button>
+        </div>
       </div>
       <Separator />
       <div className="space-y-8">
