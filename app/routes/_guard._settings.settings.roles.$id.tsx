@@ -1097,18 +1097,25 @@ const actionPermissions = [
   },
 ];
 
-const teams = ['account', 'cs', 'manager']
+const teams = ["account", "cs", "manager"];
 
 export default function RolesDetail() {
   return (
     <Card className="p-4">
       <CardHeader className="font-bold text-xl flex-row flex justify-between items-center px-0">
-        <div className="flex items-center"><ArrowBigLeftDashIcon className="cursor-pointer mr-2 h-4" /> Role detail</div>
+        <div className="flex items-center">
+          <ArrowBigLeftDashIcon className="cursor-pointer mr-2 h-4" /> Role
+          detail
+        </div>
         <Button>Edit</Button>
       </CardHeader>
       <p>Teams</p>
       <div className="flex gap-2 mt-2 cursor-pointer">
-        {teams.map((team: any, index: number) => <Badge key={index} className="rounded-md">{team}</Badge>)}
+        {teams.map((team: any, index: number) => (
+          <Badge key={index} className="rounded-md">
+            {team}
+          </Badge>
+        ))}
       </div>
       <p className="mt-4">Role</p>
       <Input className="mt-2" value="Role name"></Input>

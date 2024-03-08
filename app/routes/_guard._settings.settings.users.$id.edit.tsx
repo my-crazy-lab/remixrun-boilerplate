@@ -9,7 +9,8 @@ export default function Screen() {
   return (
     <>
       <div className="flex-row flex font-bold text-xl items-center px-0 mb-4">
-        <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" /> Update user
+        <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" /> Update
+        user
       </div>
       <Card className="p-4">
         <form>
@@ -98,9 +99,8 @@ export default function Screen() {
           <CardFooter className="py-0">
             <Button type="submit">Save changes</Button>
           </CardFooter>
-        </form >
-      </Card >
+        </form>
+      </Card>
     </>
-
   );
 }

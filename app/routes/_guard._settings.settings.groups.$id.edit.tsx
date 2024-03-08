@@ -9,7 +9,8 @@ export default function Screen() {
   return (
     <>
       <div className="flex-row flex font-bold text-xl items-center px-0 mb-4">
-        <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" /> Update group
+        <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" /> Update
+        group
       </div>
       <Card className="p-4">
         <form>
@@ -111,6 +112,5 @@ export default function Screen() {
         </form>
       </Card>
     </>
-
   );
 }

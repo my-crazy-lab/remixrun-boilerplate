@@ -7,7 +7,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,17 +21,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DataTableColumnHeader } from "@/components/ui/table-data/data-table-column-header";
-import {
-  DataTablePagination
-} from "@/components/ui/table-data/data-table-pagination";
+import { DataTablePagination } from "@/components/ui/table-data/data-table-pagination";
 import { DataTableRowActions } from "@/components/ui/table-data/data-table-row-actions";
 import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import {
-  useLoaderData,
-  useSearchParams,
-  useSubmit
-} from "@remix-run/react";
+import { useLoaderData, useSearchParams, useSubmit } from "@remix-run/react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -49,6 +43,7 @@ import {
 } from "@tanstack/react-table";
 import * as React from "react";
 import { Controller, useForm } from "react-hook-form";
+import { hocAction } from "~/hoc/remix";
 import { getSession } from "~/services/session.server";
 import {
   createNewUser,
@@ -56,10 +51,7 @@ import {
   getTotalUsers,
   getUsers,
 } from "~/services/settings.server";
-import {
-  getPageSieAndPageIndex,
-  getSkipAndLimit
-} from "~/utils/helpers";
+import { getPageSieAndPageIndex, getSkipAndLimit } from "~/utils/helpers";
 
 const columns: ColumnDef<any>[] = [
   {
@@ -136,27 +128,24 @@ const columns: ColumnDef<any>[] = [
   },
 ];
 
-export const action = async ({ request, params }: ActionFunctionArgs) => {
+export const action = hocAction(async ({ formData }: any) => {
   try {
-    const url = new URL(request.url);
-    console.log(url.pathname, "params !!");
-    const formData = await request.formData();
-    const { username, email, password, cities, groupIds } =
-      Object.fromEntries(formData);
+    const { username, email, password, cities, groupIds } = formData;
 
     await createNewUser({
       username,
       password,
       email,
-      cities: JSON.parse(cities),
-      groupsIds: JSON.parse(groupIds),
+      cities: JSON.parse(cities) || [],
+      groupsIds: JSON.parse(groupIds) || [],
     });
 
     return null;
   } catch (error: any) {
+    console.log(error);
     return error;
   }
-};
+});
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -244,9 +233,9 @@ function BtaskeeTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -291,7 +280,6 @@ function BtaskeeTable<TData, TValue>({
 export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData();
-  console.log(loaderData);
 
   const {
     register,
@@ -317,8 +305,6 @@ export default function Screen() {
   };
 
   const onSubmit = (data: any) => {
-    console.log(data, "submit form");
-
     const formData = new FormData();
     formData.append("email", data.email);
     formData.append("password", data.password);

@@ -2,9 +2,10 @@ import { ObjectId, mongodb } from "~/utils/db.server";
 import { getSession } from "../session.server";
 import { momentTz } from "~/utils/helpers.server";
 
-export async function saveActionHistory({ request }: any, { data }: any) {
+export async function saveActionHistory({ request }: any, data: any) {
   const action = new URL(request.url).pathname;
   const userId = await getUserId({ request });
+
   const actionsHistoryCol = mongodb.collection("actionsHistory");
 
   await actionsHistoryCol.insertOne({
@@ -14,8 +15,6 @@ export async function saveActionHistory({ request }: any, { data }: any) {
     action,
     createdAt: momentTz().toDate(),
   });
-
-  return { message: "Successful" };
 }
 
 export async function getUserId({ request }: any) {

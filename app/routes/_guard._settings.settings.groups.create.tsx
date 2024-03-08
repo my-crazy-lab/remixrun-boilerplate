@@ -111,6 +111,5 @@ export default function Screen() {
         </form>
       </Card>
     </>
-
   );
 }
