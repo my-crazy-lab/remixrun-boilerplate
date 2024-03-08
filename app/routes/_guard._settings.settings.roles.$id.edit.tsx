@@ -4,15 +4,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { ThickArrowLeftIcon } from "@radix-ui/react-icons";
 import _ from "lodash";
-import { ArrowBigLeftDashIcon } from "lucide-react";
 
 const actionPermissions = [
   {
@@ -1097,21 +1097,37 @@ const actionPermissions = [
   },
 ];
 
-const teams = ['account', 'cs', 'manager']
-
-export default function RolesDetail() {
+export default function EditRole() {
   return (
     <Card className="p-4">
-      <CardHeader className="font-bold text-xl flex-row flex justify-between items-center px-0">
-        <div className="flex items-center"><ArrowBigLeftDashIcon className="cursor-pointer mr-2 h-4" /> Role detail</div>
-        <Button>Edit</Button>
+      <CardHeader className="flex-row flex font-bold text-xl items-center px-0">
+        <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" /> Update role
       </CardHeader>
       <p>Teams</p>
-      <div className="flex gap-2 mt-2 cursor-pointer">
-        {teams.map((team: any, index: number) => <Badge key={index} className="rounded-md">{team}</Badge>)}
-      </div>
+      <MultiSelect
+        isDisplayAllOptions
+        options={[
+          {
+            value: "next.js",
+            label: "Next.js",
+          },
+          {
+            value: "sveltekit",
+            label: "SvelteKit",
+          },
+          {
+            value: "nuxt.js",
+            label: "Nuxt.js",
+          },
+          {
+            value: "remix",
+            label: "Remix",
+          },
+        ]}
+        className="w-[720px]"
+      />
       <p className="mt-4">Role</p>
-      <Input className="mt-2" value="Role name"></Input>
+      <Input placeholder="Role"></Input>
       <Separator className="my-4" />
       {_.map(actionPermissions, (actionPermission: any) => (
         <Accordion type="single" collapsible>
@@ -1145,6 +1161,12 @@ export default function RolesDetail() {
           </AccordionItem>
         </Accordion>
       ))}
+      <div className="gap-4 flex justify-end mt-4">
+        <Button variant="outline">Cancel</Button>
+        <Button variant="default" color="primary">
+          Save changes
+        </Button>
+      </div>
     </Card>
   );
 }
