@@ -148,8 +148,10 @@ const columns: ColumnDef<any>[] = [
   },
 ];
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request, params }: ActionFunctionArgs) => {
   try {
+    const url = new URL(request.url);
+    console.log(url.pathname, "params !!");
     const formData = await request.formData();
     const { username, email, password, cities, groupIds } =
       Object.fromEntries(formData);
