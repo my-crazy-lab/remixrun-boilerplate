@@ -1,4 +1,8 @@
-import { ActionFunction, ActionFunctionArgs } from "@remix-run/node";
+import {
+  ActionFunction,
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from "@remix-run/node";
 import { getUserId, saveActionHistory } from "~/services/helpers.server";
 import { getUserPermissions } from "~/services/role-base-access-control.server";
 
@@ -22,4 +26,21 @@ export function hocAction(callback: any, permission: string) {
   }
 
   return action;
+}
+
+export function hocLoader(callback: any, permission: string) {
+  async function loader(args: LoaderFunctionArgs) {
+    const userId = await getUserId({ request: args.request });
+    const userPermissions = await getUserPermissions(userId);
+    if (!userPermissions.includes(permission)) {
+      throw new Response(null, {
+        status: 404,
+        statutText: "Not allowed",
+      });
+    }
+
+    return callback(args);
+  }
+
+  return loader;
 }

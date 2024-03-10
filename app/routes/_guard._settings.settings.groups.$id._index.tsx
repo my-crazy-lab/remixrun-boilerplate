@@ -47,6 +47,11 @@ export default function Screen() {
           <Button variant="outline">Add group</Button>
         </Link>
       ) : null}
+      {globalData.permissions.includes(PERMISSIONS.READ_ROLE) ? (
+        <Link to={`/settings/groups/${params.id}/roles`}>
+          <Button variant="outline">Role management</Button>
+        </Link>
+      ) : null}
     </>
   );
 }

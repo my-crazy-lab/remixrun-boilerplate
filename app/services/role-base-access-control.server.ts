@@ -139,6 +139,7 @@ export async function updateGroups({
 }
 
 export async function getGroupDetail({ userId, groupId, projection }: any) {
+  //TODO parent can view children groups
   const group = await mongodb
     .collection("groups")
     .aggregate([
@@ -172,6 +173,7 @@ export async function getGroupDetail({ userId, groupId, projection }: any) {
       },
     ])
     .toArray();
+
   return group?.[0];
 }
 

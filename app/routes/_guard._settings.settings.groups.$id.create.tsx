@@ -8,12 +8,11 @@ import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { Link, useNavigate, useParams, useSubmit } from "@remix-run/react";
 import { Controller, useForm } from "react-hook-form";
 import { PERMISSIONS } from "~/constants/common";
-import { hocAction } from "~/hoc/remix";
+import { hocAction, hocLoader } from "~/hoc/remix";
 import { createGroup } from "~/services/role-base-access-control.server";
 
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
-    console.log(formData);
     const { name, description, userIds, roleIds } = formData;
     await createGroup({
       name,
@@ -28,6 +27,10 @@ export const action = hocAction(async ({ params }, { formData }) => {
     console.log(err);
     return json({ err });
   }
+}, PERMISSIONS.WRTTE_GROUP);
+
+export const loader = hocLoader(async () => {
+  return null;
 }, PERMISSIONS.WRTTE_GROUP);
 
 export default function Screen() {
