@@ -41,57 +41,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { DataTablePagination } from "@/components/ui/table-data/data-table-pagination";
 import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
-
-const dataUser = [
-  {
-    _id: "R5pRgZqKyhTKRX2Ng",
-    city: [
-      "Hồ Chí Minh",
-      "Hà Nội",
-      "Đà Nẵng",
-      "Bình Dương",
-      "Đồng Nai",
-      "Cần Thơ",
-      "Hải Phòng",
-      "Lâm Đồng",
-      "Khánh Hòa",
-      "Bangkok",
-    ],
-    isoCode: "VN",
-    services: "",
-    username: "myquyen.le",
-    emails: "xnguyen9a101@gmail.com",
-    ipAddress: "127.0.0.1",
-    profile: {
-      language: "vi",
-      timezone: "Asia/Ho_Chi_Minh",
-    },
-    teams: ["customer-service", "tasker", "marketing"],
-  },
-  {
-    _id: "ebxuQxvqjcsnonTkY",
-    username: "admin",
-    emails: "xnguyen9a10@gmail.com",
-    email: "xnguyen9a10@gmail.com",
-    city: [
-      "Hồ Chí Minh",
-      "Hà Nội",
-      "Đà Nẵng",
-      "Bình Dương",
-      "Đồng Nai",
-      "Cần Thơ",
-      "Hải Phòng",
-      "Lâm Đồng",
-      "Khánh Hòa",
-      "Bangkok",
-    ],
-    districts: [],
-    voiceCallStatus: "INACTIVE",
-    ipAddress: "127.0.0.1",
-    isoCode: "VN",
-    teams: ["customer-service", "tasker", "marketing"],
-  },
-];
+import { LoaderFunctionArgs, json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import useGlobalStore from "~/hooks/useGlobalStore";
+import { getGroupsOfUser } from "~/services/role-base-access-control.server";
+import { getUserId } from "~/services/helpers.server";
+import { PERMISSIONS } from "~/constants/common";
 
 const columns: ColumnDef<any>[] = [
   {
@@ -119,49 +74,46 @@ const columns: ColumnDef<any>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "username",
+    accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="UserName" />
+      <DataTableColumnHeader column={column} title="Group Name" />
     ),
-    cell: ({ row }) => (
-      <div className="w-[80px]">{row.getValue("username")}</div>
-    ),
+    cell: ({ row }) => <div className="w-[80px]">{row.getValue("name")}</div>,
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "emails",
+    accessorKey: "description",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Emails" />
+      <DataTableColumnHeader column={column} title="Description" />
     ),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("emails")}
+            {row.getValue("description")}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "city",
+    accessorKey: "users",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="City" />
+      <DataTableColumnHeader column={column} title="Users" />
     ),
     cell: ({ row }: any) => {
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
-            {row.getValue("city").map((e: any, index: number) => (
-              <Badge key={index}>{e}</Badge>
+            {row.getValue("users").map((e: any, index: number) => (
+              <Badge key={index}>{e.username}</Badge>
             ))}
           </span>
         </div>
       );
     },
   },
-
   {
     id: "actions",
     cell: ({ row }) => <DataTableRowActions row={row} />,
@@ -265,22 +217,46 @@ function DataTable<TData, TValue>({
   );
 }
 
-export default function UsersPage() {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const userId = await getUserId({ request });
+  const groups = await getGroupsOfUser({
+    userId,
+    projection: {
+      name: 1,
+      description: 1,
+      "users.username": 1,
+      "users.email": 1,
+      roles: 1,
+      createdAt: 1,
+      parent: 1,
+      hierarchy: 1,
+    },
+  });
+  return json({ groups });
+};
+
+export default function Screen() {
+  const loaderData = useLoaderData<{ groups: any }>();
+  const globalData = useGlobalStore((state) => state);
+  console.log(loaderData, globalData, "!!");
+
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Users management
+            Groups management
           </h2>
           <p className="text-muted-foreground">
-            Here&apos;s a list of your users!
+            Here&apos;s a list of your groups!
           </p>
         </div>
         <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Add group</Button>
-          </DialogTrigger>
+          {globalData.permissions.includes(PERMISSIONS.WRTTE_GROUP) ? (
+            <DialogTrigger asChild>
+              <Button variant="outline">Add group</Button>
+            </DialogTrigger>
+          ) : null}
           <DialogContent className="sm:max-w-[560px]">
             <DialogHeader>
               <DialogTitle>New group</DialogTitle>
@@ -381,7 +357,7 @@ export default function UsersPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <DataTable data={dataUser} columns={columns} />
+      <DataTable data={loaderData.groups} columns={columns} />
     </div>
   );
 }

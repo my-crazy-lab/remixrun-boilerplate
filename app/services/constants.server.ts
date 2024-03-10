@@ -6,11 +6,11 @@ export const statusOriginal = {
   REMOVED: "REMOVED",
 };
 
-export const newRecordCommonField = {
+export const newRecordCommonField = () => ({
   createdAt: momentTz().toDate(),
   _id: new ObjectId().toString(),
   status: statusOriginal.ACTIVE,
-};
+});
 
 export type FindOptionsClient = Pick<
   FindOptions,

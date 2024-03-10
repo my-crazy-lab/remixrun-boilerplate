@@ -17,7 +17,15 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import React from "react";
 import { Input } from "@/components/ui/input";
+import { getUserPermissions } from "~/services/role-base-access-control.server";
+import {
+  GlobalContext,
+  GlobalProps,
+  GlobalStore,
+  createGlobalStore,
+} from "~/hooks/useGlobalStore";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request, {
@@ -25,8 +33,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   });
   const session = await getSession(request.headers.get("cookie"));
 
+  const userPermissions = await getUserPermissions(user.userId);
+  console.log(userPermissions, user);
   return json(
-    { user },
+    { user: { userId: user.userId, permissions: userPermissions } },
     {
       headers: {
         "Set-Cookie": await commitSession(session), // You must commit the session whenever you read a flash
@@ -37,7 +47,12 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 export default function Screen() {
   const { t } = useTranslation();
-  const loaderData = useLoaderData();
+  const { user } = useLoaderData<{ user: GlobalProps }>();
+
+  const storeRef = React.useRef<GlobalStore>();
+  if (!storeRef.current) {
+    storeRef.current = createGlobalStore(user);
+  }
 
   return (
     <div className="hidden flex-col md:flex">
@@ -119,7 +134,9 @@ export default function Screen() {
         </div>
       </div>
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <Outlet context={loaderData} />
+        <GlobalContext.Provider value={storeRef.current}>
+          <Outlet />
+        </GlobalContext.Provider>
       </div>
     </div>
   );

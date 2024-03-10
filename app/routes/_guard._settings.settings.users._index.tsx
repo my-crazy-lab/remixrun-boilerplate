@@ -47,11 +47,11 @@ import { hocAction } from "~/hoc/remix";
 import { getSession } from "~/services/session.server";
 import {
   createNewUser,
-  getGroupsByUser,
   getTotalUsers,
   getUsers,
 } from "~/services/settings.server";
 import { getPageSieAndPageIndex, getSkipAndLimit } from "~/utils/helpers";
+import { getGroupsOfUser } from "~/services/role-base-access-control.server";
 
 const columns: ColumnDef<any>[] = [
   {
@@ -165,7 +165,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     projection: { cities: 1, username: 1, email: 1 },
   });
   const session = await getSession(request.headers.get("cookie"));
-  const groups = await getGroupsByUser({
+  const groups = await getGroupsOfUser({
     userId: session.get("user").userId,
     projection: { name: 1 },
   });

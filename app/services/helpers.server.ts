@@ -1,5 +1,5 @@
 import { ObjectId, mongodb } from "~/utils/db.server";
-import { getSession } from "../session.server";
+import { getSession } from "./session.server";
 import { momentTz } from "~/utils/helpers.server";
 
 export async function saveActionHistory({ request }: any, data: any) {
