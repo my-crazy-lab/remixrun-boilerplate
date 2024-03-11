@@ -25,13 +25,18 @@ export default function Screen() {
             <BreadcrumbSeparator>
               <Slash />
             </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="text-lg" href="/settings/groups">Group name</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <Slash />
+            </BreadcrumbSeparator>
             <BreadcrumbItem >
               <BreadcrumbPage className="text-lg">Update group</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <Button type="submit">Save changes</Button>
-
       </div>
       <form>
         <CardContent className="gap-4 pb-4 grid p-0">

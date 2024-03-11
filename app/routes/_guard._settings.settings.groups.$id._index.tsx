@@ -59,7 +59,7 @@ export default function Screen() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" href="/">Groups</BreadcrumbLink>
+              <BreadcrumbLink className="text-lg" href="/settings/groups">Groups</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator>
               <Slash />

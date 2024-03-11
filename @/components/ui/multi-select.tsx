@@ -15,9 +15,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import debounce from "lodash/debounce.js";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { Skeleton } from "./skeleton";
-import debounce from "lodash/debounce.js";
 
 export type OptionType = {
   label: string;
@@ -69,9 +69,8 @@ export function MultiSelectAsync({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${
-            selected.length > 1 ? "h-full" : "h-10"
-          }`}
+          className={`w-full justify-between ${selected.length > 1 ? "h-full" : "h-10"
+            }`}
           onClick={() => setOpen(!open)}
         >
           <div className="flex gap-1 flex-wrap">
@@ -204,9 +203,8 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${
-            selected.length > 1 ? "h-full" : "h-10"
-          }`}
+          className={`w-full justify-between ${selected.length > 1 ? "h-full" : "h-10"
+            }`}
           onClick={() => setOpen(!open)}
         >
           <div className="flex gap-1 flex-wrap">
@@ -252,7 +250,7 @@ export function MultiSelect({
                 key={option.value}
                 onSelect={() => {
                   setSelected(
-                    selected.some((item) => item.vale === uoption.value)
+                    selected.some((item) => item.value === option.value)
                       ? selected.filter((item) => item.value !== option.value)
                       : [...selected, option],
                   );
