@@ -1,28 +1,28 @@
-import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 import {
   Link,
   useActionData,
   useNavigation,
   useSubmit,
-} from "@remix-run/react";
-import { useTranslation } from "react-i18next";
+} from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
-import { Form } from "@remix-run/react";
-import { useEffect } from "react";
-import { verifyAndSendCode } from "~/services/auth.server";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
+import { Form } from '@remix-run/react';
+import { useEffect } from 'react';
+import { verifyAndSendCode } from '~/services/auth.server';
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray } from 'react-hook-form';
 
 export async function action({ request }: ActionFunctionArgs) {
   try {
     const formData = await request.formData();
     const { username, password, myKey } = Object.fromEntries(formData);
-    console.log(myKey, "test");
+    console.log(myKey, 'test');
 
     const verificationToken = await verifyAndSendCode({ username, password });
     return redirect(`/verification-code/${verificationToken}`);
@@ -60,20 +60,20 @@ export default function Screen() {
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
-      cart: [{ name: "test", quantity: 1, price: 23 }],
+      cart: [{ name: 'test', quantity: 1, price: 23 }],
     },
-    mode: "onBlur",
+    mode: 'onBlur',
   });
   const { fields, append, remove } = useFieldArray({
-    name: "cart",
+    name: 'cart',
     control,
   });
   const onSubmit = (data: FormValues) => {
     console.log(data);
 
     const formData = new FormData();
-    formData.append("myKey", "myValue");
-    submit(formData, { method: "post" });
+    formData.append('myKey', 'myValue');
+    submit(formData, { method: 'post' });
   };
   return (
     <>
@@ -89,13 +89,13 @@ export default function Screen() {
             {fields.map((field: any, index: number) => {
               return (
                 <div key={field.id}>
-                  <section className={"section"} key={field.id}>
+                  <section className={'section'} key={field.id}>
                     <Input
                       placeholder="name"
                       {...register(`cart.${index}.name` as const, {
                         required: true,
                       })}
-                      className={errors?.cart?.[index]?.name ? "error" : ""}
+                      className={errors?.cart?.[index]?.name ? 'error' : ''}
                     />
                     <Input
                       placeholder="quantity"
@@ -104,7 +104,7 @@ export default function Screen() {
                         valueAsNumber: true,
                         required: true,
                       })}
-                      className={errors?.cart?.[index]?.quantity ? "error" : ""}
+                      className={errors?.cart?.[index]?.quantity ? 'error' : ''}
                     />
                     <Input
                       placeholder="value"
@@ -113,7 +113,7 @@ export default function Screen() {
                         valueAsNumber: true,
                         required: true,
                       })}
-                      className={errors?.cart?.[index]?.price ? "error" : ""}
+                      className={errors?.cart?.[index]?.price ? 'error' : ''}
                     />
                     <Button type="button" onClick={() => remove(index)}>
                       DELETE
@@ -127,12 +127,11 @@ export default function Screen() {
               type="button"
               onClick={() =>
                 append({
-                  name: "",
+                  name: '',
                   quantity: 0,
                   price: 0,
                 })
-              }
-            >
+              }>
               APPEND
             </Button>
             <Button type="submit">Submit</Button>
@@ -159,16 +158,14 @@ export default function Screen() {
             </div>
             <Link
               className="text-end underline italic mb-8"
-              to={"/reset-password"}
-            >
+              to={'/reset-password'}>
               Forgot password?
             </Link>
             <Button
               disabled={
-                navigation.formAction === "/sign-in" &&
-                navigation.state !== "idle"
-              }
-            >
+                navigation.formAction === '/sign-in' &&
+                navigation.state !== 'idle'
+              }>
               Login
             </Button>
           </div>

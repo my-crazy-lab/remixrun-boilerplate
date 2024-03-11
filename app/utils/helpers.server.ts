@@ -1,7 +1,7 @@
-import moment from "moment-timezone";
+import moment from 'moment-timezone';
 
-moment.tz.setDefault("Asia/Jakarta");
-moment.locale("en");
+moment.tz.setDefault('Asia/Jakarta');
+moment.locale('en');
 
 export const momentTz = moment;
 

@@ -1,8 +1,8 @@
-import { Outlet } from "@remix-run/react";
-import { useTranslation } from "react-i18next";
+import { Outlet } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { authenticator } from "~/services/auth.server";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { authenticator } from '~/services/auth.server';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   return null;
@@ -10,7 +10,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   return await authenticator.isAuthenticated(request, {
-    successRedirect: "/",
+    successRedirect: '/',
   });
 }
 

@@ -1,5 +1,5 @@
-import nodemailer from "nodemailer";
-import { dotenv } from "./dotenv.server";
+import nodemailer from 'nodemailer';
+import { dotenv } from './dotenv.server';
 
 interface EmailArgs {
   text: string;

@@ -1,9 +1,9 @@
-import { FindOptions, ObjectId } from "mongodb";
-import { momentTz } from "~/utils/helpers.server";
+import { FindOptions, ObjectId } from 'mongodb';
+import { momentTz } from '~/utils/helpers.server';
 
 export const statusOriginal = {
-  ACTIVE: "ACTIVE",
-  REMOVED: "REMOVED",
+  ACTIVE: 'ACTIVE',
+  REMOVED: 'REMOVED',
 };
 
 export const newRecordCommonField = () => ({
@@ -14,5 +14,5 @@ export const newRecordCommonField = () => ({
 
 export type FindOptionsClient = Pick<
   FindOptions,
-  "limit" | "sort" | "projection" | "skip"
+  'limit' | 'sort' | 'projection' | 'skip'
 >;

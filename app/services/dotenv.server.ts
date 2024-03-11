@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 const envSchema = z.object({
   URI_APP: z.string().trim().min(1),
@@ -10,8 +10,8 @@ const envSchema = z.object({
   PLAIN_TEXT: z.string().trim().min(1),
   DOMAIN_BTASKEE_BE: z.string().trim().url(),
   NODE_ENV: z
-    .enum(["development", "production", "test"])
-    .default("development"),
+    .enum(['development', 'production', 'test'])
+    .default('development'),
 });
 
 const envServer = envSchema.safeParse({
@@ -27,7 +27,7 @@ const envServer = envSchema.safeParse({
 
 if (!envServer.success) {
   console.error(envServer.error.issues);
-  throw new Error("There is an error with the server environment variables");
+  throw new Error('There is an error with the server environment variables');
 }
 
 export const dotenv = envServer.data;

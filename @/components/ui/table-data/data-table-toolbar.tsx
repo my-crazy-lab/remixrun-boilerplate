@@ -1,6 +1,6 @@
-import { Table } from "@tanstack/react-table";
+import { Table } from '@tanstack/react-table';
 
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -14,8 +14,8 @@ export function DataTableToolbar<TData>({
   return (
     <Input
       placeholder="Search..."
-      value={(table.getColumn(column)?.getFilterValue() as string) ?? ""}
-      onChange={(event) =>
+      value={(table.getColumn(column)?.getFilterValue() as string) ?? ''}
+      onChange={event =>
         table.getColumn(column)?.setFilterValue(event.target.value)
       }
       className="h-8 w-[150px] lg:w-[250px]"

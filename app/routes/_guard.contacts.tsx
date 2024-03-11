@@ -6,15 +6,16 @@ import {
   useLoaderData,
   useNavigation,
   useOutletContext,
-} from "@remix-run/react";
+} from '@remix-run/react';
 
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from '@remix-run/node';
 
-import { json, redirect } from "@remix-run/node";
-import { createEmptyContact, getContacts } from "../data";
+import { json, redirect } from '@remix-run/node';
+import { createEmptyContact, getContacts } from '../data';
 
-import { Button } from "@/components/ui/button";
-import { authenticator } from "~/services/auth.server";
+import { Button } from '@/components/ui/button';
+import { authenticator } from '~/services/auth.server';
+import React from 'react';
 
 export const action = async () => {
   const contact = await createEmptyContact();
@@ -23,7 +24,7 @@ export const action = async () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  const q = url.searchParams.get("q");
+  const q = url.searchParams.get('q');
   const contacts = await getContacts(q);
 
   return json({ contacts, q });
@@ -35,6 +36,10 @@ export default function App() {
   const outletData = useOutletContext();
   console.log(outletData);
 
+  React.useEffect(() => {
+    console.log(2);
+  }, []);
+
   return (
     <>
       <div id="sidebar">
@@ -44,7 +49,7 @@ export default function App() {
             <input
               id="q"
               aria-label="Search contacts"
-              defaultValue={q || ""}
+              defaultValue={q || ''}
               placeholder="Search"
               type="search"
               name="q"
@@ -58,14 +63,13 @@ export default function App() {
         <nav>
           {contacts.length ? (
             <ul>
-              {contacts.map((contact) => (
+              {contacts.map(contact => (
                 <li key={contact.id}>
                   <NavLink
                     className={({ isActive, isPending }) =>
-                      isActive ? "active" : isPending ? "pending" : ""
+                      isActive ? 'active' : isPending ? 'pending' : ''
                     }
-                    to={`contacts/${contact.id}`}
-                  >
+                    to={`contacts/${contact.id}`}>
                     <Link to={`contacts/${contact.id}`}>
                       {contact.first || contact.last ? (
                         <>
@@ -73,7 +77,7 @@ export default function App() {
                         </>
                       ) : (
                         <i>No Name</i>
-                      )}{" "}
+                      )}{' '}
                       {contact.favorite ? <span>★</span> : null}
                     </Link>
                   </NavLink>
@@ -89,8 +93,7 @@ export default function App() {
       </div>
       <div
         id="detail"
-        className={navigation.state === "loading" ? "loading" : ""}
-      >
+        className={navigation.state === 'loading' ? 'loading' : ''}>
         <Outlet />
       </div>
     </>

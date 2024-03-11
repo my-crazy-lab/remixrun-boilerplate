@@ -4,14 +4,14 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MultiSelect } from "@/components/ui/multi-select";
-import { Slash } from "lucide-react";
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
+import { CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MultiSelect } from '@/components/ui/multi-select';
+import { Slash } from 'lucide-react';
 
 export default function Screen() {
   return (
@@ -20,18 +20,19 @@ export default function Screen() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" href="/settings/groups">Groups</BreadcrumbLink>
+              <BreadcrumbLink className="text-lg" href="/settings/groups">
+                Groups
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator>
               <Slash />
             </BreadcrumbSeparator>
-            <BreadcrumbItem >
+            <BreadcrumbItem>
               <BreadcrumbPage className="text-lg">Update group</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <Button type="submit">Save changes</Button>
-
       </div>
       <form>
         <CardContent className="gap-4 pb-4 grid p-0">
@@ -50,20 +51,20 @@ export default function Screen() {
                   isDisplayAllOptions
                   options={[
                     {
-                      value: "next.js",
-                      label: "Next.js",
+                      value: 'next.js',
+                      label: 'Next.js',
                     },
                     {
-                      value: "sveltekit",
-                      label: "SvelteKit",
+                      value: 'sveltekit',
+                      label: 'SvelteKit',
                     },
                     {
-                      value: "nuxt.js",
-                      label: "Nuxt.js",
+                      value: 'nuxt.js',
+                      label: 'Nuxt.js',
                     },
                     {
-                      value: "remix",
-                      label: "Remix",
+                      value: 'remix',
+                      label: 'Remix',
                     },
                   ]}
                   className="w-[360px]"
@@ -77,20 +78,20 @@ export default function Screen() {
                   isDisplayAllOptions
                   options={[
                     {
-                      value: "next.js",
-                      label: "Next.js",
+                      value: 'next.js',
+                      label: 'Next.js',
                     },
                     {
-                      value: "sveltekit",
-                      label: "SvelteKit",
+                      value: 'sveltekit',
+                      label: 'SvelteKit',
                     },
                     {
-                      value: "nuxt.js",
-                      label: "Nuxt.js",
+                      value: 'nuxt.js',
+                      label: 'Nuxt.js',
                     },
                     {
-                      value: "remix",
-                      label: "Remix",
+                      value: 'remix',
+                      label: 'Remix',
                     },
                   ]}
                   className="w-[360px]"
