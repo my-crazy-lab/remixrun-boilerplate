@@ -46,7 +46,7 @@ export function requirePermissions(
   }
 }
 
-export async function getUserPermissions(userId: string) {
+export async function getUserPermissions(userId: string, moreDetail?: boolean) {
   const matchGroups = {
     $match: {
       userIds: userId,
@@ -88,7 +88,14 @@ export async function getUserPermissions(userId: string) {
       _id: 1,
     });
 
+    if (moreDetail) {
+      return allPermissions;
+    }
+
     return allPermissions.map((p) => p._id);
+  }
+  if (moreDetail) {
+    return data;
   }
   return permissions;
 }
@@ -175,6 +182,53 @@ export async function getGroupDetail({ userId, groupId, projection }: any) {
     .toArray();
 
   return group?.[0];
+}
+
+export async function getGroupPermissions(groupId: string) {
+  const matchGroups = {
+    $match: {
+      _id: groupId,
+    },
+  };
+
+  const lookupRole = {
+    $lookup: {
+      from: "roles",
+      localField: "roleIds",
+      foreignField: "_id",
+      as: "roles",
+    },
+  };
+
+  const unwindRole = {
+    $unwind: {
+      path: "$roles",
+      preserveNullAndEmptyArrays: true,
+    },
+  };
+
+  const aggregate = [matchGroups, lookupRole, unwindRole];
+
+  const data: any = await mongodb
+    .collection("groups")
+    .aggregate(aggregate)
+    .toArray();
+
+  const setOfPermissions = data.reduce(
+    (accumulator: any[], obj: any) =>
+      new Set([...accumulator, ...(obj?.roles?.permissions || [])]),
+    [],
+  );
+
+  const permissions: Array<string> = [...setOfPermissions];
+  if (permissions.includes(PERMISSIONS.ROOT)) {
+    const allPermissions = await getAllPermissions({
+      _id: 1,
+    });
+
+    return allPermissions;
+  }
+  return data;
 }
 
 export async function getGroupsOfUser({ projection, userId }: any) {

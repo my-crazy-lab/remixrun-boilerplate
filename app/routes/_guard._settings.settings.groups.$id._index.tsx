@@ -52,6 +52,11 @@ export default function Screen() {
           <Button variant="outline">Role management</Button>
         </Link>
       ) : null}
+      {globalData.permissions.includes(PERMISSIONS.WRITE_ROLE) ? (
+        <Link to={`/settings/groups/${params.id}/roles/create`}>
+          <Button variant="outline">Add roles</Button>
+        </Link>
+      ) : null}
     </>
   );
 }
