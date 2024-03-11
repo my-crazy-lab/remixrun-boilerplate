@@ -5,8 +5,7 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  DialogTitle
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -22,7 +21,6 @@ import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
-import { PERMISSIONS } from '~/constants/common';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
@@ -62,11 +60,6 @@ export default function Screen() {
           </p>
         </div>
         <Dialog>
-          {globalData.permissions.includes(PERMISSIONS.WRITE_GROUP) ? (
-            <DialogTrigger asChild>
-              <Button variant="outline">Add group</Button>
-            </DialogTrigger>
-          ) : null}
           <DialogContent className="sm:max-w-[560px]">
             <DialogHeader>
               <DialogTitle>New group</DialogTitle>

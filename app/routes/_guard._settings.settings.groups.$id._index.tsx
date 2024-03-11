@@ -89,7 +89,7 @@ export default function Screen() {
       <div>
         <div className="flex justify-between py-4">
           <h3 className="font-semibold uppercase">user groups</h3>
-          {globalData.permissions.includes(PERMISSIONS.WRTTE_GROUP) ? (
+          {globalData.permissions.includes(PERMISSIONS.WRITE_GROUP) ? (
             <Link to={`/settings/groups/${params.id}/create`}>
               <Button>Create children group</Button>
             </Link>
