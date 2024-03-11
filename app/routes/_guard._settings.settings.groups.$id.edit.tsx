@@ -17,17 +17,37 @@ import {
   getGroupDetail,
   getRolesOfGroups,
   searchUser,
+  updateGroups,
 } from '~/services/role-base-access-control.server';
 import { getUserId } from '~/services/helpers.server';
-import { json } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import {
   useLoaderData,
   useNavigation,
   useSearchParams,
+  useSubmit,
 } from '@remix-run/react';
 import { Controller, useForm } from 'react-hook-form';
-import { hocLoader } from '~/hoc/remix';
+import { hocAction, hocLoader } from '~/hoc/remix';
 import { PERMISSIONS } from '~/constants/common';
+
+export const action = hocAction(async ({ params }, { formData }) => {
+  try {
+    const { name, description, userIds, roleIds } = formData;
+    await updateGroups({
+      name,
+      description,
+      userIds: JSON.parse(userIds),
+      roleIds: JSON.parse(roleIds),
+      groupId: params.id,
+    });
+
+    return redirect(`/settings/groups/${params.id}`);
+  } catch (err: any) {
+    console.log(err);
+    return json({ err });
+  }
+}, PERMISSIONS.WRITE_GROUP);
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
@@ -77,8 +97,8 @@ export default function Screen() {
     formState: { errors },
   } = useForm<any>({
     defaultValues: {
-      name: '',
-      description: '',
+      name: group.name,
+      description: group.description,
       userIds: group.users.map(user => ({
         value: user._id,
         label: user.username,
@@ -89,6 +109,25 @@ export default function Screen() {
       })),
     },
   });
+
+  const submit = useSubmit();
+
+  const onSubmit = (data: any) => {
+    const formData = new FormData();
+
+    formData.append('name', data.name);
+    formData.append('description', data.description);
+    formData.append(
+      'userIds',
+      JSON.stringify(data.userIds.map(user => user.value)),
+    );
+    formData.append(
+      'roleIds',
+      JSON.stringify(data.roleIds.map(role => role.value)),
+    );
+
+    submit(formData, { method: 'post' });
+  };
 
   return (
     <>
@@ -108,9 +147,8 @@ export default function Screen() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <Button type="submit">Save changes</Button>
       </div>
-      <form>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="gap-4 pb-4 grid p-0">
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -118,8 +156,9 @@ export default function Screen() {
                 Group name
               </Label>
               <Input
-                defaultValue={group.name}
-                id="group"
+                {...register('name' as const, {
+                  required: true,
+                })}
                 className="col-span-3"
               />
             </div>
@@ -129,8 +168,9 @@ export default function Screen() {
                 Description
               </Label>
               <Input
-                defaultValue={group.description}
-                id="description"
+                {...register('description' as const, {
+                  required: true,
+                })}
                 className="col-span-3"
               />
             </div>
@@ -183,6 +223,7 @@ export default function Screen() {
             </div>
           </div>
         </CardContent>
+        <Button type="submit">Save changes</Button>
       </form>
     </>
   );
