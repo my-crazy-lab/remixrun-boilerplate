@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MultiSelect, MultiSelectAsync } from "@/components/ui/multi-select";
-import { ThickArrowLeftIcon } from "@radix-ui/react-icons";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MultiSelect, MultiSelectAsync } from '@/components/ui/multi-select';
+import { ThickArrowLeftIcon } from '@radix-ui/react-icons';
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   json,
   redirect,
-} from "@remix-run/node";
+} from '@remix-run/node';
 import {
   Link,
   useLoaderData,
@@ -18,15 +18,15 @@ import {
   useParams,
   useSearchParams,
   useSubmit,
-} from "@remix-run/react";
-import { Controller, useForm } from "react-hook-form";
-import { PERMISSIONS } from "~/constants/common";
-import { hocAction, hocLoader } from "~/hoc/remix";
+} from '@remix-run/react';
+import { Controller, useForm } from 'react-hook-form';
+import { PERMISSIONS } from '~/constants/common';
+import { hocAction, hocLoader } from '~/hoc/remix';
 import {
   createGroup,
   getRolesOfGroups,
   searchUser,
-} from "~/services/role-base-access-control.server";
+} from '~/services/role-base-access-control.server';
 
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
@@ -44,19 +44,19 @@ export const action = hocAction(async ({ params }, { formData }) => {
     console.log(err);
     return json({ err });
   }
-}, PERMISSIONS.WRTTE_GROUP);
+}, PERMISSIONS.WRITE_GROUP);
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
-    const roles = await getRolesOfGroups(params.id || "");
+    const roles = await getRolesOfGroups(params.id || '');
 
     const url = new URL(request.url);
-    const searchText = url.searchParams.get("users") || "";
+    const searchText = url.searchParams.get('users') || '';
     const users = await searchUser(searchText);
 
     return json({ roles, users });
   },
-  PERMISSIONS.WRTTE_GROUP,
+  PERMISSIONS.WRITE_GROUP,
 );
 
 export default function Screen() {
@@ -73,8 +73,8 @@ export default function Screen() {
     formState: { errors },
   } = useForm<any>({
     defaultValues: {
-      name: "",
-      description: "",
+      name: '',
+      description: '',
       userIds: [],
       roleIds: [],
     },
@@ -84,18 +84,18 @@ export default function Screen() {
   const onSubmit = (data: any) => {
     const formData = new FormData();
 
-    formData.append("name", data.name);
-    formData.append("description", data.description);
+    formData.append('name', data.name);
+    formData.append('description', data.description);
     formData.append(
-      "userIds",
-      JSON.stringify(data.userIds.map((user) => user.value)),
+      'userIds',
+      JSON.stringify(data.userIds.map(user => user.value)),
     );
     formData.append(
-      "roleIds",
-      JSON.stringify(data.roleIds.map((role) => role._id)),
+      'roleIds',
+      JSON.stringify(data.roleIds.map(role => role._id)),
     );
 
-    submit(formData, { method: "post" });
+    submit(formData, { method: 'post' });
   };
 
   return (
@@ -115,7 +115,7 @@ export default function Screen() {
                   Group name
                 </Label>
                 <Input
-                  {...register("name" as const, {
+                  {...register('name' as const, {
                     required: true,
                   })}
                   className="col-span-2"
@@ -126,7 +126,7 @@ export default function Screen() {
                   Group description
                 </Label>
                 <Input
-                  {...register("description" as const, {
+                  {...register('description' as const, {
                     required: true,
                   })}
                   className="col-span-2"
@@ -140,11 +140,11 @@ export default function Screen() {
                     name="userIds"
                     render={({ field: { onChange, value } }) => (
                       <MultiSelectAsync
-                        isLoading={navigation.state === "loading"}
-                        defaultSearchValue={searchParams.get("users") || ""}
-                        searchRemix={{ searchKey: "users", setSearchParams }}
+                        isLoading={navigation.state === 'loading'}
+                        defaultSearchValue={searchParams.get('users') || ''}
+                        searchRemix={{ searchKey: 'users', setSearchParams }}
                         isDisplayAllOptions
-                        options={loaderData.users.map((user) => ({
+                        options={loaderData.users.map(user => ({
                           value: user._id,
                           label: user.username,
                         }))}
@@ -165,7 +165,7 @@ export default function Screen() {
                     render={({ field: { onChange, value } }) => (
                       <MultiSelect
                         isDisplayAllOptions
-                        options={loaderData.roles.map((role) => ({
+                        options={loaderData.roles.map(role => ({
                           value: role._id,
                           label: role.name,
                         }))}

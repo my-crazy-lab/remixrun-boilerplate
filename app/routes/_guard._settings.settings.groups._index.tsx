@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -6,10 +6,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MultiSelect } from "@/components/ui/multi-select";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 import {
   Table,
@@ -18,35 +18,49 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { DataTableColumnHeader } from "@/components/ui/table-data/data-table-column-header";
-import { DataTablePagination } from "@/components/ui/table-data/data-table-pagination";
-import { DataTableRowActions } from "@/components/ui/table-data/data-table-row-actions";
-import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from "@tanstack/react-table";
-import { flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
-import React from "react";
-import { PERMISSIONS } from "~/constants/common";
-import useGlobalStore from "~/hooks/useGlobalStore";
-import { getUserId } from "~/services/helpers.server";
-import { getGroupsOfUser } from "~/services/role-base-access-control.server";
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DataTableColumnHeader } from '@/components/ui/table-data/data-table-column-header';
+import { DataTablePagination } from '@/components/ui/table-data/data-table-pagination';
+import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-actions';
+import { DataTableToolbar } from '@/components/ui/table-data/data-table-toolbar';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+} from '@tanstack/react-table';
+import {
+  flexRender,
+  getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
+import React from 'react';
+import { PERMISSIONS } from '~/constants/common';
+import useGlobalStore from '~/hooks/useGlobalStore';
+import { getUserId } from '~/services/helpers.server';
+import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 
 const columns: ColumnDef<any>[] = [
   {
-    id: "select",
+    id: 'select',
     header: ({ table }) => (
       <Checkbox
         checked={
           table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
         className="translate-y-[2px]"
       />
@@ -54,7 +68,7 @@ const columns: ColumnDef<any>[] = [
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onCheckedChange={value => row.toggleSelected(!!value)}
         aria-label="Select row"
         className="translate-y-[2px]"
       />
@@ -63,16 +77,16 @@ const columns: ColumnDef<any>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: 'name',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Group Name" />
     ),
-    cell: ({ row }) => <div className="w-[80px]">{row.getValue("name")}</div>,
+    cell: ({ row }) => <div className="w-[80px]">{row.getValue('name')}</div>,
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "description",
+    accessorKey: 'description',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Description" />
     ),
@@ -80,14 +94,14 @@ const columns: ColumnDef<any>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("description")}
+            {row.getValue('description')}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "users",
+    accessorKey: 'users',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Users" />
     ),
@@ -95,7 +109,7 @@ const columns: ColumnDef<any>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
-            {row.getValue("users").map((e: any, index: number) => (
+            {row.getValue('users').map((e: any, index: number) => (
               <Badge key={index}>{e.username}</Badge>
             ))}
           </span>
@@ -104,7 +118,7 @@ const columns: ColumnDef<any>[] = [
     },
   },
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ];
@@ -154,17 +168,17 @@ function DataTable<TData, TValue>({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map(header => {
                   return (
                     <TableHead key={header.id} colSpan={header.colSpan}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -173,12 +187,11 @@ function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map(row => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
+                  data-state={row.getIsSelected() && 'selected'}>
+                  {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -192,8 +205,7 @@ function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                  className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
@@ -213,8 +225,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     projection: {
       name: 1,
       description: 1,
-      "users.username": 1,
-      "users.email": 1,
+      'users.username': 1,
+      'users.email': 1,
       roles: 1,
       createdAt: 1,
       parent: 1,
@@ -226,8 +238,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function Screen() {
   const loaderData = useLoaderData<{ groups: any }>();
-  const globalData = useGlobalStore((state) => state);
-  console.log(loaderData, globalData, "!!");
+  const globalData = useGlobalStore(state => state);
+  console.log(loaderData, globalData, '!!');
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -241,7 +253,7 @@ export default function Screen() {
           </p>
         </div>
         <Dialog>
-          {globalData.permissions.includes(PERMISSIONS.WRTTE_GROUP) ? (
+          {globalData.permissions.includes(PERMISSIONS.WRITE_GROUP) ? (
             <DialogTrigger asChild>
               <Button variant="outline">Add group</Button>
             </DialogTrigger>
@@ -265,20 +277,20 @@ export default function Screen() {
                     isDisplayAllOptions
                     options={[
                       {
-                        value: "next.js",
-                        label: "Next.js",
+                        value: 'next.js',
+                        label: 'Next.js',
                       },
                       {
-                        value: "sveltekit",
-                        label: "SvelteKit",
+                        value: 'sveltekit',
+                        label: 'SvelteKit',
                       },
                       {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
+                        value: 'nuxt.js',
+                        label: 'Nuxt.js',
                       },
                       {
-                        value: "remix",
-                        label: "Remix",
+                        value: 'remix',
+                        label: 'Remix',
                       },
                     ]}
                     className="w-[360px]"
@@ -292,20 +304,20 @@ export default function Screen() {
                     isDisplayAllOptions
                     options={[
                       {
-                        value: "next.js",
-                        label: "Next.js",
+                        value: 'next.js',
+                        label: 'Next.js',
                       },
                       {
-                        value: "sveltekit",
-                        label: "SvelteKit",
+                        value: 'sveltekit',
+                        label: 'SvelteKit',
                       },
                       {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
+                        value: 'nuxt.js',
+                        label: 'Nuxt.js',
                       },
                       {
-                        value: "remix",
-                        label: "Remix",
+                        value: 'remix',
+                        label: 'Remix',
                       },
                     ]}
                     className="w-[360px]"
@@ -319,20 +331,20 @@ export default function Screen() {
                     isDisplayAllOptions
                     options={[
                       {
-                        value: "next.js",
-                        label: "Next.js",
+                        value: 'next.js',
+                        label: 'Next.js',
                       },
                       {
-                        value: "sveltekit",
-                        label: "SvelteKit",
+                        value: 'sveltekit',
+                        label: 'SvelteKit',
                       },
                       {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
+                        value: 'nuxt.js',
+                        label: 'Nuxt.js',
                       },
                       {
-                        value: "remix",
-                        label: "Remix",
+                        value: 'remix',
+                        label: 'Remix',
                       },
                     ]}
                     className="w-[360px]"
