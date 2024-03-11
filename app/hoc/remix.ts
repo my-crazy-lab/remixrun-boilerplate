@@ -34,7 +34,7 @@ export function hocLoader(callback: any, permission: string) {
     if (!userPermissions.includes(permission)) {
       throw new Response(null, {
         status: 404,
-        statutText: "Not allowed",
+        statusText: "Not allowed",
       });
     }
 
