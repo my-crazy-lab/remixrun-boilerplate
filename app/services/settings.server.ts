@@ -1,9 +1,5 @@
 import { mongodb } from "~/utils/db.server";
-import {
-  FindOptionsClient,
-  newRecordCommonField,
-  statusOriginal,
-} from "./constants.server";
+import { FindOptionsClient, newRecordCommonField } from "./constants.server";
 import { hashPassword } from "./auth.server";
 
 export async function getTotalUsers() {
@@ -44,7 +40,7 @@ export async function createNewUser({
   const passwordHashed = await hashPassword(password);
 
   const newUser = await usersCol.insertOne({
-    ...newRecordCommonField,
+    ...newRecordCommonField(),
     username,
     email,
     cities,
@@ -64,70 +60,5 @@ export async function createNewUser({
     },
   );
 
-  return { message: "Successful" };
-}
-
-export async function createGroup({ name, userIds, roleIds }: any) {
-  const groupCol = mongodb.collection("groups");
-  await groupCol.insertOne({
-    ...newRecordCommonField,
-    name,
-    users: userIds,
-    roles: roleIds,
-  });
-
-  return { message: "Successful" };
-}
-
-export async function removeGroup(groupId: string) {
-  const groupCol = mongodb.collection("groups");
-  await groupCol.updateOne(
-    { _id: groupId },
-    {
-      $set: { status: statusOriginal.REMOVED },
-    },
-  );
-
-  return { message: "Successful" };
-}
-
-export async function getGroups({
-  limit,
-  skip,
-  projection,
-}: FindOptionsClient) {
-  const groupCol = mongodb.collection("groups");
-  const groups = await groupCol
-    .find(
-      {},
-      {
-        limit,
-        skip,
-        sort: { createdAt: -1 },
-        projection,
-      },
-    )
-    .toArray();
-  const total = await groupCol.count({});
-
-  return { total, groups };
-}
-
-export async function getGroupsByUser({ projection, userId }: any) {
-  const groupCol = mongodb.collection("groups");
-  const groups = await groupCol
-    .find({ users: userId }, { projection })
-    .toArray();
-  return groups;
-}
-
-export async function createRole({ name, permissions }: any) {
-  const roleCol = mongodb.collection("roles");
-  await roleCol.insertOne({
-    ...newRecordCommonField,
-    name,
-    slug: name.toLocaleLowerCase().split(" ").join("-"),
-    permissions,
-  });
   return { message: "Successful" };
 }

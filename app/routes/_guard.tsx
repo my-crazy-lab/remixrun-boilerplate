@@ -1,11 +1,11 @@
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { Form, Link, Outlet, useLoaderData } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { authenticator } from "~/services/auth.server";
-import { json } from "@remix-run/node";
 import { commitSession, getSession } from "~/services/session.server";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,6 +18,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import React from "react";
+import type {
+  GlobalProps,
+  GlobalStore
+} from "~/hooks/useGlobalStore";
+import {
+  GlobalContext,
+  createGlobalStore,
+} from "~/hooks/useGlobalStore";
+import { getUserPermissions } from "~/services/role-base-access-control.server";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request, {
@@ -25,8 +35,10 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   });
   const session = await getSession(request.headers.get("cookie"));
 
+  const userPermissions = await getUserPermissions(user.userId);
+  console.log(userPermissions, user);
   return json(
-    { user },
+    { user: { userId: user.userId, permissions: userPermissions } },
     {
       headers: {
         "Set-Cookie": await commitSession(session), // You must commit the session whenever you read a flash
@@ -37,7 +49,12 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 export default function Screen() {
   const { t } = useTranslation();
-  const loaderData = useLoaderData();
+  const { user } = useLoaderData<{ user: GlobalProps }>();
+
+  const storeRef = React.useRef<GlobalStore>();
+  if (!storeRef.current) {
+    storeRef.current = createGlobalStore(user);
+  }
 
   return (
     <div className="hidden flex-col md:flex">
@@ -56,12 +73,13 @@ export default function Screen() {
             >
               Home page
             </Link>
+            <Link
+              to="/settings/profile"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              Settings
+            </Link>
           </nav>
-          <Form method="post">
-            <button type="submit" value="test" name="_action">
-              test
-            </button>
-          </Form>
           <div className="ml-auto flex items-center space-x-4">
             <Input
               type="search"
@@ -75,9 +93,6 @@ export default function Screen() {
                   className="relative h-8 w-8 rounded-full"
                 >
                   <Avatar className="h-8 w-8">
-                    {/*
-                      <AvatarImage src="/avatars/01.png" alt="@shadcn" />
-                       * */}
                     <AvatarFallback>SC</AvatarFallback>
                   </Avatar>
                 </Button>
@@ -119,7 +134,9 @@ export default function Screen() {
         </div>
       </div>
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <Outlet context={loaderData} />
+        <GlobalContext.Provider value={storeRef.current}>
+          <Outlet />
+        </GlobalContext.Provider>
       </div>
     </div>
   );

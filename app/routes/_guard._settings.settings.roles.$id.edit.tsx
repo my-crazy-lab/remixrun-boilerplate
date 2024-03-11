@@ -1101,7 +1101,8 @@ export default function EditRole() {
   return (
     <Card className="p-4">
       <CardHeader className="flex-row flex font-bold text-xl items-center px-0">
-        <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" /> Update role
+        <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" /> Update
+        role
       </CardHeader>
       <p>Teams</p>
       <MultiSelect

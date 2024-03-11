@@ -1,8 +1,7 @@
 import { Link, Outlet, useLocation } from "@remix-run/react";
 import { cn } from "@/lib/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowBottomRightIcon } from "@radix-ui/react-icons";
 
 export default function Screen() {
   const { pathname } = useLocation();

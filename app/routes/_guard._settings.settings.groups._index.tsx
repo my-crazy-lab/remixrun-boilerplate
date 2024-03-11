@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -8,131 +7,245 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 
-const dataGroups = [
-  {
-    "_id": "bZLhevo2qKduQdjcG",
-    "name": "Admin",
-    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has",
-    "users": [
-      {
-        "_id": "R5pRgZqKyhTKRX2Ng"
-      }
-    ],
-    "roles": [
-      {
-        "_id": "super-user"
-      }
-    ]
-  },
-  {
-    "_id": "F8PiavHetxb4pNzos",
-    "name": "Tasker Recruitment",
-    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has",
-    "users": [
-      {
-        "_id": ""
-      },
-      {
-        "_id": ""
-      }
-    ],
-    "roles": [
-      {
-        "_id": "tasker"
-      }
-    ]
-  },
-  {
-    "_id": "etkkyCdobSm783E3y",
-    "name": "Group 1",
-    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has no meaningful content. It starts with and continues with nonsensical Latin-like words. nonsensical Latin-like words. nonsensical Latin-like words. ",
-    "users": [
-      {
-        "_id": "KfhstepwgsNR2Z69M"
-      }
-    ],
-    "roles": [
-      {
-        "_id": "role-1"
-      },
-      {
-        "_id": "role-2"
-      }
-    ]
-  },
-  {
-    "_id": "v82pw5dWGE6dzrQwz",
-    "name": "Accounting",
-    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has",
-    "users": [
-      {
-        "_id": "TFnqfX3G3Z3SQDR7w"
-      }
-    ],
-    "roles": [
-      {
-        "_id": "role-1"
-      },
-      {
-        "_id": "role-2"
-      }
-    ],
-    "teams": [
-      "Tasker",
-      "CS",
-      "Marketing"
-    ]
-  },
-  {
-    "_id": "NGjzPAYry5dxCR55t",
-    "name": "employee update",
-    "description": "Lorem Ipsum text is generated from sections of a work by Cicero, a Roman philosopher, but the text itself has no meaningful content. It starts with and continues with nonsensical Latin-like words.",
-    "users": [
-      {
-        "_id": "TFnqfX3G3Z3SQDR7w"
-      },
-      {
-        "_id": "KfhstepwgsNR2Z69M"
-      }
-    ],
-    "roles": [
-      {
-        "_id": "role-1"
-      },
-      {
-        "_id": "role-2"
-      }
-    ],
-    "teams": [
-      "Tasker"
-    ]
-  },
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DataTableColumnHeader } from "@/components/ui/table-data/data-table-column-header";
+import { DataTablePagination } from "@/components/ui/table-data/data-table-pagination";
+import { DataTableRowActions } from "@/components/ui/table-data/data-table-row-actions";
+import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import type { ColumnDef, ColumnFiltersState, SortingState, VisibilityState } from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
+import React from "react";
+import { PERMISSIONS } from "~/constants/common";
+import useGlobalStore from "~/hooks/useGlobalStore";
+import { getUserId } from "~/services/helpers.server";
+import { getGroupsOfUser } from "~/services/role-base-access-control.server";
+
+const columns: ColumnDef<any>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+        className="translate-y-[2px]"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+        className="translate-y-[2px]"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Group Name" />
+    ),
+    cell: ({ row }) => <div className="w-[80px]">{row.getValue("name")}</div>,
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "description",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Description" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-[500px] truncate font-medium">
+            {row.getValue("description")}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "users",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Users" />
+    ),
+    cell: ({ row }: any) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
+            {row.getValue("users").map((e: any, index: number) => (
+              <Badge key={index}>{e.username}</Badge>
+            ))}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <DataTableRowActions row={row} />,
+  },
 ];
 
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+}
 
-export default function GroupPage() {
+function DataTable<TData, TValue>({
+  columns,
+  data,
+}: DataTableProps<TData, TValue>) {
+  const [rowSelection, setRowSelection] = React.useState({});
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnVisibility,
+      rowSelection,
+      columnFilters,
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+  });
+
+  return (
+    <div className="space-y-4">
+      <DataTableToolbar column="username" table={table} />
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id} colSpan={header.colSpan}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <DataTablePagination table={table} />
+    </div>
+  );
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const userId = await getUserId({ request });
+  const groups = await getGroupsOfUser({
+    userId,
+    projection: {
+      name: 1,
+      description: 1,
+      "users.username": 1,
+      "users.email": 1,
+      roles: 1,
+      createdAt: 1,
+      parent: 1,
+      hierarchy: 1,
+    },
+  });
+  return json({ groups });
+};
+
+export default function Screen() {
+  const loaderData = useLoaderData<{ groups: any }>();
+  const globalData = useGlobalStore((state) => state);
+  console.log(loaderData, globalData, "!!");
+
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Groups
+            Groups management
           </h2>
           <p className="text-muted-foreground">
-            Here&apos;s a list of your users!
+            Here&apos;s a list of your groups!
           </p>
         </div>
         <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Add group</Button>
-          </DialogTrigger>
+          {globalData.permissions.includes(PERMISSIONS.WRTTE_GROUP) ? (
+            <DialogTrigger asChild>
+              <Button variant="outline">Add group</Button>
+            </DialogTrigger>
+          ) : null}
           <DialogContent className="sm:max-w-[560px]">
             <DialogHeader>
               <DialogTitle>New group</DialogTitle>
@@ -233,39 +346,7 @@ export default function GroupPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="grid grid-cols-3 gap-4">
-        {dataGroups.map((data) => {
-          return (
-            <Card>
-              <CardHeader className="font-semibold text-lg flex flex-row justify-between items-center">
-                {data.name}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-                    >
-                      <DotsHorizontalIcon className="h-4 w-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[160px]">
-                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      Duplicate
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardHeader>
-              <CardContent className="text-gray">
-                {data.description}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
+      <DataTable data={loaderData.groups} columns={columns} />
     </div>
   );
 }
