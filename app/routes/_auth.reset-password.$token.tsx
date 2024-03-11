@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { useActionData } from "@remix-run/react";
-import { useTranslation } from "react-i18next";
-import { toast } from "@/components/ui/use-toast";
+import { Button } from '@/components/ui/button';
+import { useActionData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
+import { toast } from '@/components/ui/use-toast';
 
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form } from "@remix-run/react";
-import { changePassword, isResetPassExpired } from "~/services/auth.server";
-import { json, redirect } from "@remix-run/node";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { Form } from '@remix-run/react';
+import { changePassword, isResetPassExpired } from '~/services/auth.server';
+import { json, redirect } from '@remix-run/node';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { useEffect } from 'react';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   try {
@@ -17,11 +17,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const { newPassword, reEnterPassword } = Object.fromEntries(formData);
 
     if (newPassword !== reEnterPassword) {
-      throw new Error("Password not match !");
+      throw new Error('Password not match !');
     }
     await changePassword({ newPassword, token: params.token });
 
-    return redirect("/sign-in");
+    return redirect('/sign-in');
   } catch (error: any) {
     console.log(error);
     return json({ error: error.message });
@@ -30,7 +30,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const isExpired = await isResetPassExpired({ token: params.token });
-  if (isExpired) return redirect("/reset-password");
+  if (isExpired) return redirect('/reset-password');
 
   return null;
 }

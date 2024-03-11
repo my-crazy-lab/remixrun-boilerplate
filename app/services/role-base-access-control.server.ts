@@ -1,13 +1,13 @@
-import { ObjectId, mongodb } from "~/utils/db.server";
-import { getUserId } from "./helpers.server";
+import { ObjectId, mongodb } from '~/utils/db.server';
+import { getUserId } from './helpers.server';
 import {
   FindOptionsClient,
   newRecordCommonField,
   statusOriginal,
-} from "./constants.server";
-import { momentTz } from "~/utils/helpers.server";
-import { PERMISSIONS } from "~/constants/common";
-import { MilkOff } from "lucide-react";
+} from './constants.server';
+import { momentTz } from '~/utils/helpers.server';
+import { PERMISSIONS } from '~/constants/common';
+import { MilkOff } from 'lucide-react';
 
 export async function isRoot(userId: string) {
   const permissions: Array<string> = await getUserPermissions(userId);
@@ -19,14 +19,14 @@ export async function verifyPermissions(
   permissions: Array<string>,
 ) {
   const userId = await getUserId({ request });
-  const rolesCol = mongodb.collection("roles");
+  const rolesCol = mongodb.collection('roles');
   const roles = await rolesCol
     .find({ permisisons: { $in: permissions } }, { projection: { _id: 1 } })
     .toArray();
 
-  const groupFound = await mongodb.collection("groups").findOne({
+  const groupFound = await mongodb.collection('groups').findOne({
     users: userId,
-    roles: { $in: roles.map((role) => role._id) },
+    roles: { $in: roles.map(role => role._id) },
   });
 
   if (groupFound) {
@@ -56,16 +56,16 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
 
   const lookupRole = {
     $lookup: {
-      from: "roles",
-      localField: "roleIds",
-      foreignField: "_id",
-      as: "roles",
+      from: 'roles',
+      localField: 'roleIds',
+      foreignField: '_id',
+      as: 'roles',
     },
   };
 
   const unwindRole = {
     $unwind: {
-      path: "$roles",
+      path: '$roles',
       preserveNullAndEmptyArrays: true,
     },
   };
@@ -73,7 +73,7 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
   const aggregate = [matchGroups, lookupRole, unwindRole];
 
   const data: any = await mongodb
-    .collection("groups")
+    .collection('groups')
     .aggregate(aggregate)
     .toArray();
 
@@ -93,7 +93,7 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
       return allPermissions;
     }
 
-    return allPermissions.map((p) => p._id);
+    return allPermissions.map(p => p._id);
   }
   if (moreDetail) {
     return data;
@@ -109,7 +109,7 @@ export async function createGroup({
   roleIds,
 }: any) {
   console.log(parent);
-  const groupCol = mongodb.collection("groups");
+  const groupCol = mongodb.collection('groups');
   const parentGroup = await groupCol.findOne({ _id: parent });
   console.log(parent, parentGroup);
   if (!parentGroup) return;
@@ -132,7 +132,7 @@ export async function updateGroups({
   userIds,
   roleIds,
 }: any) {
-  await mongodb.collection("groups").updateOne(
+  await mongodb.collection('groups').updateOne(
     { _id: groupId },
     {
       $set: {
@@ -148,19 +148,19 @@ export async function updateGroups({
 
 export async function getRolesOfGroups(groupId: string) {
   const group = await mongodb
-    .collection("groups")
+    .collection('groups')
     .aggregate([
       { $match: { _id: groupId } },
       {
         $lookup: {
-          from: "roles",
-          localField: "roleIds",
-          foreignField: "_id",
-          as: "roles",
+          from: 'roles',
+          localField: 'roleIds',
+          foreignField: '_id',
+          as: 'roles',
         },
       },
       {
-        $project: { "roles.name": 1, "roles._id": 1 },
+        $project: { 'roles.name': 1, 'roles._id': 1 },
       },
     ])
     .toArray();
@@ -169,9 +169,9 @@ export async function getRolesOfGroups(groupId: string) {
 }
 
 export async function searchUser(searchText: string) {
-  const pattern = new RegExp(searchText, "i");
+  const pattern = new RegExp(searchText, 'i');
   const users = await mongodb
-    .collection("users")
+    .collection('users')
     .find({
       $or: [
         {
@@ -190,31 +190,31 @@ export async function searchUser(searchText: string) {
 export async function getGroupDetail({ userId, groupId, projection }: any) {
   //TODO parent can view children groups
   const group = await mongodb
-    .collection("groups")
+    .collection('groups')
     .aggregate([
       { $match: { _id: groupId, userIds: userId } },
       {
         $lookup: {
-          from: "groups", // The same collection
-          localField: "_id", // Field from the input documents
-          foreignField: "parent", // Field from the documents of the "groups" collection
-          as: "children", // Output array field
+          from: 'groups', // The same collection
+          localField: '_id', // Field from the input documents
+          foreignField: 'parent', // Field from the documents of the "groups" collection
+          as: 'children', // Output array field
         },
       },
       {
         $lookup: {
-          from: "roles",
-          localField: "roleIds",
-          foreignField: "_id",
-          as: "roles",
+          from: 'roles',
+          localField: 'roleIds',
+          foreignField: '_id',
+          as: 'roles',
         },
       },
       {
         $lookup: {
-          from: "users",
-          localField: "userIds",
-          foreignField: "_id",
-          as: "users",
+          from: 'users',
+          localField: 'userIds',
+          foreignField: '_id',
+          as: 'users',
         },
       },
       {
@@ -235,16 +235,16 @@ export async function getGroupPermissions(groupId: string) {
 
   const lookupRole = {
     $lookup: {
-      from: "roles",
-      localField: "roleIds",
-      foreignField: "_id",
-      as: "roles",
+      from: 'roles',
+      localField: 'roleIds',
+      foreignField: '_id',
+      as: 'roles',
     },
   };
 
   const unwindRole = {
     $unwind: {
-      path: "$roles",
+      path: '$roles',
       preserveNullAndEmptyArrays: true,
     },
   };
@@ -252,7 +252,7 @@ export async function getGroupPermissions(groupId: string) {
   const aggregate = [matchGroups, lookupRole, unwindRole];
 
   const data: any = await mongodb
-    .collection("groups")
+    .collection('groups')
     .aggregate(aggregate)
     .toArray();
 
@@ -274,21 +274,21 @@ export async function getGroupPermissions(groupId: string) {
 }
 
 export async function getGroupsOfUser({ projection, userId }: any) {
-  const groupCol = mongodb.collection("groups");
+  const groupCol = mongodb.collection('groups');
   const lookupUser = {
     $lookup: {
-      from: "users",
-      localField: "userIds",
-      foreignField: "_id",
-      as: "users",
+      from: 'users',
+      localField: 'userIds',
+      foreignField: '_id',
+      as: 'users',
     },
   };
   const lookupRole = {
     $lookup: {
-      from: "roles",
-      localField: "roleIds",
-      foreignField: "_id",
-      as: "roles",
+      from: 'roles',
+      localField: 'roleIds',
+      foreignField: '_id',
+      as: 'roles',
     },
   };
 
@@ -308,11 +308,11 @@ export async function getGroupsOfUser({ projection, userId }: any) {
 }
 
 export async function createRole({ name, permissions, description }: any) {
-  const roleCol = mongodb.collection("roles");
+  const roleCol = mongodb.collection('roles');
   await roleCol.insertOne({
     ...newRecordCommonField(),
     name,
-    slug: name.toLocaleLowerCase().split(" ").join("-"),
+    slug: name.toLocaleLowerCase().split(' ').join('-'),
     permissions,
     description,
   });
@@ -324,13 +324,13 @@ export async function updateRole({
   permissions,
   description,
 }: any) {
-  await mongodb.collection("roles").updateOne(
+  await mongodb.collection('roles').updateOne(
     { _id: roleId },
     {
       $set: {
         updatedAt: momentTz().toDate(),
         name,
-        slug: name.toLocaleLowerCase().split("").join("-"),
+        slug: name.toLocaleLowerCase().split('').join('-'),
         permissions,
         description,
       },
@@ -340,14 +340,14 @@ export async function updateRole({
 
 export async function getAllPermissions({ projection }: any) {
   const data = await mongodb
-    .collection("permissions")
+    .collection('permissions')
     .find({}, { projection })
     .toArray();
   return data;
 }
 
 export async function deleteUser(userId: string) {
-  await mongodb.collection("users").updateOne(
+  await mongodb.collection('users').updateOne(
     { _id: userId },
     {
       $set: {
@@ -359,7 +359,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function deleteRole(roleId: string) {
-  await mongodb.collection("roles").updateOne(
+  await mongodb.collection('roles').updateOne(
     { _id: roleId },
     {
       $set: {
@@ -371,7 +371,7 @@ export async function deleteRole(roleId: string) {
 }
 
 export async function deleteGroup(groupId: string) {
-  await mongodb.collection("groups").updateOne(
+  await mongodb.collection('groups').updateOne(
     {
       _id: groupId,
     },
@@ -387,16 +387,16 @@ export async function deleteGroup(groupId: string) {
 export async function getPermissionsOfGroup(groupId: string) {
   const lookupRole = {
     $lookup: {
-      from: "roles",
-      localField: "roles._id",
-      foreignField: "_id",
-      as: "role",
+      from: 'roles',
+      localField: 'roles._id',
+      foreignField: '_id',
+      as: 'role',
     },
   };
 
   const unwindRole = {
     $unwind: {
-      path: "$role",
+      path: '$role',
       preserveNullAndEmptyArrays: true,
     },
   };
@@ -404,7 +404,7 @@ export async function getPermissionsOfGroup(groupId: string) {
   const aggregate = [{ $match: { _id: groupId } }, lookupRole, unwindRole];
 
   const data: any = await mongodb
-    .collection("groups")
+    .collection('groups')
     .aggregate(aggregate)
     .toArray();
 
@@ -419,7 +419,7 @@ export async function getPermissionsOfGroup(groupId: string) {
 
 // TODO
 export async function getUsersHierarchy(groupId: string) {
-  await mongodb.collection("groups");
+  await mongodb.collection('groups');
 }
 
 /*

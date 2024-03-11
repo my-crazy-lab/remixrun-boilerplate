@@ -1,17 +1,17 @@
-import { PassThrough } from "node:stream";
+import { PassThrough } from 'node:stream';
 
-import type { AppLoadContext, EntryContext } from "@remix-run/node";
-import { createReadableStreamFromReadable } from "@remix-run/node";
-import { RemixServer } from "@remix-run/react";
-import * as isbotModule from "isbot";
-import { renderToPipeableStream } from "react-dom/server";
+import type { AppLoadContext, EntryContext } from '@remix-run/node';
+import { createReadableStreamFromReadable } from '@remix-run/node';
+import { RemixServer } from '@remix-run/react';
+import * as isbotModule from 'isbot';
+import { renderToPipeableStream } from 'react-dom/server';
 
-import { I18nextProvider, initReactI18next } from "react-i18next";
-import Backend from "i18next-fs-backend";
-import i18n from "./i18n"; // your i18n configuration file
-import { resolve } from "node:path";
-import { createInstance } from "i18next";
-import i18next from "./i18next.server";
+import { I18nextProvider, initReactI18next } from 'react-i18next';
+import Backend from 'i18next-fs-backend';
+import i18n from './i18n'; // your i18n configuration file
+import { resolve } from 'node:path';
+import { createInstance } from 'i18next';
+import i18next from './i18next.server';
 
 const ABORT_DELAY = 5_000;
 
@@ -22,7 +22,7 @@ export default function handleRequest(
   remixContext: EntryContext,
   loadContext: AppLoadContext,
 ) {
-  return isBotRequest(request.headers.get("user-agent"))
+  return isBotRequest(request.headers.get('user-agent'))
     ? handleBotRequest(
         request,
         responseStatusCode,
@@ -46,12 +46,12 @@ function isBotRequest(userAgent: string | null) {
   }
 
   // isbot >= 3.8.0, >4
-  if ("isbot" in isbotModule && typeof isbotModule.isbot === "function") {
+  if ('isbot' in isbotModule && typeof isbotModule.isbot === 'function') {
     return isbotModule.isbot(userAgent);
   }
 
   // isbot < 3.8.0
-  if ("default" in isbotModule && typeof isbotModule.default === "function") {
+  if ('default' in isbotModule && typeof isbotModule.default === 'function') {
     return isbotModule.default(userAgent);
   }
 
@@ -76,7 +76,7 @@ async function i18nConfig({
       ...i18n, // spread the configuration
       lng: lang, // The locale we detected above
       ns, // The namespaces the routes about to render wants to use
-      backend: { loadPath: resolve("./public/locales/{{lng}}/{{ns}}.json") },
+      backend: { loadPath: resolve('./public/locales/{{lng}}/{{ns}}.json') },
     });
 
   return instance;
@@ -106,7 +106,7 @@ async function handleBotRequest(
           const body = new PassThrough();
           const stream = createReadableStreamFromReadable(body);
 
-          responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set('Content-Type', 'text/html');
 
           resolve(
             new Response(stream, {
@@ -158,7 +158,7 @@ async function handleBrowserRequest(
           const body = new PassThrough();
           const stream = createReadableStreamFromReadable(body);
 
-          responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set('Content-Type', 'text/html');
 
           resolve(
             new Response(stream, {

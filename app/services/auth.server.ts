@@ -1,15 +1,15 @@
 // app/services/auth.server.ts
-import { Authenticator } from "remix-auth";
-import { sessionStorage } from "~/services/session.server";
-import { FormStrategy } from "remix-auth-form";
-import bcrypt from "bcrypt";
+import { Authenticator } from 'remix-auth';
+import { sessionStorage } from '~/services/session.server';
+import { FormStrategy } from 'remix-auth-form';
+import bcrypt from 'bcrypt';
 
-import { mongodb } from "~/utils/db.server";
-import { dotenv } from "./dotenv.server";
-import { getFutureTimeFromToday, momentTz } from "~/utils/helpers.server";
-import { sendEmail } from "./mail.server";
-import { v4 as uuidv4 } from "uuid";
-import { json } from "@remix-run/node";
+import { mongodb } from '~/utils/db.server';
+import { dotenv } from './dotenv.server';
+import { getFutureTimeFromToday, momentTz } from '~/utils/helpers.server';
+import { sendEmail } from './mail.server';
+import { v4 as uuidv4 } from 'uuid';
+import { json } from '@remix-run/node';
 
 // Create an instance of the authenticator, pass a generic with what
 // strategies will return and will store in the session
@@ -31,19 +31,19 @@ export async function verifyAndSendCode({
   password: string;
   username: string;
 }) {
-  const usersCol = mongodb.collection("users");
+  const usersCol = mongodb.collection('users');
 
   const user = await usersCol.findOne({ username });
 
   if (!user) {
-    throw json({ message: "User not found !" }, { status: 404 });
+    throw json({ message: 'User not found !' }, { status: 404 });
   }
   const verified = await compareHash({
     password,
     hash: user?.services?.password?.bcrypt,
   });
 
-  if (!verified) throw new Error("Not correct account");
+  if (!verified) throw new Error('Not correct account');
 
   const verificationCode = await sendVerificationCode({ email: user.email });
   return verificationCode;
@@ -55,7 +55,7 @@ export async function sendVerificationCode({ email }: { email: string }) {
   ).toString();
   const token = uuidv4();
 
-  const accountsCol = mongodb.collection("users");
+  const accountsCol = mongodb.collection('users');
   await accountsCol.updateOne(
     {
       email,
@@ -64,7 +64,7 @@ export async function sendVerificationCode({ email }: { email: string }) {
       $set: {
         verification: {
           code: verificationCode,
-          expired: getFutureTimeFromToday(10, "minutes").toDate(),
+          expired: getFutureTimeFromToday(10, 'minutes').toDate(),
           token,
         },
       },
@@ -74,50 +74,50 @@ export async function sendVerificationCode({ email }: { email: string }) {
   await sendEmail({
     to: email,
     from: dotenv.MAIL_FROM,
-    subject: "Your verification code",
+    subject: 'Your verification code',
     text: `${verificationCode} is your verification code.`,
   });
   return token;
 }
 
 export async function isVerificationCodeExpired({ token }: { token: string }) {
-  const account = await mongodb.collection("users").findOne({
-    "verification.token": token,
-    "verification.expired": { $gt: momentTz().toDate() },
+  const account = await mongodb.collection('users').findOne({
+    'verification.token': token,
+    'verification.expired': { $gt: momentTz().toDate() },
   });
 
   return !account?._id;
 }
 
 export async function isResetPassExpired({ token }: { token: string }) {
-  const account = await mongodb.collection("users").findOne({
-    "resetPassword.token": token,
-    "resetPassword.expired": { $gt: momentTz().toDate() },
+  const account = await mongodb.collection('users').findOne({
+    'resetPassword.token': token,
+    'resetPassword.expired': { $gt: momentTz().toDate() },
   });
 
   return !account?._id;
 }
 
 export async function verifyCode({ code }: { code: string }) {
-  const isExpired = await mongodb.collection("users").findOne({
-    "verification.expired": { $gt: momentTz().toDate() },
+  const isExpired = await mongodb.collection('users').findOne({
+    'verification.expired': { $gt: momentTz().toDate() },
   });
   if (!isExpired?._id) {
-    throw new Error("Verification code expired !");
+    throw new Error('Verification code expired !');
   }
 
-  const account = await mongodb.collection("users").findOneAndUpdate(
+  const account = await mongodb.collection('users').findOneAndUpdate(
     {
-      "verification.code": code,
+      'verification.code': code,
     },
     {
       $set: {
-        "verification.expired": momentTz().toDate(),
+        'verification.expired': momentTz().toDate(),
       },
     },
   );
   if (!account?._id) {
-    throw new Error("Code incorrect!");
+    throw new Error('Code incorrect!');
   }
   return { userId: account._id };
 }
@@ -125,27 +125,27 @@ export async function verifyCode({ code }: { code: string }) {
 export async function resetPassword({ email }: { email: string }) {
   const resetToken = uuidv4();
 
-  const account = await mongodb.collection("users").findOneAndUpdate(
+  const account = await mongodb.collection('users').findOneAndUpdate(
     {
       email,
     },
     {
       $set: {
         resetPassword: {
-          expired: getFutureTimeFromToday(15, "minutes").toDate(),
+          expired: getFutureTimeFromToday(15, 'minutes').toDate(),
           token: resetToken,
         },
       },
     },
   );
   if (!account?._id) {
-    throw new Error("Email incorrect !");
+    throw new Error('Email incorrect !');
   }
 
   await sendEmail({
     to: email,
     from: dotenv.MAIL_FROM,
-    subject: "Your link to reset password",
+    subject: 'Your link to reset password',
     text: `${dotenv.DOMAIN_BTASKEE_BE}/reset-password/${resetToken} is link to reset your password`,
   });
 }
@@ -157,40 +157,40 @@ export async function changePassword({
   token: string;
   newPassword: string;
 }) {
-  if (!newPassword || !token) throw new Error("Not accept");
+  if (!newPassword || !token) throw new Error('Not accept');
 
   const hashedPassword = await hashPassword(newPassword);
 
-  const account = await mongodb.collection("users").findOneAndUpdate(
+  const account = await mongodb.collection('users').findOneAndUpdate(
     {
-      "resetPassword.expired": { $gt: momentTz().toDate() },
-      "resetPassword.token": token,
+      'resetPassword.expired': { $gt: momentTz().toDate() },
+      'resetPassword.token': token,
     },
     {
       $set: {
-        "services.password.bcrypt": hashedPassword,
-        "resetPassword.expired": momentTz().toDate(),
+        'services.password.bcrypt': hashedPassword,
+        'resetPassword.expired': momentTz().toDate(),
       },
     },
   );
 
   if (!account?._id) {
-    throw new Error("This link expired !");
+    throw new Error('This link expired !');
   }
 }
 
 // Tell the Authenticator to use the form strategy
 authenticator.use(
   new FormStrategy(async ({ form }) => {
-    const code = form.get("code")?.toString();
+    const code = form.get('code')?.toString();
     if (!code) {
-      throw new Error("Login failure");
+      throw new Error('Login failure');
     }
 
     const user = await verifyCode({
       code,
     });
-    console.log("login done");
+    console.log('login done');
     // the type of this user must match the type you pass to the Authenticator
     // the strategy will automatically inherit the type if you instantiate
     // directly inside the `use` method
@@ -198,5 +198,5 @@ authenticator.use(
   }),
   // each strategy has a name and can be changed to use another one
   // same strategy multiple times, especially useful for the OAuth2 strategy.
-  "user-pass",
+  'user-pass',
 );

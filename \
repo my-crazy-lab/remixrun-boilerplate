@@ -15,7 +15,6 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { Link, useLoaderData, useParams, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
-import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
@@ -58,7 +57,7 @@ export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
     );
   }
 
-  return json({ permissions, permissionsGrouped: groupPermissionsByModule() });
+  return json({ permissions: groupPermissionsByModule() });
 }, PERMISSIONS.WRITE_ROLE);
 
 export default function RolesDetail() {
@@ -74,25 +73,24 @@ export default function RolesDetail() {
     defaultValues: {
       name: '',
       description: '',
+      userIds: [],
+      roleIds: [],
     },
   });
   const submit = useSubmit();
 
   const onSubmit = (data: any) => {
+    console.log(data, "@")
     const formData = new FormData();
-    const permissions: string[] = [];
-
-    Object.entries(data.permissions).forEach(item => {
-      if (item[1]) {
-        permissions.push(item[0]);
-      }
-    });
 
     formData.append('name', data.name);
     formData.append('description', data.description);
-    formData.append('permissions', JSON.stringify(permissions));
+    formData.append(
+      'permissions',
+      JSON.stringify(data.permissions.map(permission => permission._id)),
+    );
 
-    submit(formData, { method: 'post' });
+   // submit(formData, { method: 'post' });
   };
   console.log(loaderData);
 
@@ -118,7 +116,7 @@ export default function RolesDetail() {
           placeholder="Role"
           {...register('description' as const, { required: true })}></Input>
         <Separator className="my-4" />
-        {_.map(loaderData.permissionsGrouped, (actionPermission: any) => (
+        {_.map(loaderData.permissions, (actionPermission: any) => (
           <Accordion type="single" collapsible key={actionPermission._id}>
             <AccordionItem value={actionPermission.module}>
               <AccordionTrigger>
@@ -136,7 +134,7 @@ export default function RolesDetail() {
                       <div className="mt-1 flex items-center gap-2">
                         <Controller
                           control={control}
-                          name={`permissions.${action._id}`}
+                          name={action._id}
                           render={({ field: { value, onChange } }) => (
                             <Switch
                               checked={value}
@@ -146,7 +144,7 @@ export default function RolesDetail() {
                         />
                         <Label
                           className="text-sm text-gray-500"
-                          htmlFor={`permissions.${action._id}`}>
+                          htmlFor={action._id}>
                           {action.description}
                         </Label>
                       </div>

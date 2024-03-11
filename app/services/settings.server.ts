@@ -1,15 +1,15 @@
-import { mongodb } from "~/utils/db.server";
-import { FindOptionsClient, newRecordCommonField } from "./constants.server";
-import { hashPassword } from "./auth.server";
+import { mongodb } from '~/utils/db.server';
+import { FindOptionsClient, newRecordCommonField } from './constants.server';
+import { hashPassword } from './auth.server';
 
 export async function getTotalUsers() {
-  const total = await mongodb.collection("users").count({});
+  const total = await mongodb.collection('users').count({});
 
   return total;
 }
 
 export async function getUsers({ skip, limit, projection }: FindOptionsClient) {
-  const usersCol = mongodb.collection("users");
+  const usersCol = mongodb.collection('users');
   const users = await usersCol
     .find(
       {},
@@ -36,7 +36,7 @@ export async function createNewUser({
   cities,
   groupIds,
 }: any) {
-  const usersCol = mongodb.collection("users");
+  const usersCol = mongodb.collection('users');
   const passwordHashed = await hashPassword(password);
 
   const newUser = await usersCol.insertOne({
@@ -47,7 +47,7 @@ export async function createNewUser({
     services: { password: { bcrypt: passwordHashed } },
   });
 
-  const groupCol = mongodb.collection("groups");
+  const groupCol = mongodb.collection('groups');
 
   await groupCol.updateMany(
     {
@@ -60,5 +60,5 @@ export async function createNewUser({
     },
   );
 
-  return { message: "Successful" };
+  return { message: 'Successful' };
 }

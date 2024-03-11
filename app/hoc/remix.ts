@@ -1,9 +1,6 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs
-} from "@remix-run/node";
-import { getUserId, saveActionHistory } from "~/services/helpers.server";
-import { getUserPermissions } from "~/services/role-base-access-control.server";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { getUserId, saveActionHistory } from '~/services/helpers.server';
+import { getUserPermissions } from '~/services/role-base-access-control.server';
 
 export function hocAction(callback: any, permission: string) {
   async function action(args: ActionFunctionArgs) {
@@ -13,7 +10,7 @@ export function hocAction(callback: any, permission: string) {
     if (!userPermissions.includes(permission)) {
       throw new Response(null, {
         status: 404,
-        statusText: "Not allowed",
+        statusText: 'Not allowed',
       });
     }
 
@@ -34,7 +31,7 @@ export function hocLoader(callback: any, permission: string) {
     if (!userPermissions.includes(permission)) {
       throw new Response(null, {
         status: 404,
-        statusText: "Not allowed",
+        statusText: 'Not allowed',
       });
     }
 

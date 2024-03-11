@@ -29,8 +29,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     projection: {
       name: 1,
       description: 1,
-      "users.username": 1,
-      "users.email": 1,
+      'users.username': 1,
+      'users.email': 1,
       roles: 1,
       createdAt: 1,
       parent: 1,
@@ -42,8 +42,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function Screen() {
   const loaderData = useLoaderData<{ groups: any }>();
-  const globalData = useGlobalStore((state) => state);
-  console.log(loaderData, globalData, "!!");
+  const globalData = useGlobalStore(state => state);
+  console.log(loaderData, globalData, '!!');
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -81,20 +81,20 @@ export default function Screen() {
                     isDisplayAllOptions
                     options={[
                       {
-                        value: "next.js",
-                        label: "Next.js",
+                        value: 'next.js',
+                        label: 'Next.js',
                       },
                       {
-                        value: "sveltekit",
-                        label: "SvelteKit",
+                        value: 'sveltekit',
+                        label: 'SvelteKit',
                       },
                       {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
+                        value: 'nuxt.js',
+                        label: 'Nuxt.js',
                       },
                       {
-                        value: "remix",
-                        label: "Remix",
+                        value: 'remix',
+                        label: 'Remix',
                       },
                     ]}
                     className="w-[360px]"
@@ -108,20 +108,20 @@ export default function Screen() {
                     isDisplayAllOptions
                     options={[
                       {
-                        value: "next.js",
-                        label: "Next.js",
+                        value: 'next.js',
+                        label: 'Next.js',
                       },
                       {
-                        value: "sveltekit",
-                        label: "SvelteKit",
+                        value: 'sveltekit',
+                        label: 'SvelteKit',
                       },
                       {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
+                        value: 'nuxt.js',
+                        label: 'Nuxt.js',
                       },
                       {
-                        value: "remix",
-                        label: "Remix",
+                        value: 'remix',
+                        label: 'Remix',
                       },
                     ]}
                     className="w-[360px]"
@@ -135,20 +135,20 @@ export default function Screen() {
                     isDisplayAllOptions
                     options={[
                       {
-                        value: "next.js",
-                        label: "Next.js",
+                        value: 'next.js',
+                        label: 'Next.js',
                       },
                       {
-                        value: "sveltekit",
-                        label: "SvelteKit",
+                        value: 'sveltekit',
+                        label: 'SvelteKit',
                       },
                       {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
+                        value: 'nuxt.js',
+                        label: 'Nuxt.js',
                       },
                       {
-                        value: "remix",
-                        label: "Remix",
+                        value: 'remix',
+                        label: 'Remix',
                       },
                     ]}
                     className="w-[360px]"
