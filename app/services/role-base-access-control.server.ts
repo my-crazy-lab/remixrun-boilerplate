@@ -307,15 +307,24 @@ export async function getGroupsOfUser({ projection, userId }: any) {
   return groups;
 }
 
-export async function createRole({ name, permissions, description }: any) {
+export async function createRole({
+  groupId,
+  name,
+  permissions,
+  description,
+}: any) {
   const roleCol = mongodb.collection('roles');
-  await roleCol.insertOne({
+  const { insertedId: roleId } = await roleCol.insertOne({
     ...newRecordCommonField(),
     name,
     slug: name.toLocaleLowerCase().split(' ').join('-'),
     permissions,
     description,
   });
+
+  await mongodb
+    .collection('groups')
+    .updateOne({ _id: groupId }, { $push: { roleIds: roleId } });
 }
 
 export async function updateRole({

@@ -30,6 +30,7 @@ export const action = hocAction(
       const { name, description, permissions } = formData;
       await createRole({
         name,
+        groupId: params.id,
         description,
         permissions: JSON.parse(permissions),
       });

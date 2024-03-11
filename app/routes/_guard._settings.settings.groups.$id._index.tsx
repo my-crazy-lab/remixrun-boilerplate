@@ -143,7 +143,7 @@ export default function Screen() {
           {loaderData.group.roles.map((role: any, index: number) => {
             return (
               <Button variant="outline" key={index} className="mr-4 mt-4">
-                {role.name}
+                {role._id}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
