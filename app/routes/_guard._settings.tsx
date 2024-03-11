@@ -1,7 +1,7 @@
-import { Link, Outlet, useLocation } from "@remix-run/react";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Link, Outlet, useLocation } from '@remix-run/react';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 export default function Screen() {
   const { pathname } = useLocation();
@@ -22,38 +22,36 @@ export default function Screen() {
         <aside className="-mx-4 lg:w-1/5">
           <nav
             className={cn(
-              "flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1",
-            )}
-          >
+              'flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1',
+            )}>
             {[
               {
-                title: "Profile",
-                href: "/settings/profile",
+                title: 'Profile',
+                href: '/settings/profile',
               },
               {
-                title: "Roles management",
-                href: "/settings/roles",
+                title: 'Roles management',
+                href: '/settings/roles',
               },
               {
-                title: "Users management",
-                href: "/settings/users",
+                title: 'Users management',
+                href: '/settings/users',
               },
               {
-                title: "Groups",
-                href: "/settings/groups",
+                title: 'Groups',
+                href: '/settings/groups',
               },
-            ].map((item) => (
+            ].map(item => (
               <Link
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  buttonVariants({ variant: "ghost" }),
+                  buttonVariants({ variant: 'ghost' }),
                   pathname.includes(item.href)
-                    ? "bg-muted hover:bg-muted"
-                    : "hover:bg-transparent hover:underline",
-                  "justify-start",
-                )}
-              >
+                    ? 'bg-muted hover:bg-muted'
+                    : 'hover:bg-transparent hover:underline',
+                  'justify-start',
+                )}>
                 {item.title}
               </Link>
             ))}

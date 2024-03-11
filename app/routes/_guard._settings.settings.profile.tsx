@@ -1,32 +1,32 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 export default function Screen() {
   const dataUser = {
     city: [
-      "Hồ Chí Minh",
-      "Hà Nội",
-      "Đà Nẵng",
-      "Bình Dương",
-      "Đồng Nai",
-      "Cần Thơ",
-      "Hải Phòng",
-      "Lâm Đồng",
-      "Khánh Hòa",
-      "Bangkok",
+      'Hồ Chí Minh',
+      'Hà Nội',
+      'Đà Nẵng',
+      'Bình Dương',
+      'Đồng Nai',
+      'Cần Thơ',
+      'Hải Phòng',
+      'Lâm Đồng',
+      'Khánh Hòa',
+      'Bangkok',
     ],
-    isoCode: "VN",
-    services: "",
-    username: "myquyen.le",
-    emails: "xnguyen9a101@gmail.com",
-    ipAddress: "127.0.0.1",
+    isoCode: 'VN',
+    services: '',
+    username: 'myquyen.le',
+    emails: 'xnguyen9a101@gmail.com',
+    ipAddress: '127.0.0.1',
     profile: {
-      language: "vi",
-      timezone: "Asia/Ho_Chi_Minh",
+      language: 'vi',
+      timezone: 'Asia/Ho_Chi_Minh',
     },
-    teams: ["customer-service", "tasker", "marketing"],
+    teams: ['customer-service', 'tasker', 'marketing'],
   };
 
   return (
@@ -78,8 +78,7 @@ export default function Screen() {
                   <Badge
                     className="text-center block"
                     variant="outline"
-                    key={index}
-                  >
+                    key={index}>
                     {team}
                   </Badge>
                 );
@@ -92,8 +91,7 @@ export default function Screen() {
                   <Badge
                     className="text-center block"
                     variant="outline"
-                    key={index}
-                  >
+                    key={index}>
                     {ct}
                   </Badge>
                 );
@@ -106,8 +104,7 @@ export default function Screen() {
                   <Badge
                     className="text-center block"
                     variant="outline"
-                    key={index}
-                  >
+                    key={index}>
                     {ct}
                   </Badge>
                 );

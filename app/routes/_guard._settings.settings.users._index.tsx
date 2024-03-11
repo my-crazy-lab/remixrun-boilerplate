@@ -1,6 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -8,10 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { MultiSelect } from "@/components/ui/multi-select";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { MultiSelect } from '@/components/ui/multi-select';
 import {
   Table,
   TableBody,
@@ -19,19 +19,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { DataTableColumnHeader } from "@/components/ui/table-data/data-table-column-header";
-import { DataTablePagination } from "@/components/ui/table-data/data-table-pagination";
-import { DataTableRowActions } from "@/components/ui/table-data/data-table-row-actions";
-import { DataTableToolbar } from "@/components/ui/table-data/data-table-toolbar";
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+} from '@/components/ui/table';
+import { DataTableColumnHeader } from '@/components/ui/table-data/data-table-column-header';
+import { DataTablePagination } from '@/components/ui/table-data/data-table-pagination';
+import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-actions';
+import { DataTableToolbar } from '@/components/ui/table-data/data-table-toolbar';
+import { ActionFunctionArgs, LoaderFunctionArgs, json } from '@remix-run/node';
 import {
   useLoaderData,
   useNavigate,
   useNavigation,
   useSearchParams,
   useSubmit,
-} from "@remix-run/react";
+} from '@remix-run/react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -46,29 +46,29 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table";
-import * as React from "react";
-import { Controller, useForm } from "react-hook-form";
-import { hocAction } from "~/hoc/remix";
-import { getSession } from "~/services/session.server";
+} from '@tanstack/react-table';
+import * as React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { hocAction } from '~/hoc/remix';
+import { getSession } from '~/services/session.server';
 import {
   createNewUser,
   getTotalUsers,
   getUsers,
-} from "~/services/settings.server";
-import { getPageSieAndPageIndex, getSkipAndLimit } from "~/utils/helpers";
-import { getGroupsOfUser } from "~/services/role-base-access-control.server";
+} from '~/services/settings.server';
+import { getPageSieAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
+import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 
 const columns: ColumnDef<any>[] = [
   {
-    id: "select",
+    id: 'select',
     header: ({ table }) => (
       <Checkbox
         checked={
           table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
         className="translate-y-[2px]"
       />
@@ -76,7 +76,7 @@ const columns: ColumnDef<any>[] = [
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        onCheckedChange={value => row.toggleSelected(!!value)}
         aria-label="Select row"
         className="translate-y-[2px]"
       />
@@ -85,18 +85,18 @@ const columns: ColumnDef<any>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "username",
+    accessorKey: 'username',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="UserName" />
     ),
     cell: ({ row }) => (
-      <div className="w-[80px]">{row.getValue("username")}</div>
+      <div className="w-[80px]">{row.getValue('username')}</div>
     ),
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "email",
+    accessorKey: 'email',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Email" />
     ),
@@ -104,14 +104,14 @@ const columns: ColumnDef<any>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
-            {row.getValue("email")}
+            {row.getValue('email')}
           </span>
         </div>
       );
     },
   },
   {
-    accessorKey: "cities",
+    accessorKey: 'cities',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="City" />
     ),
@@ -120,7 +120,7 @@ const columns: ColumnDef<any>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {row
-              ?.getValue("cities")
+              ?.getValue('cities')
               .map((e: any, index: number) => <Badge key={index}>{e}</Badge>)}
           </span>
         </div>
@@ -129,7 +129,7 @@ const columns: ColumnDef<any>[] = [
   },
 
   {
-    id: "actions",
+    id: 'actions',
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ];
@@ -160,8 +160,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { limit, skip } = getSkipAndLimit(
     getPageSieAndPageIndex({
       total,
-      pageSize: Number(url.searchParams.get("pageSize")) || 0,
-      pageIndex: Number(url.searchParams.get("pageIndex")) || 0,
+      pageSize: Number(url.searchParams.get('pageSize')) || 0,
+      pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
     }),
   );
 
@@ -170,9 +170,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     limit,
     projection: { cities: 1, username: 1, email: 1 },
   });
-  const session = await getSession(request.headers.get("cookie"));
+  const session = await getSession(request.headers.get('cookie'));
   const groups = await getGroupsOfUser({
-    userId: session.get("user").userId,
+    userId: session.get('user').userId,
     projection: { name: 1 },
   });
   return json({ users, total, groups });
@@ -231,9 +231,9 @@ function BtaskeeTable<TData, TValue>({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map(header => {
                   return (
                     <TableHead key={header.id} colSpan={header.colSpan}>
                       {header.isPlaceholder
@@ -250,12 +250,11 @@ function BtaskeeTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getCoreRowModel().rows?.length ? (
-              table.getCoreRowModel().rows.map((row) => (
+              table.getCoreRowModel().rows.map(row => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
+                  data-state={row.getIsSelected() && 'selected'}>
+                  {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -269,8 +268,7 @@ function BtaskeeTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                  className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>
@@ -295,11 +293,11 @@ export default function Screen() {
     formState: { errors },
   } = useForm<any>({
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
       cities: [],
       groupIds: [],
-      username: "",
+      username: '',
     },
   });
   const submit = useSubmit();
@@ -312,13 +310,13 @@ export default function Screen() {
 
   const onSubmit = (data: any) => {
     const formData = new FormData();
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-    formData.append("cities", JSON.stringify(data.cities));
-    formData.append("groupIds", JSON.stringify(data.groupIds));
-    formData.append("username", data.username);
+    formData.append('email', data.email);
+    formData.append('password', data.password);
+    formData.append('cities', JSON.stringify(data.cities));
+    formData.append('groupIds', JSON.stringify(data.groupIds));
+    formData.append('username', data.username);
 
-    submit(formData, { method: "post" });
+    submit(formData, { method: 'post' });
     onCloseAndReset();
   };
 
@@ -335,13 +333,12 @@ export default function Screen() {
         </div>
         <Dialog
           open={open}
-          onOpenChange={(open) => {
+          onOpenChange={open => {
             if (!open) {
               reset();
             }
             setOpen(open);
-          }}
-        >
+          }}>
           <DialogTrigger asChild>
             <Button variant="outline">Add new user</Button>
           </DialogTrigger>
@@ -356,7 +353,7 @@ export default function Screen() {
                     Username
                   </Label>
                   <Input
-                    {...register("username" as const, {
+                    {...register('username' as const, {
                       required: true,
                     })}
                     id="username"
@@ -369,7 +366,7 @@ export default function Screen() {
                     Email
                   </Label>
                   <Input
-                    {...register("email" as const, {
+                    {...register('email' as const, {
                       required: true,
                     })}
                     id="email"
@@ -383,7 +380,7 @@ export default function Screen() {
                     Password
                   </Label>
                   <Input
-                    {...register("password" as const, {
+                    {...register('password' as const, {
                       required: true,
                     })}
                     autoComplete="off"
@@ -406,16 +403,16 @@ export default function Screen() {
                           isDisplayAllOptions
                           options={[
                             {
-                              value: "HCM",
-                              label: "Ho Chi Minh",
+                              value: 'HCM',
+                              label: 'Ho Chi Minh',
                             },
                             {
-                              value: "HN",
-                              label: "Hanoi",
+                              value: 'HN',
+                              label: 'Hanoi',
                             },
                             {
-                              value: "DT",
-                              label: "Dong Thap",
+                              value: 'DT',
+                              label: 'Dong Thap',
                             },
                           ]}
                           className="w-[360px]"
@@ -428,7 +425,7 @@ export default function Screen() {
                   <Label className="text-right">Groups</Label>
                   <div className="col-span-3">
                     <MultiSelect
-                      options={loaderData?.groups?.map((e) => ({
+                      options={loaderData?.groups?.map(e => ({
                         value: e._id,
                         label: e.name,
                       }))}
@@ -451,8 +448,8 @@ export default function Screen() {
         columns={columns}
         pagination={getPageSieAndPageIndex({
           total: loaderData?.total || 0,
-          pageSize: Number(searchParams.get("pageSize") || 0),
-          pageIndex: Number(searchParams.get("pageIndex") || 0),
+          pageSize: Number(searchParams.get('pageSize') || 0),
+          pageIndex: Number(searchParams.get('pageIndex') || 0),
         })}
         setSearchParams={setSearchParams}
       />

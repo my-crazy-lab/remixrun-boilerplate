@@ -1,19 +1,19 @@
-import { Button } from "@/components/ui/button";
-import { useActionData, useLoaderData, useRouteError } from "@remix-run/react";
-import { useTranslation } from "react-i18next";
-import { toast } from "@/components/ui/use-toast";
+import { Button } from '@/components/ui/button';
+import { useActionData, useLoaderData, useRouteError } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
+import { toast } from '@/components/ui/use-toast';
 
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { Form } from '@remix-run/react';
 import {
   authenticator,
   resetPassword,
   verifyAndSendCode,
-} from "~/services/auth.server";
-import { json, redirect } from "@remix-run/node";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
+} from '~/services/auth.server';
+import { json, redirect } from '@remix-run/node';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { useEffect } from 'react';
 
 export async function action({ request }: ActionFunctionArgs) {
   try {
@@ -53,7 +53,7 @@ export default function Screen() {
       </div>
       <div className="grid gap-6">
         {actionData?.isSent ? (
-          "Check your mail"
+          'Check your mail'
         ) : (
           <Form method="post">
             <div className="grid gap-2">

@@ -1,5 +1,5 @@
-import { createStore, useStore } from "zustand";
-import React, { createContext } from "react";
+import { createStore, useStore } from 'zustand';
+import React, { createContext } from 'react';
 
 export interface GlobalProps {
   userId: string;
@@ -14,10 +14,10 @@ export type GlobalStore = ReturnType<typeof createGlobalStore>;
 
 export const createGlobalStore = (initProps?: Partial<GlobalProps>) => {
   const DEFAULT_PROPS: GlobalProps = {
-    userId: "",
+    userId: '',
     permissions: [],
   };
-  return createStore<GlobalState>()((set) => ({
+  return createStore<GlobalState>()(set => ({
     ...DEFAULT_PROPS,
     ...initProps,
   }));
@@ -29,6 +29,6 @@ export default function useGlobalStore<T>(
   selector: (state: GlobalState) => T,
 ): T {
   const store = React.useContext(GlobalContext);
-  if (!store) throw new Error("Missing BearContext.Provider in the tree");
+  if (!store) throw new Error('Missing BearContext.Provider in the tree');
   return useStore(store, selector);
 }

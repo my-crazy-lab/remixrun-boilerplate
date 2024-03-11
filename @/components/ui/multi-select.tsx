@@ -15,9 +15,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { Skeleton } from './skeleton';
-import debounce from 'lodash/debounce.js';
 
 export type OptionType = {
   label: string;

@@ -1,23 +1,23 @@
-import { Button } from "@/components/ui/button";
-import { useActionData, useLoaderData } from "@remix-run/react";
-import { useTranslation } from "react-i18next";
-import { toast } from "@/components/ui/use-toast";
+import { Button } from '@/components/ui/button';
+import { useActionData, useLoaderData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
+import { toast } from '@/components/ui/use-toast';
 
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { Form } from '@remix-run/react';
 import {
   authenticator,
   isVerificationCodeExpired,
-} from "~/services/auth.server";
-import { json, redirect } from "@remix-run/node";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
-import { commitSession, getSession } from "~/services/session.server";
+} from '~/services/auth.server';
+import { json, redirect } from '@remix-run/node';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { useEffect } from 'react';
+import { commitSession, getSession } from '~/services/session.server';
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  return await authenticator.authenticate("user-pass", request, {
-    successRedirect: "/",
+  return await authenticator.authenticate('user-pass', request, {
+    successRedirect: '/',
     failureRedirect: `/verification-code/${params.token}`,
     throwOnError: true,
   });
@@ -25,19 +25,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const isExpired = await isVerificationCodeExpired({ token: params.token });
-  if (isExpired) return redirect("/sign-in");
+  if (isExpired) return redirect('/sign-in');
 
   await authenticator.isAuthenticated(request, {
-    successRedirect: "/",
+    successRedirect: '/',
   });
-  const session = await getSession(request.headers.get("cookie"));
+  const session = await getSession(request.headers.get('cookie'));
   const error = session.get(authenticator.sessionErrorKey);
 
   return json(
     { error },
     {
       headers: {
-        "Set-Cookie": await commitSession(session), // You must commit the session whenever you read a flash
+        'Set-Cookie': await commitSession(session), // You must commit the session whenever you read a flash
       },
     },
   );
