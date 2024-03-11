@@ -7,6 +7,7 @@ import {
 } from "./constants.server";
 import { momentTz } from "~/utils/helpers.server";
 import { PERMISSIONS } from "~/constants/common";
+import { MilkOff } from "lucide-react";
 
 export async function isRoot(userId: string) {
   const permissions: Array<string> = await getUserPermissions(userId);
@@ -143,6 +144,47 @@ export async function updateGroups({
       },
     },
   );
+}
+
+export async function getRolesOfGroups(groupId: string) {
+  const group = await mongodb
+    .collection("groups")
+    .aggregate([
+      { $match: { _id: groupId } },
+      {
+        $lookup: {
+          from: "roles",
+          localField: "roleIds",
+          foreignField: "_id",
+          as: "roles",
+        },
+      },
+      {
+        $project: { "roles.name": 1, "roles._id": 1 },
+      },
+    ])
+    .toArray();
+
+  return group[0]?.roles;
+}
+
+export async function searchUser(searchText: string) {
+  const pattern = new RegExp(searchText, "i");
+  const users = await mongodb
+    .collection("users")
+    .find({
+      $or: [
+        {
+          email: { $regex: pattern },
+        },
+        {
+          username: { $regex: pattern },
+        },
+      ],
+    })
+    .toArray();
+
+  return users;
 }
 
 export async function getGroupDetail({ userId, groupId, projection }: any) {

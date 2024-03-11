@@ -2,14 +2,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MultiSelect } from "@/components/ui/multi-select";
+import { MultiSelect, MultiSelectAsync } from "@/components/ui/multi-select";
 import { ThickArrowLeftIcon } from "@radix-ui/react-icons";
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { Link, useNavigate, useParams, useSubmit } from "@remix-run/react";
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  json,
+  redirect,
+} from "@remix-run/node";
+import {
+  Link,
+  useLoaderData,
+  useNavigate,
+  useNavigation,
+  useParams,
+  useSearchParams,
+  useSubmit,
+} from "@remix-run/react";
 import { Controller, useForm } from "react-hook-form";
 import { PERMISSIONS } from "~/constants/common";
 import { hocAction, hocLoader } from "~/hoc/remix";
-import { createGroup } from "~/services/role-base-access-control.server";
+import {
+  createGroup,
+  getRolesOfGroups,
+  searchUser,
+} from "~/services/role-base-access-control.server";
 
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
@@ -29,17 +46,29 @@ export const action = hocAction(async ({ params }, { formData }) => {
   }
 }, PERMISSIONS.WRTTE_GROUP);
 
-export const loader = hocLoader(async () => {
-  return null;
-}, PERMISSIONS.WRTTE_GROUP);
+export const loader = hocLoader(
+  async ({ params, request }: LoaderFunctionArgs) => {
+    const roles = await getRolesOfGroups(params.id || "");
+
+    const url = new URL(request.url);
+    const searchText = url.searchParams.get("users") || "";
+    const users = await searchUser(searchText);
+
+    return json({ roles, users });
+  },
+  PERMISSIONS.WRTTE_GROUP,
+);
 
 export default function Screen() {
   const params = useParams();
+  const loaderData = useLoaderData<any>();
+  const navigation = useNavigation();
+
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const {
     register,
     control,
-    reset,
     handleSubmit,
     formState: { errors },
   } = useForm<any>({
@@ -54,10 +83,17 @@ export default function Screen() {
 
   const onSubmit = (data: any) => {
     const formData = new FormData();
+
     formData.append("name", data.name);
     formData.append("description", data.description);
-    formData.append("userIds", JSON.stringify(data.userIds));
-    formData.append("roleIds", JSON.stringify(data.roleIds));
+    formData.append(
+      "userIds",
+      JSON.stringify(data.userIds.map((user) => user.value)),
+    );
+    formData.append(
+      "roleIds",
+      JSON.stringify(data.roleIds.map((role) => role._id)),
+    );
 
     submit(formData, { method: "post" });
   };
@@ -86,32 +122,32 @@ export default function Screen() {
                 />
               </div>
               <div className="grid grid-cols-3 items-center gap-4">
+                <Label htmlFor="group" className="text-left">
+                  Group description
+                </Label>
+                <Input
+                  {...register("description" as const, {
+                    required: true,
+                  })}
+                  className="col-span-2"
+                />
+              </div>
+              <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-left">Users</Label>
                 <div className="col-span-2">
                   <Controller
                     control={control}
                     name="userIds"
                     render={({ field: { onChange, value } }) => (
-                      <MultiSelect
+                      <MultiSelectAsync
+                        isLoading={navigation.state === "loading"}
+                        defaultSearchValue={searchParams.get("users") || ""}
+                        searchRemix={{ searchKey: "users", setSearchParams }}
                         isDisplayAllOptions
-                        options={[
-                          {
-                            value: "next.js",
-                            label: "Next.js",
-                          },
-                          {
-                            value: "sveltekit",
-                            label: "SvelteKit",
-                          },
-                          {
-                            value: "nuxt.js",
-                            label: "Nuxt.js",
-                          },
-                          {
-                            value: "remix",
-                            label: "Remix",
-                          },
-                        ]}
+                        options={loaderData.users.map((user) => ({
+                          value: user._id,
+                          label: user.username,
+                        }))}
                         selected={value}
                         setSelected={onChange}
                         className="w-[360px]"
@@ -123,34 +159,28 @@ export default function Screen() {
               <div className="grid grid-cols-3 items-center gap-4">
                 <Label className="text-left">Roles</Label>
                 <div className="col-span-2">
-                  <MultiSelect
-                    isDisplayAllOptions
-                    options={[
-                      {
-                        value: "next.js",
-                        label: "Next.js",
-                      },
-                      {
-                        value: "sveltekit",
-                        label: "SvelteKit",
-                      },
-                      {
-                        value: "nuxt.js",
-                        label: "Nuxt.js",
-                      },
-                      {
-                        value: "remix",
-                        label: "Remix",
-                      },
-                    ]}
-                    className="w-[360px]"
+                  <Controller
+                    control={control}
+                    name="roleIds"
+                    render={({ field: { onChange, value } }) => (
+                      <MultiSelect
+                        isDisplayAllOptions
+                        options={loaderData.roles.map((role) => ({
+                          value: role._id,
+                          label: role.name,
+                        }))}
+                        selected={value}
+                        setSelected={onChange}
+                        className="w-[360px]"
+                      />
+                    )}
                   />
                 </div>
               </div>
             </div>
           </CardContent>
           <CardFooter className="py-0">
-            <Button type="submit">Save changes</Button>
+            <Button type="submit">Save</Button>
           </CardFooter>
         </form>
       </Card>
