@@ -92,7 +92,7 @@ export default function Screen() {
     );
     formData.append(
       'roleIds',
-      JSON.stringify(data.roleIds.map(role => role._id)),
+      JSON.stringify(data.roleIds.map(role => role.value)),
     );
 
     submit(formData, { method: 'post' });

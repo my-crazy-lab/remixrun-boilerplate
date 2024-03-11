@@ -314,7 +314,7 @@ export async function createRole({
   description,
 }: any) {
   const roleCol = mongodb.collection('roles');
-  const { insertedId: roleId } = await roleCol.insertOne({
+  const {insertedId}= await roleCol.insertOne({
     ...newRecordCommonField(),
     name,
     slug: name.toLocaleLowerCase().split(' ').join('-'),
@@ -324,7 +324,7 @@ export async function createRole({
 
   await mongodb
     .collection('groups')
-    .updateOne({ _id: groupId }, { $push: { roleIds: roleId } });
+    .updateOne({ _id: groupId }, { $push: { roleIds: insertedId} });
 }
 
 export async function updateRole({
