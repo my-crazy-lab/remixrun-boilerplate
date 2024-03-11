@@ -9,7 +9,15 @@
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve build",
     "typecheck": "tsc",
+    "prettier": "prettier --write .",
+    "cspell": "cspell --config .spellcheckerrc.json \"**\"",
     "deploy": "cross-env NODE_ENV=production node server.mjs"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "npx --no -- commitlint --edit ${1}",
+      "pre-commit": "npm run cspell && npm run prettier && npm run lint"
+    }
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.1.2",
@@ -40,6 +48,7 @@
     "cmdk": "^0.2.1",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
+    "husky": "^9.0.11",
     "i18next": "^23.10.0",
     "i18next-browser-languagedetector": "^7.2.0",
     "i18next-fs-backend": "^2.3.1",
@@ -68,6 +77,8 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.0.3",
+    "@commitlint/config-conventional": "^19.0.3",
     "@remix-run/dev": "^2.3.1",
     "@remix-run/eslint-config": "^2.7.2",
     "@remix-run/testing": "^2.7.2",
@@ -79,6 +90,7 @@
     "@types/react-dom": "^18.2.7",
     "autoprefixer": "^10.4.17",
     "cross-env": "^7.0.3",
+    "cspell": "^8.6.0",
     "eslint": "^8.47.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
