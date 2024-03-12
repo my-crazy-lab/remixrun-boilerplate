@@ -27,9 +27,6 @@ import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupDetail } from '~/services/role-base-access-control.server';
 
-export const handle = {
-  breadcrumb: () => <Link to="/settings/groups/id">Groups chil</Link>,
-};
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });

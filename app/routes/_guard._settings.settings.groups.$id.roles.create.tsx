@@ -29,6 +29,7 @@ import {
   createRole,
   getGroupPermissions,
 } from '~/services/role-base-access-control.server';
+import { groupPermissionsByModule } from '~/utils/helpers';
 
 export const action = hocAction(
   async ({ params }: ActionFunctionArgs, { formData }: any) => {
@@ -53,19 +54,10 @@ export const action = hocAction(
 export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
   const permissions = await getGroupPermissions(params.id || '');
 
-  function groupPermissionsByModule() {
-    return Object.values(
-      permissions.reduce((acc: any, { module, ...rest }: any) => {
-        if (!acc[module]) {
-          acc[module] = { module, actions: [] };
-        }
-        acc[module].actions.push({ ...rest });
-        return acc;
-      }, {}),
-    );
-  }
-
-  return json({ permissions, permissionsGrouped: groupPermissionsByModule() });
+  return json({
+    permissions,
+    permissionsGrouped: groupPermissionsByModule(permissions),
+  });
 }, PERMISSIONS.WRITE_ROLE);
 
 export default function RolesDetail() {
