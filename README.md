@@ -31,7 +31,7 @@ Now you'll need to pick a host to deploy it to.
 - :globe_with_meridians: **International**: Built-in i18n solution
 - :gear: **Best Practices**: Solid workflow to make your code healthy
 - :white_check_mark: **Unit Test**: Fly safely with unit [Jest](https://jestjs.io/)
-- :art: **Theming**: Avaiable Error boundary page
+- :art: **Router redirect**: Avaiable Error boundary page
 - :1234: **Plugin architecture**:  Modify multi project for Enterprise by plugin architecture (Doing)
 - :iphone: **Avaiable deployment**: [Docker](https://www.docker.com/) and avaiable CI/CD for github/gitlab (Doing)
 
