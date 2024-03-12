@@ -1,4 +1,4 @@
-# [Remix framework](https://remix.run) Boilerplate
+# Clean and Solid boilerplate for Remix
 
 ## Features
 
