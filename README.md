@@ -52,6 +52,59 @@
 
 ## Development mode
 
+### Environment
+1. Node 18
+2. Mongodb
+
+### Add hierarchy 1: 
+```
+db.collection("permissions").insert({
+    "_id" : "root",
+    "permissions" : [
+        "root"
+    ],
+    "name":"ROOT",
+})
+db.collection("roles").insert({
+  {
+    "_id" : "root",
+    "description" : "This is root user, with all power",
+    "module" : "special",
+    "name" : "ROOT"
+  }
+})
+db.collection("groups").insert({
+    "name" : "Group root",
+    "roleIds" : [
+        "root"
+    ],
+    "userIds" : [
+        "R5pRgZqKyhTKRX2acadd",
+        "R5pRgZqKyhTKRX2N22"
+    ],
+    "hierarchy" : NumberInt(1)
+})
+```
+
+Because this is internal applicatons, the User cannot register freely. We will create Root account first, and create another user by core workflow. <br>
+Example: 
+```
+db.collection("users").insert({
+  "username" : "minhlee",
+  "email" : "test@gmail.com",
+})
+```
+
+After that, forgot and change password (to match by your .env, because this machine hash password from your key and salt-round).
+
+You must to verify at your Email to reset password.<br>
+If your STMP don't avaiable, you can go to direct link:
+```
+`${localhost}/reset-password/${resetPassword.token}`
+```
+
+**Start local**
+
 ```sh
 npm run dev
 ```
