@@ -1,35 +1,28 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, MultiSelectAsync } from '@/components/ui/multi-select';
-import { Slash } from 'lucide-react';
 import type { LoaderFunctionArgs } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
+import {
+  useLoaderData,
+  useNavigate,
+  useNavigation,
+  useSearchParams,
+  useSubmit,
+} from '@remix-run/react';
+import { MoveLeft } from 'lucide-react';
+import { Controller, useForm } from 'react-hook-form';
+import { PERMISSIONS } from '~/constants/common';
+import { hocAction, hocLoader } from '~/hoc/remix';
+import { getUserId } from '~/services/helpers.server';
 import {
   getGroupDetail,
   getRolesOfGroups,
   searchUser,
   updateGroups,
 } from '~/services/role-base-access-control.server';
-import { getUserId } from '~/services/helpers.server';
-import { json, redirect } from '@remix-run/node';
-import {
-  useLoaderData,
-  useNavigation,
-  useSearchParams,
-  useSubmit,
-} from '@remix-run/react';
-import { Controller, useForm } from 'react-hook-form';
-import { hocAction, hocLoader } from '~/hoc/remix';
-import { PERMISSIONS } from '~/constants/common';
 
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
@@ -90,6 +83,9 @@ export default function Screen() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const navigate = useNavigate()
+  const goBack = () => navigate(-1)
+
   const {
     register,
     control,
@@ -131,22 +127,9 @@ export default function Screen() {
 
   return (
     <>
-      <div className="text-2xl flex-row flex justify-between items-center px-0 pb-6">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to="/settings/groups">
-                Groups
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-lg">Update group</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
+        <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+        Update role
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="gap-4 pb-4 grid p-0">
@@ -223,7 +206,9 @@ export default function Screen() {
             </div>
           </div>
         </CardContent>
-        <Button type="submit">Save changes</Button>
+        <div className='flex justify-end'>
+          <Button type="submit">Save changes</Button>
+        </div>
       </form>
     </>
   );
