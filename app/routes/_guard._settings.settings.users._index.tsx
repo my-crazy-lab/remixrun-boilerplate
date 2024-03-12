@@ -24,20 +24,21 @@ import { DataTableColumnHeader } from '@/components/ui/table-data/data-table-col
 import { DataTablePagination } from '@/components/ui/table-data/data-table-pagination';
 import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-actions';
 import { DataTableToolbar } from '@/components/ui/table-data/data-table-toolbar';
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import {
   useLoaderData,
-  useNavigate,
-  useNavigation,
   useSearchParams,
-  useSubmit,
+  useSubmit
 } from '@remix-run/react';
-import {
+import type {
   ColumnDef,
   ColumnFiltersState,
   PaginationState,
   SortingState,
-  VisibilityState,
+  VisibilityState
+} from '@tanstack/react-table';
+import {
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -50,6 +51,7 @@ import {
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { hocAction } from '~/hoc/remix';
+import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 import { getSession } from '~/services/session.server';
 import {
   createNewUser,
@@ -57,7 +59,6 @@ import {
   getUsers,
 } from '~/services/settings.server';
 import { getPageSieAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
-import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 
 const columns: ColumnDef<any>[] = [
   {
@@ -239,9 +240,9 @@ function BtaskeeTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}
@@ -321,7 +322,7 @@ export default function Screen() {
   };
 
   return (
-    <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
+    <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">

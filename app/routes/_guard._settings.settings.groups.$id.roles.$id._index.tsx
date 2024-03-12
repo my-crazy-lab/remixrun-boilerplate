@@ -245,6 +245,11 @@ const actionPermissions = [
   },
 ];
 
+// export const loader = hocLoader(
+//   async ({ request }: args) => {},
+//   PERMISSIONS.READ_ROLE,
+// );
+
 export default function RolesDetail() {
   return (
     <>

@@ -1,22 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { MultiSelect } from '@/components/ui/multi-select';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
@@ -24,6 +14,10 @@ import { Link, useLoaderData } from '@remix-run/react';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
+
+export const handle = {
+  breadcrumb: () => <Link to="/settings/groups">Groups</Link>,
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
@@ -49,7 +43,7 @@ export default function Screen() {
   console.log(loaderData, globalData, '!!');
 
   return (
-    <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
+    <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
@@ -59,106 +53,6 @@ export default function Screen() {
             Here&apos;s a list of your groups!
           </p>
         </div>
-        <Dialog>
-          <DialogContent className="sm:max-w-[560px]">
-            <DialogHeader>
-              <DialogTitle>New group</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="group" className="text-right">
-                  Group name
-                </Label>
-                <Input id="group" className="col-span-3" />
-              </div>
-
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Users</Label>
-                <div className="col-span-3">
-                  <MultiSelect
-                    isDisplayAllOptions
-                    options={[
-                      {
-                        value: 'next.js',
-                        label: 'Next.js',
-                      },
-                      {
-                        value: 'sveltekit',
-                        label: 'SvelteKit',
-                      },
-                      {
-                        value: 'nuxt.js',
-                        label: 'Nuxt.js',
-                      },
-                      {
-                        value: 'remix',
-                        label: 'Remix',
-                      },
-                    ]}
-                    className="w-[360px]"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Roles</Label>
-                <div className="col-span-3">
-                  <MultiSelect
-                    isDisplayAllOptions
-                    options={[
-                      {
-                        value: 'next.js',
-                        label: 'Next.js',
-                      },
-                      {
-                        value: 'sveltekit',
-                        label: 'SvelteKit',
-                      },
-                      {
-                        value: 'nuxt.js',
-                        label: 'Nuxt.js',
-                      },
-                      {
-                        value: 'remix',
-                        label: 'Remix',
-                      },
-                    ]}
-                    className="w-[360px]"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Teams</Label>
-                <div className="col-span-3">
-                  <MultiSelect
-                    isDisplayAllOptions
-                    options={[
-                      {
-                        value: 'next.js',
-                        label: 'Next.js',
-                      },
-                      {
-                        value: 'sveltekit',
-                        label: 'SvelteKit',
-                      },
-                      {
-                        value: 'nuxt.js',
-                        label: 'Nuxt.js',
-                      },
-                      {
-                        value: 'remix',
-                        label: 'Remix',
-                      },
-                    ]}
-                    className="w-[360px]"
-                  />
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Save changes</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
       <div className="grid grid-cols-3 gap-4">
         {loaderData.groups.map((group: any, index: number) => {

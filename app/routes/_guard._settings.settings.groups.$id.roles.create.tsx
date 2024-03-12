@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { useLoaderData, useParams, useSubmit } from '@remix-run/react';
+import { Link, useLoaderData, useParams, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { Slash } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
@@ -151,6 +151,7 @@ export default function RolesDetail() {
           placeholder="Description"
           {...register('description' as const, { required: true })}></Input>
         <Separator className="my-4" />
+
         {_.map(loaderData.permissionsGrouped, (actionPermission: any) => (
           <Accordion type="single" collapsible key={actionPermission._id}>
             <AccordionItem value={actionPermission.module}>
@@ -192,9 +193,11 @@ export default function RolesDetail() {
         ))}
 
         <div className="gap-4 flex justify-end mt-4">
-          <Button variant="outline">Cancel</Button>
+          <Link to={`/settings/groups/${params.id}`}>
+            <Button variant="outline">Cancel</Button>
+          </Link>
           <Button variant="default" type="submit" color="primary">
-            Create
+            Save changes
           </Button>
         </div>
       </form>

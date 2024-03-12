@@ -27,6 +27,10 @@ import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupDetail } from '~/services/role-base-access-control.server';
 
+export const handle = {
+  breadcrumb: () => <Link to="/settings/groups/id">Groups chil</Link>,
+};
+
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
   const group = await getGroupDetail({
@@ -149,26 +153,29 @@ export default function Screen() {
 
           {loaderData.group.roles.map((role: any, index: number) => {
             return (
-              <Button variant="outline" key={index} className="mr-4 mt-4">
-                {role._id}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-                      <DotsHorizontalIcon className="h-4 w-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[160px]">
-                    <Link to={''}>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                    </Link>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </Button>
+              <Link key={index} to={`/settings/groups/${params.id}/roles/${role._id}`}>
+                <Button variant="outline" className="mr-4 mt-4">
+                  {role._id}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+                        <DotsHorizontalIcon className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[160px]">
+                      <Link to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                      </Link>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </Button>
+              </Link>
+
             );
           })}
         </Card>

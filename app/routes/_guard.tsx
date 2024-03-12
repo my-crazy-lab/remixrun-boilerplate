@@ -45,10 +45,6 @@ export default function Screen() {
   const { t } = useTranslation();
   const { user } = useLoaderData<{ user: GlobalProps }>();
 
-  React.useEffect(() => {
-    console.log(2);
-  }, []);
-
   const storeRef = React.useRef<GlobalStore>();
   if (!storeRef.current) {
     storeRef.current = createGlobalStore(user);
@@ -118,8 +114,8 @@ export default function Screen() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Form method="post" action="/logout">
-                    <button type="submit">Logout</button>
+                  <Form className='w-full' method="post" action="/logout">
+                    <button className='w-full  text-start' type="submit">Logout</button>
                   </Form>
                 </DropdownMenuItem>
               </DropdownMenuContent>
