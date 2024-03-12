@@ -1,11 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import {
-  Form,
-  Link,
-  useActionData,
-  useNavigation
-} from '@remix-run/react';
+import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -14,7 +9,6 @@ import type { ActionFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { useEffect } from 'react';
 import { verifyAndSendCode } from '~/services/auth.server';
-
 
 export async function action({ request }: ActionFunctionArgs) {
   try {

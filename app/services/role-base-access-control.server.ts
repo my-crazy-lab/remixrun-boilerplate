@@ -164,10 +164,12 @@ export async function getRoleDetail(roleId: string) {
 }
 
 export async function getRolesOfGroups(groupId: string) {
-  const group = await mongodb
+  const groups = await mongodb
     .collection('groups')
     .aggregate([
-      { $match: { genealogy: {$in: groupId} } },
+      {
+        $match: { $or: [{ genealogy: { $in: [groupId] } }, { _id: groupId }] },
+      },
       {
         $lookup: {
           from: 'roles',
@@ -182,7 +184,10 @@ export async function getRolesOfGroups(groupId: string) {
     ])
     .toArray();
 
-  return group[0]?.roles;
+  const setOfRoles = new Set(
+    groups.reduce((acc: any, arr: any) => [...acc, ...(arr.roles || [])], []),
+  );
+  return [...setOfRoles];
 }
 
 export async function searchUser(searchText: string) {
@@ -200,7 +205,6 @@ export async function searchUser(searchText: string) {
       ],
     })
     .toArray();
-
   return users;
 }
 
@@ -211,10 +215,10 @@ export async function getGroupDetail({ userId, groupId, projection }: any) {
       { $match: { _id: groupId, userIds: userId } },
       {
         $lookup: {
-          from: 'groups', 
-          localField: '_id', 
-          foreignField: 'genealogy', 
-          as: 'children', 
+          from: 'groups',
+          localField: '_id',
+          foreignField: 'genealogy',
+          as: 'children',
         },
       },
       {

@@ -1,6 +1,6 @@
-import { cn } from '@/lib/utils'
-import { cva, type VariantProps } from 'class-variance-authority'
-import * as React from 'react'
+import { cn } from '@/lib/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
+import * as React from 'react';
 
 const containerVariants = cva('mx-auto px-4 sm:px-6 lg:px-8', {
   variants: {
@@ -15,12 +15,12 @@ const containerVariants = cva('mx-auto px-4 sm:px-6 lg:px-8', {
   defaultVariants: {
     variant: 'narrowConstrainedPadded',
   },
-})
+});
 
 export interface ContainerProps
   extends React.HTMLAttributes<HTMLDivElement>,
-  VariantProps<typeof containerVariants> {
-  asChild?: boolean
+    VariantProps<typeof containerVariants> {
+  asChild?: boolean;
 }
 
 const Container: React.FC<ContainerProps> = ({
@@ -30,8 +30,8 @@ const Container: React.FC<ContainerProps> = ({
   variant,
   ...props
 }) => {
-  const Comp = asChild ? React.Fragment : 'div'
-  const containerClasses = cn(containerVariants({ variant }), className)
+  const Comp = asChild ? React.Fragment : 'div';
+  const containerClasses = cn(containerVariants({ variant }), className);
 
   return (
     <Comp className={containerClasses} {...props}>
@@ -41,7 +41,7 @@ const Container: React.FC<ContainerProps> = ({
         children
       )}
     </Comp>
-  )
-}
+  );
+};
 
-export { Container, containerVariants }
+export { Container, containerVariants };

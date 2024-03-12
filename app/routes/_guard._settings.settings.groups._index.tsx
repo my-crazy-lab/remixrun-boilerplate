@@ -15,7 +15,6 @@ import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 
-
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
   const groups = await getGroupsOfUser({

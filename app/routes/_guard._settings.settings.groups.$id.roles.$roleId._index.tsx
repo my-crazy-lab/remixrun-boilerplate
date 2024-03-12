@@ -24,7 +24,7 @@ import { hocLoader } from '~/hoc/remix';
 import { getRoleDetail } from '~/services/role-base-access-control.server';
 
 export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
-  if (!params.roleId) return json({ role: {} })
+  if (!params.roleId) return json({ role: {} });
   const role = await getRoleDetail(params.roleId);
 
   return json({ role });
@@ -32,7 +32,7 @@ export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
 
 export default function RolesDetail() {
   const loaderData = useLoaderData<any>();
-  const params = useParams()
+  const params = useParams();
 
   console.log(loaderData);
 
@@ -50,7 +50,9 @@ export default function RolesDetail() {
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={`/settings/groups/${params.id}`}>
+              <BreadcrumbLink
+                className="text-lg"
+                to={`/settings/groups/${params.id}`}>
                 Group root
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -64,7 +66,9 @@ export default function RolesDetail() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <p className="text-base mt-2">{loaderData.role.actionPermissions[0].actions[0].description}</p>
+        <p className="text-base mt-2">
+          {loaderData.role.actionPermissions[0].actions[0].description}
+        </p>
       </div>
       <ScrollArea>
         {_.map(loaderData.role.actionPermissions, (actionPermission: any) => (

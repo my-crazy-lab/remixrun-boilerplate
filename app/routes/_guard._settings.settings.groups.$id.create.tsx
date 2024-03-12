@@ -10,19 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, MultiSelectAsync } from '@/components/ui/multi-select';
-import type {
-  LoaderFunctionArgs
-} from '@remix-run/node';
-import {
-  json,
-  redirect
-} from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import {
   useLoaderData,
   useNavigation,
   useParams,
   useSearchParams,
-  useSubmit
+  useSubmit,
 } from '@remix-run/react';
 import { Slash } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
@@ -117,7 +112,9 @@ export default function Screen() {
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={`/settings/groups/${params.id}`}>
+              <BreadcrumbLink
+                className="text-lg"
+                to={`/settings/groups/${params.id}`}>
                 Group root
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -125,9 +122,7 @@ export default function Screen() {
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-lg">
-                New group
-              </BreadcrumbPage>
+              <BreadcrumbPage className="text-lg">New group</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

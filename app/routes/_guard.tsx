@@ -114,8 +114,10 @@ export default function Screen() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Form className='w-full' method="post" action="/logout">
-                    <button className='w-full  text-start' type="submit">Logout</button>
+                  <Form className="w-full" method="post" action="/logout">
+                    <button className="w-full  text-start" type="submit">
+                      Logout
+                    </button>
                   </Form>
                 </DropdownMenuItem>
               </DropdownMenuContent>

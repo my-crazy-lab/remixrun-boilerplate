@@ -109,24 +109,20 @@ export default function RolesDetail() {
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={`/settings/groups/${params.id}`}>
+              <BreadcrumbLink
+                className="text-lg"
+                to={`/settings/groups/${params.id}`}>
                 {/* {loaderData.group.name} */}
               </BreadcrumbLink>
-
             </BreadcrumbItem>
             <BreadcrumbSeparator>
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-lg">
-                Create role
-              </BreadcrumbPage>
+              <BreadcrumbPage className="text-lg">Create role</BreadcrumbPage>
             </BreadcrumbItem>
-
           </BreadcrumbList>
         </Breadcrumb>
-
-
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>

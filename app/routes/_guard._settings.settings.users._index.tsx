@@ -26,17 +26,13 @@ import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-a
 import { DataTableToolbar } from '@/components/ui/table-data/data-table-toolbar';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import {
-  useLoaderData,
-  useSearchParams,
-  useSubmit
-} from '@remix-run/react';
+import { useLoaderData, useSearchParams, useSubmit } from '@remix-run/react';
 import type {
   ColumnDef,
   ColumnFiltersState,
   PaginationState,
   SortingState,
-  VisibilityState
+  VisibilityState,
 } from '@tanstack/react-table';
 import {
   flexRender,
@@ -135,7 +131,7 @@ const columns: ColumnDef<any>[] = [
   },
 ];
 
-export const action = hocAction(async ({ }, { formData }: any) => {
+export const action = hocAction(async ({}, { formData }: any) => {
   try {
     const { username, email, password, cities } = formData;
 
@@ -219,7 +215,6 @@ function BtaskeeTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-
   });
 
   return (
@@ -236,9 +231,9 @@ function BtaskeeTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}

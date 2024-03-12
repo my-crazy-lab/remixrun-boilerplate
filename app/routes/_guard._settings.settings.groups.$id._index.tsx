@@ -27,7 +27,6 @@ import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupDetail } from '~/services/role-base-access-control.server';
 
-
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
   const group = await getGroupDetail({
@@ -89,9 +88,7 @@ export default function Screen() {
           <Button variant="default">Edit</Button>
         </Link>
       </div>
-      <p>
-        desx
-      </p>
+      <p>desx</p>
 
       <div>
         <div className="flex justify-between py-4">
@@ -149,7 +146,9 @@ export default function Screen() {
 
           {loaderData.group.roles.map((role: any, index: number) => {
             return (
-              <Link key={index} to={`/settings/groups/${params.id}/roles/${role._id}`}>
+              <Link
+                key={index}
+                to={`/settings/groups/${params.id}/roles/${role._id}`}>
                 <Button variant="outline" className="mr-4 mt-4">
                   {role._id}
                   <DropdownMenu>
@@ -162,7 +161,8 @@ export default function Screen() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[160px]">
-                      <Link to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
+                      <Link
+                        to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
                         <DropdownMenuItem>Edit</DropdownMenuItem>
                       </Link>
                       <DropdownMenuSeparator />
@@ -171,7 +171,6 @@ export default function Screen() {
                   </DropdownMenu>
                 </Button>
               </Link>
-
             );
           })}
         </Card>
