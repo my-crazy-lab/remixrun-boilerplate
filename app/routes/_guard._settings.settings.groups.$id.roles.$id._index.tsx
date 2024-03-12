@@ -16,6 +16,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import _ from 'lodash';
 import { Slash } from 'lucide-react';
+import { PERMISSIONS } from '~/constants/common';
+import { hocLoader } from '~/hoc/remix';
 
 const actionPermissions = [
   {
@@ -244,6 +246,11 @@ const actionPermissions = [
     ],
   },
 ];
+
+export const loader = hocLoader(
+  async ({ request }: args) => {},
+  PERMISSIONS.READ_ROLE,
+);
 
 export default function RolesDetail() {
   return (

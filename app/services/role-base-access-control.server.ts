@@ -146,6 +146,25 @@ export async function updateGroups({
   );
 }
 
+export async function getRoleDetail(roleId: string) {
+  const data = await mongodb
+    .collection('roles')
+    .aggregate([
+      { $match: { _id: roleId } },
+      {
+        $lookup: {
+          from: 'permissions',
+          localField: 'permissions',
+          foreignField: '_id',
+          as: 'actionPermissions',
+        },
+      },
+    ])
+    .toArray();
+
+  return data;
+}
+
 export async function getRolesOfGroups(groupId: string) {
   const group = await mongodb
     .collection('groups')
@@ -314,7 +333,7 @@ export async function createRole({
   description,
 }: any) {
   const roleCol = mongodb.collection('roles');
-  const {insertedId}= await roleCol.insertOne({
+  const { insertedId } = await roleCol.insertOne({
     ...newRecordCommonField(),
     name,
     slug: name.toLocaleLowerCase().split(' ').join('-'),
@@ -324,7 +343,7 @@ export async function createRole({
 
   await mongodb
     .collection('groups')
-    .updateOne({ _id: groupId }, { $push: { roleIds: insertedId} });
+    .updateOne({ _id: groupId }, { $push: { roleIds: insertedId } });
 }
 
 export async function updateRole({
