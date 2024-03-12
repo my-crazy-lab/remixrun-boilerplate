@@ -4,18 +4,24 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { ThickArrowLeftIcon } from '@radix-ui/react-icons';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { Link, useLoaderData, useParams, useSubmit } from '@remix-run/react';
+import { useLoaderData, useParams, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
-import React from 'react';
+import { Slash } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
@@ -98,13 +104,39 @@ export default function RolesDetail() {
   console.log(loaderData);
 
   return (
-    <Card className="p-4">
-      <CardHeader className="flex-row flex font-bold text-xl items-center px-0">
-        <Link to={`/settings/groups/${params.id}`}>
-          <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" />
-        </Link>
-        New role
-      </CardHeader>
+    <>
+      <div className="flex justify-between items-center text-2xl px-0 pb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="text-lg" to="/settings/groups">
+                Groups
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <Slash />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbLink className="text-lg" to={`/settings/groups/${params.id}`}>
+                {/* {loaderData.group.name} */}
+              </BreadcrumbLink>
+
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <Slash />
+            </BreadcrumbSeparator>
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-lg">
+                Create role
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+
+          </BreadcrumbList>
+        </Breadcrumb>
+
+
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <Label className="text-left" htmlFor="name">
           Role name
@@ -112,11 +144,11 @@ export default function RolesDetail() {
         <Input
           placeholder="Role"
           {...register('name' as const, { required: true })}></Input>
-        <Label className="text-left" htmlFor="description">
+        <Label className="text-left mt-4" htmlFor="description">
           Description
         </Label>
         <Input
-          placeholder="Role"
+          placeholder="Description"
           {...register('description' as const, { required: true })}></Input>
         <Separator className="my-4" />
         {_.map(loaderData.permissionsGrouped, (actionPermission: any) => (
@@ -166,6 +198,6 @@ export default function RolesDetail() {
           </Button>
         </div>
       </form>
-    </Card>
+    </>
   );
 }

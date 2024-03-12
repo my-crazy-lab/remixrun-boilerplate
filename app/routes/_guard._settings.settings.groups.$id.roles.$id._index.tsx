@@ -252,7 +252,7 @@ export default function RolesDetail() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" href={`/settings/groups`}>
+              <BreadcrumbLink className="text-lg" to={`/settings/groups`}>
                 Groups
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -260,7 +260,7 @@ export default function RolesDetail() {
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" href={`/settings/groups/`}>
+              <BreadcrumbLink className="text-lg" to={`/settings/groups/`}>
                 Group root
               </BreadcrumbLink>
             </BreadcrumbItem>

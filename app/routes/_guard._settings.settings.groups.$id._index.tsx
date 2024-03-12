@@ -66,7 +66,7 @@ export default function Screen() {
 
   return (
     <>
-      <div className="text-2xl px-0 pb-6">
+      <div className="flex justify-between items-center text-2xl px-0 ">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -84,7 +84,14 @@ export default function Screen() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
+        <Link to={`/settings/groups/${loaderData.group._id}/edit`}>
+          <Button variant="default">Edit</Button>
+        </Link>
       </div>
+      <p>
+        desx
+      </p>
 
       <div>
         <div className="flex justify-between py-4">
