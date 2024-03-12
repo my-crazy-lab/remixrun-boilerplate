@@ -79,9 +79,9 @@ db.collection("groups").insert({
         "root"
     ],
     "userIds" : [
-        "R5pRgZqKyhTKRX2acadd",
-        "R5pRgZqKyhTKRX2N22"
+        "root",
     ],
+    "genealogy": [],
     "hierarchy" : NumberInt(1)
 })
 ```
@@ -90,6 +90,7 @@ Because this is internal applicatons, the User cannot register freely. We will c
 Example: 
 ```
 db.collection("users").insert({
+  "_id": "root",
   "username" : "minhlee",
   "email" : "test@gmail.com",
 })
