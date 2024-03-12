@@ -24,7 +24,6 @@ import { DataTableColumnHeader } from '@/components/ui/table-data/data-table-col
 import { DataTablePagination } from '@/components/ui/table-data/data-table-pagination';
 import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-actions';
 import { DataTableToolbar } from '@/components/ui/table-data/data-table-toolbar';
-<<<<<<< HEAD
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import {
