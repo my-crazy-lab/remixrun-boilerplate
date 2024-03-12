@@ -58,3 +58,49 @@ export function getPageSieAndPageIndex({
     pageIndex,
   };
 }
+
+export function groupPermissionsByModule(
+  permissions: any,
+): Array<{ module: string; actions: Array<any> }> {
+  return Object.values(
+    permissions.reduce((acc: any, { module, ...rest }: any) => {
+      if (!acc[module]) {
+        acc[module] = { module, actions: [] };
+      }
+      acc[module].actions.push({ ...rest });
+      return acc;
+    }, {}),
+  );
+}
+
+export const mapReplacer = (key: any, value: any) => {
+  if (value instanceof Map) {
+    return {
+      dataType: 'Map',
+      value: Array.from(value.entries()),
+    };
+  }
+  return value;
+};
+
+export const mapReviver: Parameters<JSON['parse']>[1] = (
+  _: any,
+  value: any,
+) => {
+  if (typeof value === 'object' && value !== null) {
+    if (value.dataType === 'Map') {
+      return new Map(value.value);
+    }
+  }
+  return value;
+};
+
+export function convertRolesToPermissions(roles: any) {
+  const setOfPermissions = new Set(
+    roles.reduce(
+      (acc: any, role: any) => [...acc, ...(role?.permissions || [])],
+      [],
+    ),
+  );
+  return [...setOfPermissions] as Array<string>;
+}
