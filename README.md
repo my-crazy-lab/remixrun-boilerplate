@@ -9,10 +9,10 @@
 - :rocket: **State of The Art Development**: Newest development stack [Zustand](https://zustand-demo.pmnd.rs/), [Shadcn](https://ui.shadcn.com/), [React hook form](https://react-hook-form.com/), [Lodash](https://lodash.com/), [Momentjs](https://momentjs.com/), [React 18](https://react.dev/blog/2022/03/29/react-v18), [Table](https://tanstack.com/table/latest)
 - :globe_with_meridians: **International**: Built-in i18n solution
 - :gear: **Best Practices**: Solid workflow to make your code healthy
-- :white_check_mark: **Unit Test**: Fly safely with unit [Jest](https://jestjs.io/)
 - :art: **Router Redirect**: Avaiable Error boundary page
-- :1234: **Plugin Architecture**:  Modify multi project for Enterprise by plugin architecture (Doing)
-- :iphone: **Avaiable CICD**: (Doing)
+- :white_check_mark: **Unit Test**: Fly safely with unit [Jest](https://jestjs.io/), 100% coverage. (DOING)
+- :1234: **Plugin Architecture**:  Modify multi project for Enterprise by plugin architecture (DOING)
+- :iphone: **Avaiable CICD**: (DOING)
 
 ## Code Structure
 
