@@ -1,13 +1,8 @@
-import { ObjectId, mongodb } from '~/utils/db.server';
+import { mongodb } from '~/utils/db.server';
 import { getUserId } from './helpers.server';
-import {
-  FindOptionsClient,
-  newRecordCommonField,
-  statusOriginal,
-} from './constants.server';
+import { newRecordCommonField, statusOriginal } from './constants.server';
 import { momentTz } from '~/utils/helpers.server';
 import { PERMISSIONS } from '~/constants/common';
-import { MilkOff } from 'lucide-react';
 import {
   convertRolesToPermissions,
   groupPermissionsByModule,
@@ -118,7 +113,7 @@ export async function createGroup({
     description,
     userIds: userIds,
     roleIds: roleIds,
-    parent,
+    genealogy: [...(parentGroup.genealogy || []), parent],
     hierarchy: parentGroup.hierarchy + 1,
   });
 }
@@ -172,7 +167,7 @@ export async function getRolesOfGroups(groupId: string) {
   const group = await mongodb
     .collection('groups')
     .aggregate([
-      { $match: { _id: groupId } },
+      { $match: { genealogy: {$in: groupId} } },
       {
         $lookup: {
           from: 'roles',
@@ -210,17 +205,16 @@ export async function searchUser(searchText: string) {
 }
 
 export async function getGroupDetail({ userId, groupId, projection }: any) {
-  //TODO parent can view children groups
   const group = await mongodb
     .collection('groups')
     .aggregate([
       { $match: { _id: groupId, userIds: userId } },
       {
         $lookup: {
-          from: 'groups', // The same collection
-          localField: '_id', // Field from the input documents
-          foreignField: 'parent', // Field from the documents of the "groups" collection
-          as: 'children', // Output array field
+          from: 'groups', 
+          localField: '_id', 
+          foreignField: 'genealogy', 
+          as: 'children', 
         },
       },
       {
@@ -285,6 +279,8 @@ export async function getGroupPermissions(groupId: string) {
   );
 
   const permissions: Array<string> = [...setOfPermissions];
+
+  // root account can access all permissions
   if (permissions.includes(PERMISSIONS.ROOT)) {
     const allPermissions = await getAllPermissions({
       _id: 1,
@@ -414,63 +410,3 @@ export async function deleteGroup(groupId: string) {
     },
   );
 }
-
-export async function getPermissionsOfGroup(groupId: string) {
-  const lookupRole = {
-    $lookup: {
-      from: 'roles',
-      localField: 'roles._id',
-      foreignField: '_id',
-      as: 'role',
-    },
-  };
-
-  const unwindRole = {
-    $unwind: {
-      path: '$role',
-      preserveNullAndEmptyArrays: true,
-    },
-  };
-
-  const aggregate = [{ $match: { _id: groupId } }, lookupRole, unwindRole];
-
-  const data: any = await mongodb
-    .collection('groups')
-    .aggregate(aggregate)
-    .toArray();
-
-  const setOfPermissions = data.reduce(
-    (accumulator: any[], obj: any) =>
-      new Set([...accumulator, ...(obj?.role?.permissions || [])]),
-    [],
-  );
-
-  return [...setOfPermissions];
-}
-
-// TODO
-export async function getUsersHierarchy(groupId: string) {
-  await mongodb.collection('groups');
-}
-
-/*
- OK get all permissions (for root)
- OK get all groups of user 
- OK get details of groups: users, roles, groups children, ...
- OK edit groups: add users, roles, change name, descriptions
- OK create child groups 
-    get list roles of group -> list permissions   
-    input username or user's email
- OK update roles  
-    get permission from parent groups 
-    update into roles collection
- OK create roles  
-    get permissions chosen from parent groups
-    save into roles collection
- OK list roles of groups -> view detail permisisons of roles 
- OK delete user 
- OK delete roles 
- OK delete group with another permission 
- get all users from parent and children of groups
- OK verify root
-*/

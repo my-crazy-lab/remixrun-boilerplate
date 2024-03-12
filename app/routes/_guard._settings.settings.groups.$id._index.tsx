@@ -33,8 +33,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     projection: {
       roles: 1,
       users: 1,
-      'children.name': 1,
-      'children.description': 1,
+      children: 1,
       parent: 1,
       hierarchy: 1,
       name: 1,
