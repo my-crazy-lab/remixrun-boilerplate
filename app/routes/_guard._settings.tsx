@@ -41,6 +41,10 @@ export default function Screen() {
                 title: 'Groups',
                 href: '/settings/groups',
               },
+              {
+                title: 'Action history',
+                href: '/settings/action-history',
+              },
             ].map(item => (
               <Link
                 key={item.href}

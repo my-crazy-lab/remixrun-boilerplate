@@ -2,5 +2,6 @@
   "version": "0.1",
   "language": "en, vi",
   "words": ["tasker", "spellcheckerrc"],
-  "ignorePaths": ["node_modules", "dist"]
+  "ignorePaths": ["node_modules", "dist", "public", "build", "package.json"],
+  "ignoreWords": ["languagedetector", "uuidv4", "bTaskee", "BSON"]
 }

@@ -122,7 +122,7 @@ export default function Screen() {
                 <CardContent>
                   {child.description
                     ? child.description
-                    : `Lorem ipsum dolor sit amet and continues with nonsensical Latin-like words. If you need more information or assistance, feel free to ask!`}
+                    : `Lorem ipsum dolor sit and continues with nonsensical Latin-like words. If you need more information or assistance, feel free to ask!`}
                 </CardContent>
               </Card>
             );

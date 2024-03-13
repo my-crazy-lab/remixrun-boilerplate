@@ -12,41 +12,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+
 import { DataTableColumnHeader } from '@/components/ui/table-data/data-table-column-header';
-import { DataTablePagination } from '@/components/ui/table-data/data-table-pagination';
 import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-actions';
-import { DataTableToolbar } from '@/components/ui/table-data/data-table-toolbar';
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from '@remix-run/node';
-import {
-  useLoaderData,
-  useNavigate,
-  useNavigation,
-  useSearchParams,
-  useSubmit,
-} from '@remix-run/react';
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  PaginationState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import { useLoaderData, useSearchParams, useSubmit } from '@remix-run/react';
+
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { hocAction } from '~/hoc/remix';
@@ -56,8 +28,10 @@ import {
   getTotalUsers,
   getUsers,
 } from '~/services/settings.server';
-import { getPageSieAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
+import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
+import BTaskeeTable from '@/components/ui/btaskee-table';
+import { ColumnDef } from '@tanstack/react-table';
 
 const columns: ColumnDef<any>[] = [
   {
@@ -158,7 +132,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const total = await getTotalUsers();
 
   const { limit, skip } = getSkipAndLimit(
-    getPageSieAndPageIndex({
+    getPageSizeAndPageIndex({
       total,
       pageSize: Number(url.searchParams.get('pageSize')) || 0,
       pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
@@ -177,109 +151,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   });
   return json({ users, total, groups });
 };
-
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  total: number;
-  pagination: PaginationState;
-  setSearchParams: any;
-}
-
-function BtaskeeTable<TData, TValue>({
-  columns,
-  data,
-  total,
-  pagination,
-  setSearchParams,
-}: DataTableProps<TData, TValue>) {
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
-      sorting,
-      columnVisibility,
-      rowSelection,
-      columnFilters,
-      pagination: pagination,
-    },
-    rowCount: total,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-  });
-
-  return (
-    <div className="space-y-4">
-      <DataTableToolbar column="username" table={table} />
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map(headerGroup => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => {
-                  return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getCoreRowModel().rows?.length ? (
-              table.getCoreRowModel().rows.map(row => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <DataTablePagination table={table} setSearchParams={setSearchParams} />
-    </div>
-  );
-}
 
 export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -442,11 +313,11 @@ export default function Screen() {
         </Dialog>
       </div>
 
-      <BtaskeeTable
+      <BTaskeeTable
         total={loaderData?.total || 0}
         data={loaderData?.users || []}
         columns={columns}
-        pagination={getPageSieAndPageIndex({
+        pagination={getPageSizeAndPageIndex({
           total: loaderData?.total || 0,
           pageSize: Number(searchParams.get('pageSize') || 0),
           pageIndex: Number(searchParams.get('pageIndex') || 0),

@@ -21,7 +21,7 @@ export async function verifyPermissions(
   const userId = await getUserId({ request });
   const rolesCol = mongodb.collection('roles');
   const roles = await rolesCol
-    .find({ permisisons: { $in: permissions } }, { projection: { _id: 1 } })
+    .find({ permissions: { $in: permissions } }, { projection: { _id: 1 } })
     .toArray();
 
   const groupFound = await mongodb.collection('groups').findOne({
@@ -314,7 +314,7 @@ export async function createRole({
   description,
 }: any) {
   const roleCol = mongodb.collection('roles');
-  const {insertedId}= await roleCol.insertOne({
+  const { insertedId } = await roleCol.insertOne({
     ...newRecordCommonField(),
     name,
     slug: name.toLocaleLowerCase().split(' ').join('-'),
@@ -324,7 +324,7 @@ export async function createRole({
 
   await mongodb
     .collection('groups')
-    .updateOne({ _id: groupId }, { $push: { roleIds: insertedId} });
+    .updateOne({ _id: groupId }, { $push: { roleIds: insertedId } });
 }
 
 export async function updateRole({
@@ -445,7 +445,7 @@ export async function getUsersHierarchy(groupId: string) {
  OK create roles  
     get permissions chosen from parent groups
     save into roles collection
- OK list roles of groups -> view detail permisisons of roles 
+ OK list roles of groups -> view detail permission of roles 
  OK delete user 
  OK delete roles 
  OK delete group with another permission 
