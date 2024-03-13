@@ -21,6 +21,7 @@ import { useLoaderData, useSearchParams, useSubmit } from '@remix-run/react';
 
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
 import { getSession } from '~/services/session.server';
 import {
@@ -29,9 +30,8 @@ import {
   getUsers,
 } from '~/services/settings.server';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
-import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 import BTaskeeTable from '@/components/ui/btaskee-table';
-import { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 
 const columns: ColumnDef<any>[] = [
   {
@@ -108,16 +108,15 @@ const columns: ColumnDef<any>[] = [
   },
 ];
 
-export const action = hocAction(async ({ formData }: any) => {
+export const action = hocAction(async ({}, { formData }: any) => {
   try {
-    const { username, email, password, cities, groupIds } = formData;
+    const { username, email, password, cities } = formData;
 
     await createNewUser({
       username,
       password,
       email,
       cities: JSON.parse(cities) || [],
-      groupsIds: JSON.parse(groupIds) || [],
     });
 
     return null;
@@ -125,7 +124,7 @@ export const action = hocAction(async ({ formData }: any) => {
     console.log(error);
     return error;
   }
-});
+}, PERMISSIONS.WRITE_USER);
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -145,11 +144,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     projection: { cities: 1, username: 1, email: 1 },
   });
   const session = await getSession(request.headers.get('cookie'));
-  const groups = await getGroupsOfUser({
-    userId: session.get('user').userId,
-    projection: { name: 1 },
-  });
-  return json({ users, total, groups });
+  return json({ users, total });
 };
 
 export default function Screen() {
@@ -167,7 +162,6 @@ export default function Screen() {
       email: '',
       password: '',
       cities: [],
-      groupIds: [],
       username: '',
     },
   });
@@ -183,8 +177,7 @@ export default function Screen() {
     const formData = new FormData();
     formData.append('email', data.email);
     formData.append('password', data.password);
-    formData.append('cities', JSON.stringify(data.cities));
-    formData.append('groupIds', JSON.stringify(data.groupIds));
+    formData.append('cities', JSON.stringify(data.cities.map(c => c.value)));
     formData.append('username', data.username);
 
     submit(formData, { method: 'post' });
@@ -192,7 +185,7 @@ export default function Screen() {
   };
 
   return (
-    <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
+    <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
@@ -227,7 +220,6 @@ export default function Screen() {
                     {...register('username' as const, {
                       required: true,
                     })}
-                    id="username"
                     className="col-span-3"
                     placeholder="Username"
                   />
@@ -240,7 +232,6 @@ export default function Screen() {
                     {...register('email' as const, {
                       required: true,
                     })}
-                    id="email"
                     type="email"
                     className="col-span-3"
                     placeholder="Email"
@@ -255,7 +246,6 @@ export default function Screen() {
                       required: true,
                     })}
                     autoComplete="off"
-                    id="password"
                     type="password"
                     className="col-span-3"
                     placeholder="Password"
@@ -289,18 +279,6 @@ export default function Screen() {
                           className="w-[360px]"
                         />
                       )}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Groups</Label>
-                  <div className="col-span-3">
-                    <MultiSelect
-                      options={loaderData?.groups?.map(e => ({
-                        value: e._id,
-                        label: e.name,
-                      }))}
-                      className="w-[360px]"
                     />
                   </div>
                 </div>

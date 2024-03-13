@@ -5,17 +5,15 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { ThickArrowLeftIcon } from '@radix-ui/react-icons';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { Link, useLoaderData, useParams, useSubmit } from '@remix-run/react';
+import { useLoaderData, useNavigate, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
-import React from 'react';
+import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
@@ -23,6 +21,7 @@ import {
   createRole,
   getGroupPermissions,
 } from '~/services/role-base-access-control.server';
+import { groupPermissionsByModule } from '~/utils/helpers';
 
 export const action = hocAction(
   async ({ params }: ActionFunctionArgs, { formData }: any) => {
@@ -47,25 +46,16 @@ export const action = hocAction(
 export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
   const permissions = await getGroupPermissions(params.id || '');
 
-  function groupPermissionsByModule() {
-    return Object.values(
-      permissions.reduce((acc: any, { module, ...rest }: any) => {
-        if (!acc[module]) {
-          acc[module] = { module, actions: [] };
-        }
-        acc[module].actions.push({ ...rest });
-        return acc;
-      }, {}),
-    );
-  }
-
-  return json({ permissions, permissionsGrouped: groupPermissionsByModule() });
+  return json({
+    permissions,
+    permissionsGrouped: groupPermissionsByModule(permissions),
+  });
 }, PERMISSIONS.WRITE_ROLE);
 
 export default function RolesDetail() {
-  const params = useParams();
   const loaderData = useLoaderData<any>();
-
+  const navigate = useNavigate()
+  const goBack = () => navigate(-1)
   const {
     register,
     control,
@@ -95,16 +85,14 @@ export default function RolesDetail() {
 
     submit(formData, { method: 'post' });
   };
-  console.log(loaderData);
 
   return (
-    <Card className="p-4">
-      <CardHeader className="flex-row flex font-bold text-xl items-center px-0">
-        <Link to={`/settings/groups/${params.id}`}>
-          <ThickArrowLeftIcon className="cursor-pointer mr-2 h-5 w-5" />
-        </Link>
-        New role
-      </CardHeader>
+    <>
+      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
+        <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+        Create role
+      </div >
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <Label className="text-left" htmlFor="name">
           Role name
@@ -112,13 +100,14 @@ export default function RolesDetail() {
         <Input
           placeholder="Role"
           {...register('name' as const, { required: true })}></Input>
-        <Label className="text-left" htmlFor="description">
+        <Label className="text-left mt-4" htmlFor="description">
           Description
         </Label>
         <Input
-          placeholder="Role"
+          placeholder="Description"
           {...register('description' as const, { required: true })}></Input>
         <Separator className="my-4" />
+
         {_.map(loaderData.permissionsGrouped, (actionPermission: any) => (
           <Accordion type="single" collapsible key={actionPermission._id}>
             <AccordionItem value={actionPermission.module}>
@@ -159,13 +148,12 @@ export default function RolesDetail() {
           </Accordion>
         ))}
 
-        <div className="gap-4 flex justify-end mt-4">
-          <Button variant="outline">Cancel</Button>
+        <div className="flex justify-end mt-4">
           <Button variant="default" type="submit" color="primary">
-            Create
+            Save changes
           </Button>
         </div>
       </form>
-    </Card>
+    </>
   );
 }

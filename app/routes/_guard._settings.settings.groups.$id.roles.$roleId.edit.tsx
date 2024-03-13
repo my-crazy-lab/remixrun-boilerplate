@@ -420,11 +420,10 @@ export default function EditRole() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="gap-4 flex mt-4">
+        <div className="flex mt-4">
           <Button variant="default" color="primary">
             Save changes
           </Button>
-          <Button variant="outline">Cancel</Button>
         </div>
       </div>
       <>

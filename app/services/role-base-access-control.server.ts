@@ -1,13 +1,12 @@
-import { ObjectId, mongodb } from '~/utils/db.server';
-import { getUserId } from './helpers.server';
-import {
-  FindOptionsClient,
-  newRecordCommonField,
-  statusOriginal,
-} from './constants.server';
-import { momentTz } from '~/utils/helpers.server';
 import { PERMISSIONS } from '~/constants/common';
-import { MilkOff } from 'lucide-react';
+import { mongodb } from '~/utils/db.server';
+import {
+  convertRolesToPermissions,
+  groupPermissionsByModule,
+} from '~/utils/helpers';
+import { momentTz } from '~/utils/helpers.server';
+import { newRecordCommonField, statusOriginal } from './constants.server';
+import { getUserId } from './helpers.server';
 
 export async function isRoot(userId: string) {
   const permissions: Array<string> = await getUserPermissions(userId);
@@ -72,18 +71,14 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
 
   const aggregate = [matchGroups, lookupRole, unwindRole];
 
-  const data: any = await mongodb
+  const groups: any = await mongodb
     .collection('groups')
     .aggregate(aggregate)
     .toArray();
 
-  const setOfPermissions = data.reduce(
-    (accumulator: any[], obj: any) =>
-      new Set([...accumulator, ...(obj?.roles?.permissions || [])]),
-    [],
+  const permissions = convertRolesToPermissions(
+    groups.map(group => group.roles),
   );
-
-  const permissions: Array<string> = [...setOfPermissions];
   if (permissions.includes(PERMISSIONS.ROOT)) {
     const allPermissions = await getAllPermissions({
       _id: 1,
@@ -96,7 +91,7 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
     return allPermissions.map(p => p._id);
   }
   if (moreDetail) {
-    return data;
+    return groups;
   }
   return permissions;
 }
@@ -108,10 +103,8 @@ export async function createGroup({
   userIds,
   roleIds,
 }: any) {
-  console.log(parent);
   const groupCol = mongodb.collection('groups');
   const parentGroup = await groupCol.findOne({ _id: parent });
-  console.log(parent, parentGroup);
   if (!parentGroup) return;
 
   await groupCol.insertOne({
@@ -120,7 +113,7 @@ export async function createGroup({
     description,
     userIds: userIds,
     roleIds: roleIds,
-    parent,
+    genealogy: [...(parentGroup.genealogy || []), parent],
     hierarchy: parentGroup.hierarchy + 1,
   });
 }
@@ -146,11 +139,37 @@ export async function updateGroups({
   );
 }
 
+export async function getRoleDetail(roleId: string) {
+  const roles = await mongodb
+    .collection('roles')
+    .aggregate([
+      { $match: { _id: roleId } },
+      {
+        $lookup: {
+          from: 'permissions',
+          localField: 'permissions',
+          foreignField: '_id',
+          as: 'actionPermissions',
+        },
+      },
+    ])
+    .toArray();
+
+  if (!roles.length) return {};
+
+  return {
+    ...roles[0],
+    actionPermissions: groupPermissionsByModule(roles[0].actionPermissions),
+  };
+}
+
 export async function getRolesOfGroups(groupId: string) {
-  const group = await mongodb
+  const groups = await mongodb
     .collection('groups')
     .aggregate([
-      { $match: { _id: groupId } },
+      {
+        $match: { $or: [{ genealogy: { $in: [groupId] } }, { _id: groupId }] },
+      },
       {
         $lookup: {
           from: 'roles',
@@ -165,7 +184,10 @@ export async function getRolesOfGroups(groupId: string) {
     ])
     .toArray();
 
-  return group[0]?.roles;
+  const setOfRoles = new Set(
+    groups.reduce((acc: any, arr: any) => [...acc, ...(arr.roles || [])], []),
+  );
+  return [...setOfRoles];
 }
 
 export async function searchUser(searchText: string) {
@@ -183,22 +205,20 @@ export async function searchUser(searchText: string) {
       ],
     })
     .toArray();
-
   return users;
 }
 
 export async function getGroupDetail({ userId, groupId, projection }: any) {
-  //TODO parent can view children groups
   const group = await mongodb
     .collection('groups')
     .aggregate([
       { $match: { _id: groupId, userIds: userId } },
       {
         $lookup: {
-          from: 'groups', // The same collection
-          localField: '_id', // Field from the input documents
-          foreignField: 'parent', // Field from the documents of the "groups" collection
-          as: 'children', // Output array field
+          from: 'groups',
+          localField: '_id',
+          foreignField: 'genealogy',
+          as: 'children',
         },
       },
       {
@@ -263,6 +283,8 @@ export async function getGroupPermissions(groupId: string) {
   );
 
   const permissions: Array<string> = [...setOfPermissions];
+
+  // root account can access all permissions
   if (permissions.includes(PERMISSIONS.ROOT)) {
     const allPermissions = await getAllPermissions({
       _id: 1,

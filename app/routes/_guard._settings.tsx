@@ -1,7 +1,7 @@
-import { Link, Outlet, useLocation } from '@remix-run/react';
-import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { Link, Outlet, useLocation } from '@remix-run/react';
 
 export default function Screen() {
   const { pathname } = useLocation();
@@ -28,10 +28,6 @@ export default function Screen() {
               {
                 title: 'Profile',
                 href: '/settings/profile',
-              },
-              {
-                title: 'Roles management',
-                href: '/settings/roles',
               },
               {
                 title: 'Users management',

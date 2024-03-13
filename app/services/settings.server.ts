@@ -126,31 +126,15 @@ export async function createNewUser({
   password,
   email,
   cities,
-  groupIds,
 }: any) {
   const usersCol = mongodb.collection('users');
   const passwordHashed = await hashPassword(password);
 
-  const newUser = await usersCol.insertOne({
+  await usersCol.insertOne({
     ...newRecordCommonField(),
     username,
     email,
     cities,
     services: { password: { bcrypt: passwordHashed } },
   });
-
-  const groupCol = mongodb.collection('groups');
-
-  await groupCol.updateMany(
-    {
-      _id: { $in: groupIds },
-    },
-    {
-      $push: {
-        users: newUser.insertedId.toString(),
-      },
-    },
-  );
-
-  return { message: 'Successful' };
 }

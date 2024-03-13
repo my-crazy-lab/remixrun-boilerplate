@@ -10,12 +10,10 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import React from 'react';
@@ -45,10 +43,6 @@ export default function Screen() {
   const { t } = useTranslation();
   const { user } = useLoaderData<{ user: GlobalProps }>();
 
-  React.useEffect(() => {
-    console.log(2);
-  }, []);
-
   const storeRef = React.useRef<GlobalStore>();
   if (!storeRef.current) {
     storeRef.current = createGlobalStore(user);
@@ -59,11 +53,6 @@ export default function Screen() {
       <div className="border-b">
         <div className="flex h-16 items-center px-4">
           <nav className="flex items-center space-x-4 lg:space-x-6 mx-6">
-            <Link
-              to="/contacts"
-              className="text-sm font-medium transition-colors hover:text-primary">
-              Demo page
-            </Link>
             <Link
               to="/"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
@@ -91,7 +80,7 @@ export default function Screen() {
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="mt-2 w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">shadcn</p>
@@ -101,25 +90,11 @@ export default function Screen() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    Profile
-                    <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    Billing
-                    <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    Settings
-                    <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>New Team</DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Form method="post" action="/logout">
-                    <button type="submit">Logout</button>
+                  <Form className="w-full" method="post" action="/logout">
+                    <button className="w-full  text-start" type="submit">
+                      Logout
+                    </button>
                   </Form>
                 </DropdownMenuItem>
               </DropdownMenuContent>
