@@ -5,20 +5,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { useLoaderData, useParams } from '@remix-run/react';
+import { useLoaderData, useNavigate } from '@remix-run/react';
 import _ from 'lodash';
-import { Slash } from 'lucide-react';
+import { MoveLeft } from 'lucide-react';
 import { PERMISSIONS } from '~/constants/common';
 import { hocLoader } from '~/hoc/remix';
 import { getRoleDetail } from '~/services/role-base-access-control.server';
@@ -32,40 +25,18 @@ export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
 
 export default function RolesDetail() {
   const loaderData = useLoaderData<any>();
-  const params = useParams();
+  const navigate = useNavigate()
+  const goBack = () => navigate(-1)
 
   console.log(loaderData);
 
   return (
     <>
       <div className="text-2xl px-0 pb-6">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={`/settings/groups`}>
-                Groups
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                className="text-lg"
-                to={`/settings/groups/${params.id}`}>
-                Group root
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-lg">
-                {loaderData.role.actionPermissions[0].actions[0].name} role
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
+          <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+          {loaderData.role.actionPermissions[0].actions[0].name}
+        </div >
         <p className="text-base mt-2">
           {loaderData.role.actionPermissions[0].actions[0].description}
         </p>

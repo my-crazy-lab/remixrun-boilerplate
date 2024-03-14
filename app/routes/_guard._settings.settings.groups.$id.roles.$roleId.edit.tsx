@@ -424,8 +424,8 @@ const actionPermissions: Array<IActionPermission> = [
 ];
 
 export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
-  if (!params.id) return json({ role: {} });
-  const role = await getRoleDetail(params.id);
+  if (!params.roleId) return json({ role: {} });
+  const role = await getRoleDetail(params.roleId);
 
   return json({ role });
 }, PERMISSIONS.WRITE_ROLE);
@@ -466,6 +466,7 @@ export const action = hocAction(
 
 export default function EditRole() {
   const { role } = useLoaderData<typeof loader>();
+  console.log("🚀 ~ EditRole ~ role:", role)
   const dataAction = useActionData<typeof action>();
   const submit = useSubmit();
 
@@ -480,7 +481,7 @@ export default function EditRole() {
 
       permissionFromServer.actions.forEach(action => {
         defaultValues.permissions[permissionFromServer.module][action._id] =
-          role.permissions.includes(action._id);
+          role?.permissions?.includes(action._id) || false;
       });
     });
 

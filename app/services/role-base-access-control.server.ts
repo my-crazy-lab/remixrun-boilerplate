@@ -20,7 +20,7 @@ export async function verifyPermissions(
   const userId = await getUserId({ request });
   const rolesCol = mongodb.collection('roles');
   const roles = await rolesCol
-    .find({ permisisons: { $in: permissions } }, { projection: { _id: 1 } })
+    .find({ permissions: { $in: permissions } }, { projection: { _id: 1 } })
     .toArray();
 
   const groupFound = await mongodb.collection('groups').findOne({
@@ -419,3 +419,63 @@ export async function deleteGroup(groupId: string) {
     },
   );
 }
+
+export async function getPermissionsOfGroup(groupId: string) {
+  const lookupRole = {
+    $lookup: {
+      from: 'roles',
+      localField: 'roles._id',
+      foreignField: '_id',
+      as: 'role',
+    },
+  };
+
+  const unwindRole = {
+    $unwind: {
+      path: '$role',
+      preserveNullAndEmptyArrays: true,
+    },
+  };
+
+  const aggregate = [{ $match: { _id: groupId } }, lookupRole, unwindRole];
+
+  const data: any = await mongodb
+    .collection('groups')
+    .aggregate(aggregate)
+    .toArray();
+
+  const setOfPermissions = data.reduce(
+    (accumulator: any[], obj: any) =>
+      new Set([...accumulator, ...(obj?.role?.permissions || [])]),
+    [],
+  );
+
+  return [...setOfPermissions];
+}
+
+// TODO
+export async function getUsersHierarchy(groupId: string) {
+  await mongodb.collection('groups');
+}
+
+/*
+ OK get all permissions (for root)
+ OK get all groups of user 
+ OK get details of groups: users, roles, groups children, ...
+ OK edit groups: add users, roles, change name, descriptions
+ OK create child groups 
+    get list roles of group -> list permissions   
+    input username or user's email
+ OK update roles  
+    get permission from parent groups 
+    update into roles collection
+ OK create roles  
+    get permissions chosen from parent groups
+    save into roles collection
+ OK list roles of groups -> view detail permission of roles 
+ OK delete user 
+ OK delete roles 
+ OK delete group with another permission 
+ get all users from parent and children of groups
+ OK verify root
+*/

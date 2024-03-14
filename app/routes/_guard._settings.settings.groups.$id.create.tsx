@@ -1,11 +1,3 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,12 +6,12 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import {
   useLoaderData,
+  useNavigate,
   useNavigation,
-  useParams,
   useSearchParams,
-  useSubmit,
+  useSubmit
 } from '@remix-run/react';
-import { Slash } from 'lucide-react';
+import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
@@ -60,7 +52,8 @@ export const loader = hocLoader(
 );
 
 export default function Screen() {
-  const params = useParams();
+  const navigate = useNavigate()
+  const goBack = () => navigate(-1)
   const loaderData = useLoaderData<any>();
   const navigation = useNavigation();
 
@@ -100,33 +93,10 @@ export default function Screen() {
 
   return (
     <>
-      <div className="flex-row flex text-xl items-center px-0 mb-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={`/settings/groups`}>
-                Groups
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                className="text-lg"
-                to={`/settings/groups/${params.id}`}>
-                Group root
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-lg">New group</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
+        <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+        New group
+      </div >
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-3 items-center gap-4">
@@ -197,7 +167,9 @@ export default function Screen() {
             </div>
           </div>
         </div>
-        <Button type="submit">Save</Button>
+        <div className='flex justify-end'>
+          <Button type="submit">Save changes</Button>
+        </div>
       </form>
     </>
   );

@@ -35,7 +35,7 @@ export function getSkipAndLimit({ pageSize, pageIndex }: PaginationState) {
   return { skip: pageSize * pageIndex, limit: pageSize };
 }
 
-export function getPageSieAndPageIndex({
+export function getPageSizeAndPageIndex({
   total,
   pageIndex,
   pageSize,

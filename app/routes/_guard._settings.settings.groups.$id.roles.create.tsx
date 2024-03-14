@@ -4,14 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,9 +11,9 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { Link, useLoaderData, useParams, useSubmit } from '@remix-run/react';
+import { useLoaderData, useNavigate, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
-import { Slash } from 'lucide-react';
+import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
@@ -61,9 +53,9 @@ export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
 }, PERMISSIONS.WRITE_ROLE);
 
 export default function RolesDetail() {
-  const params = useParams();
   const loaderData = useLoaderData<any>();
-
+  const navigate = useNavigate()
+  const goBack = () => navigate(-1)
   const {
     register,
     control,
@@ -93,37 +85,13 @@ export default function RolesDetail() {
 
     submit(formData, { method: 'post' });
   };
-  console.log(loaderData);
 
   return (
     <>
-      <div className="flex justify-between items-center text-2xl px-0 pb-6">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to="/settings/groups">
-                Groups
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                className="text-lg"
-                to={`/settings/groups/${params.id}`}>
-                {/* {loaderData.group.name} */}
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-lg">Create role</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
+      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
+        <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+        Create role
+      </div >
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Label className="text-left" htmlFor="name">
@@ -180,10 +148,7 @@ export default function RolesDetail() {
           </Accordion>
         ))}
 
-        <div className="gap-4 flex justify-end mt-4">
-          <Link to={`/settings/groups/${params.id}`}>
-            <Button variant="outline">Cancel</Button>
-          </Link>
+        <div className="flex justify-end mt-4">
           <Button variant="default" type="submit" color="primary">
             Save changes
           </Button>

@@ -30,7 +30,7 @@ export interface Groups {
   parent: string;
   hierarchy: number;
   createdAt: Date;
-  updatedat?: Date;
+  updatedAt?: Date;
   status?: string;
 }
 
@@ -38,10 +38,10 @@ export interface Groups {
   Flow: root create Groups with hierarchy = 2, parent=root
               auto add permission "groups-control" 
               add user + roles into Groups
-              when have new feautres -> new permissions -> update into roles of Groups 
+              when have new feature -> new permissions -> update into roles of Groups 
         manager create Groups with hierarchy = 3, parent=Groups's id of manager 
-                add user + roles, because dont have "groups-control" cannot create any hierarchy form there 
-                any manager have permisison "groups-control" so when add this permission into any group, this group can control and create groups children 
+                add user + roles, because don't have "groups-control" cannot create any hierarchy form there 
+                any manager have permission "groups-control" so when add this permission into any group, this group can control and create groups children 
                 
   View: H1 any groups created by H1 is always H2
         H2 any groups created by H2 is always H3 
@@ -52,7 +52,7 @@ export interface Groups {
         when create roles, just choose permission form roles of parent groups and have permission group-control
         Create User -> just have permission group-control 
         -- 
-        UI Profile / Groups / Histoy 
+        UI Profile / Groups / History 
           Groups show list group we're in, and groups children of it, don't have create group at here 
           click to go to group detail
           Just users in parent can edit information of children groups, add/delete user, edit roles 
