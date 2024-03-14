@@ -354,7 +354,12 @@ export async function updateRole({
   name,
   permissions,
   description,
-}: any) {
+}: {
+  roleId: any;
+  name: string;
+  permissions: string[];
+  description: string;
+}) {
   await mongodb.collection('roles').updateOne(
     { _id: roleId },
     {

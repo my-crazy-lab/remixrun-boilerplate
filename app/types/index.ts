@@ -1,3 +1,5 @@
+import { TActionPermissionModule } from '~/constants/common';
+
 export interface Permissions {
   _id: string;
   name: string;
@@ -75,3 +77,14 @@ export type AddArguments<
   F extends (...args: any[]) => any,
   Args extends any[],
 > = (...args: [...Parameters<F>, ...Args]) => ReturnType<F>;
+
+export interface IActionPermission {
+  module: TActionPermissionModule;
+  actions: Array<{
+    _id: string;
+    name: string;
+    description: string;
+    module: TActionPermissionModule;
+    children?: Array<{ _id: string }>;
+  }>;
+}

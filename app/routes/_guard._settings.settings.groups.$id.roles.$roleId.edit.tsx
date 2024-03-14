@@ -12,15 +12,45 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { CheckIcon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
+import {
+  Toast,
+  ToastTitle,
+  ToastProvider,
+  ToastViewport,
+} from '@/components/ui/toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import type { IActionPermission } from '~/types';
+import { json } from '@remix-run/node';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import _ from 'lodash';
 import { Slash } from 'lucide-react';
-const actionPermissions = [
+import { PERMISSIONS } from '~/constants/common';
+import { hocAction, hocLoader } from '~/hoc/remix';
+import { useForm, Controller } from 'react-hook-form';
+import {
+  getRoleDetail,
+  updateRole,
+} from '~/services/role-base-access-control.server';
+import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
+
+const actionPermissions: Array<IActionPermission> = [
+  {
+    module: 'special',
+    actions: [
+      {
+        _id: 'root',
+        name: 'ROOT',
+        description: 'This is root user, with all power',
+        module: 'special',
+      },
+    ],
+  },
   {
     module: 'tasker',
     actions: [
@@ -393,9 +423,107 @@ const actionPermissions = [
   },
 ];
 
+export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
+  if (!params.roleId) return json({ role: {} });
+  const role = await getRoleDetail(params.roleId);
+
+  return json({ role });
+}, PERMISSIONS.WRITE_ROLE);
+
+export interface IFormData {
+  name: string;
+  description: string;
+  permissions: string;
+}
+
+export const action = hocAction(
+  async (
+    { params }: ActionFunctionArgs,
+    {
+      formData,
+    }: {
+      formData: IFormData;
+    },
+  ) => {
+    try {
+      const { name, description, permissions } = formData;
+      updateRole({
+        name,
+        description,
+        permissions: JSON.parse(permissions),
+        roleId: params.id,
+      });
+      return {
+        isShowSuccess: true,
+      };
+    } catch (err: any) {
+      console.log(err);
+      return json({ err });
+    }
+  },
+  PERMISSIONS.WRITE_ROLE,
+);
+
 export default function EditRole() {
+  const { role } = useLoaderData<typeof loader>();
+  console.log("🚀 ~ EditRole ~ role:", role)
+  const dataAction = useActionData<typeof action>();
+  const submit = useSubmit();
+
+  const getDefaultValues = () => {
+    const defaultValues: any = {
+      permissions: {},
+      name: role.name || '',
+      description: role.description || '',
+    };
+    actionPermissions.forEach(permissionFromServer => {
+      defaultValues.permissions[permissionFromServer.module] = {};
+
+      permissionFromServer.actions.forEach(action => {
+        defaultValues.permissions[permissionFromServer.module][action._id] =
+          role?.permissions?.includes(action._id) || false;
+      });
+    });
+
+    return {
+      defaultValues,
+    };
+  };
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<any>(getDefaultValues());
+
+  const onSubmit = ({
+    name,
+    permissions,
+    description,
+  }: {
+    name: string;
+    permissions: any;
+    description: string;
+  }) => {
+    const selectedPermissions: string[] = [];
+
+    actionPermissions.forEach(actionPermission => {
+      actionPermission.actions.forEach(action => {
+        if (permissions?.[actionPermission.module]?.[action._id]) {
+          selectedPermissions.push(action._id);
+        }
+      });
+    });
+
+    submit(
+      { name, description, permissions: JSON.stringify(selectedPermissions) },
+      { method: 'post' },
+    );
+  };
+
   return (
-    <>
+    <ToastProvider swipeDirection="right">
       <div className="text-2xl px-0 pb-6 flex justify-between items-center">
         <Breadcrumb>
           <BreadcrumbList>
@@ -420,19 +548,39 @@ export default function EditRole() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex mt-4">
-          <Button variant="default" color="primary">
+        <div className="gap-4 flex mt-4">
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            variant="default"
+            type="submit"
+            color="primary">
             Save changes
           </Button>
         </div>
       </div>
-      <>
-        <p>Role</p>
-        <Input className="mt-2" placeholder="Role"></Input>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <p>Name</p>
+        <Input
+          {...register('name', { required: true })}
+          className="mt-2"
+          placeholder="Enter name..."
+        />
+        <p className="mt-2">Description</p>
+        <Input
+          {...register('description', { required: true })}
+          className="mt-2"
+          placeholder="Enter description..."
+        />
         <Separator className="my-4" />
-        <ScrollArea className="h-96 mt-4 rounded-md border p-4">
-          {_.map(actionPermissions, (actionPermission: any) => (
-            <Accordion type="single" collapsible>
+
+        <p className="mt-2">Permissions</p>
+        <ScrollArea className="mt-4 rounded-md border p-4">
+          {_.map(actionPermissions, actionPermission => (
+            <Accordion
+              key={actionPermission.module}
+              defaultValue={actionPermissions[0].module}
+              type="single"
+              collapsible>
               <AccordionItem value={actionPermission.module}>
                 <AccordionTrigger>
                   {actionPermission?.module?.toUpperCase()} features
@@ -440,21 +588,31 @@ export default function EditRole() {
                 <AccordionContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {_.map(actionPermission.actions, action => (
-                      <div key={action._id} className="my-2">
-                        <Label
-                          htmlFor={action._id}
-                          className="block text-base font-medium text-gray-700">
-                          {action.name}
-                        </Label>
-                        <div className="mt-1 flex items-center gap-2">
-                          <Switch id={action._id} />
-                          <Label
-                            className="text-sm text-gray-500"
-                            htmlFor={action._id}>
-                            {action.description}
-                          </Label>
-                        </div>
-                      </div>
+                      <Controller
+                        key={action._id}
+                        control={control}
+                        name={`permissions.${actionPermission.module}.${action._id}`}
+                        render={({ field: { onChange, value } }) => (
+                          <div key={action._id} className="my-2">
+                            <Label
+                              htmlFor={action._id}
+                              className="block text-base font-medium text-gray-700">
+                              {action.name}
+                            </Label>
+                            <div className="mt-1 flex items-center gap-2">
+                              <Switch
+                                onCheckedChange={onChange}
+                                checked={value}
+                              />
+                              <Label
+                                className="text-sm text-gray-500"
+                                htmlFor={action._id}>
+                                {action.description}
+                              </Label>
+                            </div>
+                          </div>
+                        )}
+                      />
                     ))}
                   </div>
                 </AccordionContent>
@@ -462,7 +620,18 @@ export default function EditRole() {
             </Accordion>
           ))}
         </ScrollArea>
-      </>
-    </>
+      </form>
+      {dataAction?.isShowSuccess ? (
+        <Toast className="flex flex-col" open={dataAction?.isShowSuccess}>
+          <ToastTitle className="font-bold text-xl text-green-500">
+            <div className="flex">
+              <CheckIcon className="mr-2 w-6 h-6" />
+              Updated successfully
+            </div>
+          </ToastTitle>
+        </Toast>
+      ) : null}
+      <ToastViewport />
+    </ToastProvider>
   );
 }
