@@ -83,8 +83,8 @@ export default function Screen() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const navigate = useNavigate()
-  const goBack = () => navigate(-1)
+  const navigate = useNavigate();
+  const goBack = () => navigate(-1);
 
   const {
     register,
@@ -128,7 +128,9 @@ export default function Screen() {
   return (
     <>
       <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
-        <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+        <Button onClick={goBack}>
+          <MoveLeft className="h-5 w-5" />{' '}
+        </Button>
         Update role
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -206,7 +208,7 @@ export default function Screen() {
             </div>
           </div>
         </CardContent>
-        <div className='flex justify-end'>
+        <div className="flex justify-end">
           <Button type="submit">Save changes</Button>
         </div>
       </form>

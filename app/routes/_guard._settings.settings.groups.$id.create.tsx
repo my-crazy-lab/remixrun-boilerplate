@@ -9,7 +9,7 @@ import {
   useNavigate,
   useNavigation,
   useSearchParams,
-  useSubmit
+  useSubmit,
 } from '@remix-run/react';
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
@@ -52,8 +52,8 @@ export const loader = hocLoader(
 );
 
 export default function Screen() {
-  const navigate = useNavigate()
-  const goBack = () => navigate(-1)
+  const navigate = useNavigate();
+  const goBack = () => navigate(-1);
   const loaderData = useLoaderData<any>();
   const navigation = useNavigation();
 
@@ -94,9 +94,11 @@ export default function Screen() {
   return (
     <>
       <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
-        <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+        <Button onClick={goBack}>
+          <MoveLeft className="h-5 w-5" />{' '}
+        </Button>
         New group
-      </div >
+      </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-3 items-center gap-4">
@@ -167,7 +169,7 @@ export default function Screen() {
             </div>
           </div>
         </div>
-        <div className='flex justify-end'>
+        <div className="flex justify-end">
           <Button type="submit">Save changes</Button>
         </div>
       </form>
