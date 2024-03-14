@@ -447,14 +447,15 @@ export const action = hocAction(
   ) => {
     try {
       const { name, description, permissions } = formData;
-
       updateRole({
         name,
         description,
         permissions: JSON.parse(permissions),
         roleId: params.id,
       });
-      return true;
+      return {
+        isShowSuccess: true,
+      };
     } catch (err: any) {
       console.log(err);
       return json({ err });
@@ -465,7 +466,7 @@ export const action = hocAction(
 
 export default function EditRole() {
   const { role } = useLoaderData<typeof loader>();
-  const isShowSuccess = useActionData<typeof action>()
+  const dataAction = useActionData<typeof action>();
   const submit = useSubmit();
 
   const getDefaultValues = () => {
@@ -619,14 +620,16 @@ export default function EditRole() {
           ))}
         </ScrollArea>
       </form>
-      <Toast className="flex flex-col" open={isShowSuccess}>
-        <ToastTitle className="font-bold text-xl text-green-500">
-          <div className='flex'>
-            <CheckIcon className="mr-2 w-6 h-6" />
-            Updated successfully
-          </div>
-        </ToastTitle>
-      </Toast>
+      {dataAction?.isShowSuccess ? (
+        <Toast className="flex flex-col" open={dataAction?.isShowSuccess}>
+          <ToastTitle className="font-bold text-xl text-green-500">
+            <div className="flex">
+              <CheckIcon className="mr-2 w-6 h-6" />
+              Updated successfully
+            </div>
+          </ToastTitle>
+        </Toast>
+      ) : null}
       <ToastViewport />
     </ToastProvider>
   );
