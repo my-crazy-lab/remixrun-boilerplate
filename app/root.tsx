@@ -1,21 +1,31 @@
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Toaster } from '@/components/ui/toaster';
+import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import type {
+  ClientLoaderFunctionArgs
+} from '@remix-run/react';
 import {
   Links,
   LiveReload,
   Meta,
+  Outlet,
   Scripts,
   ScrollRestoration,
-  Outlet,
   useLoaderData,
-  ClientLoaderFunctionArgs,
-  useRouteError,
+  useNavigate,
+  useRouteError
 } from '@remix-run/react';
-import { Toaster } from '@/components/ui/toaster';
-
-import type { LoaderFunctionArgs, LinksFunction } from '@remix-run/node';
-import { json } from '@remix-run/node';
-import styles from './tailwind.css';
 import { useChangeLanguage } from 'remix-i18next/react';
 import i18next from '~/i18next.server';
+import styles from './tailwind.css';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   // Add data get one time as Services, Users profile,... at here
@@ -25,7 +35,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ locale });
 };
 
-let clientCache: {
+const clientCache: {
   locale?: string;
 } = {};
 export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
@@ -54,6 +64,7 @@ export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  const navigate = useNavigate()
   console.error(error);
   return (
     <html>
@@ -63,8 +74,19 @@ export function ErrorBoundary() {
         <Links />
       </head>
       <body>
-        <>Error page</>
-        {/* add the UI you want your users to see */}
+        <div className="flex items-center justify-center h-screen bg-slate-300">
+          <Card className="w-[420px]">
+            <CardHeader className="text-center">
+              <CardTitle className="lg:text-7xl text-4xl">404</CardTitle>
+              <CardDescription>
+                The page you’re looking for doesn’t exist.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="flex justify-center">
+              <Button onClick={() => { navigate(-1) }}>Go Back</Button>
+            </CardFooter>
+          </Card>
+        </div>
         <Scripts />
       </body>
     </html>
