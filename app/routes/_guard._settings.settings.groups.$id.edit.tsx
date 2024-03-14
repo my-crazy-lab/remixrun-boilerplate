@@ -129,7 +129,7 @@ export default function Screen() {
     <>
       <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
         <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
-        Update role
+        Update group
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="gap-4 pb-4 grid p-0">

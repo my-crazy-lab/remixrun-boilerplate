@@ -46,17 +46,18 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
 export default function Screen() {
   const params = useParams();
-  const navigate = useNavigate()
-  const goBack = () => navigate(-1)
+  const navigate = useNavigate();
+  const goBack = () => navigate(-1);
   const loaderData = useLoaderData<any>();
   const globalData = useGlobalStore(state => state);
 
   return (
     <>
-
       <div className="flex justify-between items-center text-xl px-0 pb-6">
-        <div className='flex items-center gap-4'>
-          <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+        <div className="flex items-center gap-4">
+          <Button onClick={goBack}>
+            <MoveLeft className="h-5 w-5" />{' '}
+          </Button>
           {loaderData.group.name}
         </div>
 
@@ -65,9 +66,9 @@ export default function Screen() {
         </Link>
       </div>
       <p>
-        {loaderData.group.description ?
-          loaderData.group.description :
-          `Lorem ipsum dolor sit amet and continues with nonsensical Latin-like words. If you need more information or assistance, feel free to ask!`}
+        {loaderData.group.description
+          ? loaderData.group.description
+          : `Lorem ipsum dolor sit amet and continues with nonsensical Latin-like words. If you need more information or assistance, feel free to ask!`}
       </p>
 
       <div>
@@ -80,40 +81,43 @@ export default function Screen() {
           ) : null}
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {loaderData.group.children.length ? loaderData.group.children.map((child: any, index: number) => {
-            return (
-              <Link key={index} to={`/settings/groups/${child._id}`}>
-                <Card className="cursor-pointer hover:border-primary">
-                  <CardHeader className="font-semibold flex flex-row justify-between items-center">
-                    <h1>{child.name}</h1>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-                          <DotsHorizontalIcon className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-[160px]">
-                        <Link to={`/settings/groups/${child._id}/edit`}>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                        </Link>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </CardHeader>
-                  <CardContent>
-                    {child.description
-                      ? child.description
-                      : `Lorem ipsum dolor sit amet and continues with nonsensical Latin-like words. If you need more information or assistance, feel free to ask!`}
-                  </CardContent>
-                </Card>
-              </Link>
-
-            );
-          }) : 'No user group here!'}
+          {loaderData.group.children.length
+            ? loaderData.group.children.map((child: any, index: number) => {
+                return (
+                  <Link key={index} to={`/settings/groups/${child._id}`}>
+                    <Card className="cursor-pointer hover:border-primary">
+                      <CardHeader className="font-semibold flex flex-row justify-between items-center">
+                        <h1>{child.name}</h1>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+                              <DotsHorizontalIcon className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[160px]">
+                            <Link to={`/settings/groups/${child._id}/edit`}>
+                              <DropdownMenuItem>Edit</DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </CardHeader>
+                      <CardContent>
+                        {child.description
+                          ? child.description
+                          : `Lorem ipsum dolor sit amet and continues with nonsensical Latin-like words. If you need more information or assistance, feel free to ask!`}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })
+            : 'No user group here!'}
         </div>
       </div>
       <div className="grid md:grid-cols-2 grid-cols-1 gap-6 mt-6">

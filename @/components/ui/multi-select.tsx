@@ -18,6 +18,7 @@ import {
 import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { Skeleton } from './skeleton';
+import type { SetURLSearchParams } from 'react-router-dom';
 
 export type OptionType = {
   label: string;
@@ -32,7 +33,7 @@ interface MultiSelectAsyncProps {
   setSelected?: any;
   isLoading?: boolean;
   defaultSearchValue?: string;
-  searchRemix: { setSearchParams: any; searchKey: string };
+  searchRemix: { setSearchParams: SetURLSearchParams; searchKey: string };
 }
 
 export function MultiSelectAsync({
@@ -104,7 +105,6 @@ export function MultiSelectAsync({
       <PopoverContent className="w-full p-0">
         <Command className={className} shouldFilter={false}>
           <CommandInput
-            autoFocus
             value={searchText}
             onValueChange={e => {
               setSearchText(e);
@@ -184,7 +184,7 @@ export function MultiSelect({
     setSelected(selected.filter(i => i.value !== item));
   };
 
-  const handleisDisplayAllOptions = () => {
+  const handleIsDisplayAllOptions = () => {
     if (allSelected && selected) {
       setSelected([]);
     } else {
@@ -237,7 +237,7 @@ export function MultiSelect({
           <CommandInput placeholder="Search..." />
           <CommandEmpty>No item found.</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
-            <CommandItem onSelect={handleisDisplayAllOptions}>
+            <CommandItem onSelect={handleIsDisplayAllOptions}>
               {allSelected ? 'Unselect All' : 'Select All'}
             </CommandItem>
             {options.map(option => (

@@ -13,7 +13,6 @@ import type {
   ClientLoaderFunctionArgs
 } from '@remix-run/react';
 import {
-  Link,
   Links,
   LiveReload,
   Meta,
@@ -21,7 +20,8 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
-  useRouteError,
+  useNavigate,
+  useRouteError
 } from '@remix-run/react';
 import { useChangeLanguage } from 'remix-i18next/react';
 import i18next from '~/i18next.server';
@@ -64,6 +64,7 @@ export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  const navigate = useNavigate()
   console.error(error);
   return (
     <html>
@@ -73,7 +74,7 @@ export function ErrorBoundary() {
         <Links />
       </head>
       <body>
-        <div className="flex items-center justify-center h-screen bg-slate-400">
+        <div className="flex items-center justify-center h-screen bg-slate-300">
           <Card className="w-[420px]">
             <CardHeader className="text-center">
               <CardTitle className="lg:text-7xl text-4xl">404</CardTitle>
@@ -82,13 +83,10 @@ export function ErrorBoundary() {
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-center">
-              <Button asChild>
-                <Link to="/">Go Back</Link>
-              </Button>
+              <Button onClick={() => { navigate(-1) }}>Go Back</Button>
             </CardFooter>
           </Card>
         </div>
-        {/* add the UI you want your users to see */}
         <Scripts />
       </body>
     </html>
