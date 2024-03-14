@@ -1,6 +1,6 @@
-const routeLink = {
-  signIn: '/sign-in',
-  groupSetting: '/settings/groups',
+const ROUTE_LINK = {
+  SIGN_IN: '/sign-in',
+  GROUP_SETTING: '/settings/groups',
 };
 
-export default routeLink;
+export default ROUTE_LINK;

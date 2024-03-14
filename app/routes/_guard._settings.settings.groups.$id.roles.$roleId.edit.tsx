@@ -32,7 +32,7 @@ import {
   updateRole,
 } from '~/services/role-base-access-control.server';
 import { useLoaderData, useSubmit } from '@remix-run/react';
-import routeLink from '~/constants/routeURL';
+import ROUTE_LINK from '~/constants/routeURL';
 
 export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
   if (!params.roleId) return json({ role: {} });
@@ -60,7 +60,7 @@ export const action = hocAction(
         roleId: params.roleId,
       });
 
-      return redirect(`${routeLink.groupSetting}/${params.id}`);
+      return redirect(`${ROUTE_LINK.GROUP_SETTING}/${params.id}`);
     } catch (err: any) {
       return json({ err });
     }
@@ -131,7 +131,7 @@ export default function EditRole() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={routeLink.groupSetting}>
+              <BreadcrumbLink className="text-lg" to={ROUTE_LINK.GROUP_SETTING}>
                 Groups
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -139,7 +139,7 @@ export default function EditRole() {
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={routeLink.groupSetting}>
+              <BreadcrumbLink className="text-lg" to={ROUTE_LINK.GROUP_SETTING}>
                 Group root
               </BreadcrumbLink>
             </BreadcrumbItem>
