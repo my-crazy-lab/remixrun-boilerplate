@@ -70,7 +70,6 @@ export const action = hocAction(
 
 export default function EditRole() {
   const { role } = useLoaderData<typeof loader>();
-  console.log("🚀 ~ EditRole ~ role:", role)
   const submit = useSubmit();
 
   const getDefaultValues = () => {
