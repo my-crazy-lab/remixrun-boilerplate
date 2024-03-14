@@ -60,7 +60,7 @@ export const action = hocAction(
         roleId: params.roleId,
       });
 
-      return redirect(`${routeLink.group_setting}/${params.id}`);
+      return redirect(`${routeLink.groupSetting}/${params.id}`);
     } catch (err: any) {
       return json({ err });
     }
@@ -131,7 +131,7 @@ export default function EditRole() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={routeLink.group_setting}>
+              <BreadcrumbLink className="text-lg" to={routeLink.groupSetting}>
                 Groups
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -139,7 +139,7 @@ export default function EditRole() {
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={routeLink.group_setting}>
+              <BreadcrumbLink className="text-lg" to={routeLink.groupSetting}>
                 Group root
               </BreadcrumbLink>
             </BreadcrumbItem>

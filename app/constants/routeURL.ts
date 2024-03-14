@@ -1,6 +1,6 @@
 const routeLink = {
   signIn: '/sign-in',
-  group_setting: '/settings/groups',
+  groupSetting: '/settings/groups',
 };
 
 export default routeLink;
