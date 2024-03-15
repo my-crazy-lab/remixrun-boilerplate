@@ -140,7 +140,7 @@ export async function updateGroups({
   );
 }
 
-export async function getRoleDetail({roleId, userId, groupdId}:any) {
+export async function getRoleDetail({ roleId, userId, groupdId }: any) {
   const roles = await mongodb
     .collection('roles')
     .aggregate([
@@ -452,6 +452,37 @@ export async function getPermissionsOfGroup(groupId: string) {
   );
 
   return [...setOfPermissions];
+}
+
+export async function verifyUserCanModifyGroup({
+  userId,
+  groupId,
+}: {
+  userId: string;
+  groupId: string;
+}) {
+  const group = await mongodb
+    .collection('groups')
+    .aggregate([
+      {
+        $match: { _id: groupId },
+      },
+      {
+        $lookup: {
+          from: 'groups',
+          localField: 'genealogy',
+          foreignField: '_id',
+          as: 'parents',
+        },
+      },
+      {
+        $match: {
+          'parents.userIds': userId,
+        },
+      },
+    ])
+    .toArray();
+  return group;
 }
 
 // TODO

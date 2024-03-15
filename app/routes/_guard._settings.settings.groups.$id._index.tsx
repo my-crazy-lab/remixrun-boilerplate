@@ -17,10 +17,19 @@ import { MoveLeft } from 'lucide-react';
 import { PERMISSIONS } from '~/constants/common';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
-import { getGroupDetail } from '~/services/role-base-access-control.server';
+import {
+  getGroupDetail,
+  verifyUserCanModifyGroup,
+} from '~/services/role-base-access-control.server';
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
+
+  const test = await verifyUserCanModifyGroup({
+    userId,
+    groupId: params.id || '',
+  });
+
   const group = await getGroupDetail({
     projection: {
       roles: 1,
@@ -41,7 +50,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       statusText: 'Not Found',
     });
   }
-  return json({ group });
+  return json({ group, test });
 };
 
 export default function Screen() {
@@ -50,7 +59,7 @@ export default function Screen() {
   const goBack = () => navigate(-1);
   const loaderData = useLoaderData<any>();
   const globalData = useGlobalStore(state => state);
-
+  console.log(loaderData);
   return (
     <>
       <div className="flex justify-between items-center text-xl px-0 pb-6">

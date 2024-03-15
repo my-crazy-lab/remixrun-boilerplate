@@ -1,17 +1,15 @@
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import { Toaster } from '@/components/ui/toaster';
 import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import type {
-  ClientLoaderFunctionArgs
-} from '@remix-run/react';
+import type { ClientLoaderFunctionArgs } from '@remix-run/react';
 import {
   Links,
   LiveReload,
@@ -21,7 +19,7 @@ import {
   ScrollRestoration,
   useLoaderData,
   useNavigate,
-  useRouteError
+  useRouteError,
 } from '@remix-run/react';
 import { useChangeLanguage } from 'remix-i18next/react';
 import i18next from '~/i18next.server';
@@ -61,7 +59,7 @@ export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   console.error(error);
   return (
     <html>
@@ -80,7 +78,12 @@ export function ErrorBoundary() {
               </CardDescription>
             </CardHeader>
             <CardFooter className="flex justify-center">
-              <Button onClick={() => { navigate(-1) }}>Go Back</Button>
+              <Button
+                onClick={() => {
+                  navigate(-1);
+                }}>
+                Go Back
+              </Button>
             </CardFooter>
           </Card>
         </div>
