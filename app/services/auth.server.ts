@@ -190,7 +190,6 @@ authenticator.use(
     const user = await verifyCode({
       code,
     });
-    console.log('login done');
     // the type of this user must match the type you pass to the Authenticator
     // the strategy will automatically inherit the type if you instantiate
     // directly inside the `use` method

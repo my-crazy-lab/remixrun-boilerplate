@@ -79,6 +79,7 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
   const permissions = convertRolesToPermissions(
     groups.map(group => group.roles),
   );
+
   if (permissions.includes(PERMISSIONS.ROOT)) {
     const allPermissions = await getAllPermissions({
       _id: 1,
@@ -139,7 +140,7 @@ export async function updateGroups({
   );
 }
 
-export async function getRoleDetail(roleId: string) {
+export async function getRoleDetail({roleId, userId, groupdId}:any) {
   const roles = await mongodb
     .collection('roles')
     .aggregate([

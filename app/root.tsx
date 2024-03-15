@@ -28,8 +28,6 @@ import i18next from '~/i18next.server';
 import styles from './tailwind.css';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // Add data get one time as Services, Users profile,... at here
-
   const locale = await i18next.getLocale(request);
 
   return json({ locale });
@@ -39,7 +37,6 @@ const clientCache: {
   locale?: string;
 } = {};
 export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
-  console.log('loader client');
   if (clientCache.locale) {
     return { locale: clientCache.locale };
   }

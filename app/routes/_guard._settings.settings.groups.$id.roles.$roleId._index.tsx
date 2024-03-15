@@ -28,8 +28,6 @@ export default function RolesDetail() {
   const navigate = useNavigate();
   const goBack = () => navigate(-1);
 
-  console.log(loaderData);
-
   return (
     <>
       <div className="text-2xl px-0 pb-6">
