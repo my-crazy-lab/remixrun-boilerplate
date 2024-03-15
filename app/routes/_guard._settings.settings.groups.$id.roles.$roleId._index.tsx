@@ -25,18 +25,18 @@ export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
 
 export default function RolesDetail() {
   const loaderData = useLoaderData<any>();
-  const navigate = useNavigate()
-  const goBack = () => navigate(-1)
-
-  console.log(loaderData);
+  const navigate = useNavigate();
+  const goBack = () => navigate(-1);
 
   return (
     <>
       <div className="text-2xl px-0 pb-6">
         <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
-          <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+          <Button onClick={goBack}>
+            <MoveLeft className="h-5 w-5" />{' '}
+          </Button>
           {loaderData.role.actionPermissions[0].actions[0].name}
-        </div >
+        </div>
         <p className="text-base mt-2">
           {loaderData.role.actionPermissions[0].actions[0].description}
         </p>

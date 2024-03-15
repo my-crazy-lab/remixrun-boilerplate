@@ -14,7 +14,6 @@ export async function action({ request }: ActionFunctionArgs) {
   try {
     const formData = await request.formData();
     const { username, password, myKey } = Object.fromEntries(formData);
-    console.log(myKey, 'test');
 
     const verificationToken = await verifyAndSendCode({ username, password });
     return redirect(`/verification-code/${verificationToken}`);
@@ -25,7 +24,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Screen() {
   const { t } = useTranslation();
-
   const error = useActionData<any>();
 
   useEffect(() => {

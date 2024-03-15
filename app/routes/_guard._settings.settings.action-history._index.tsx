@@ -82,7 +82,6 @@ const columns: ColumnDef<IActionsHistory>[] = [
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  console.log(url);
   const searchText = url.searchParams.get('username') || '';
   const total = await getTotalActionsHistory({
     searchText,

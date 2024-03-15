@@ -13,10 +13,6 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { createEmptyContact, getContacts } from '../data';
 
-import { Button } from '@/components/ui/button';
-import { authenticator } from '~/services/auth.server';
-import React from 'react';
-
 export const action = async () => {
   const contact = await createEmptyContact();
   return redirect(`/contacts/${contact.id}/edit`);
@@ -34,11 +30,6 @@ export default function App() {
   const { contacts, q } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const outletData = useOutletContext();
-  console.log(outletData);
-
-  React.useEffect(() => {
-    console.log(2);
-  }, []);
 
   return (
     <>

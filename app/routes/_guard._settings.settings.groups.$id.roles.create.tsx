@@ -54,8 +54,8 @@ export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
 
 export default function RolesDetail() {
   const loaderData = useLoaderData<any>();
-  const navigate = useNavigate()
-  const goBack = () => navigate(-1)
+  const navigate = useNavigate();
+  const goBack = () => navigate(-1);
   const {
     register,
     control,
@@ -89,9 +89,11 @@ export default function RolesDetail() {
   return (
     <>
       <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
-        <Button onClick={goBack}><MoveLeft className='h-5 w-5' /> </Button>
+        <Button onClick={goBack}>
+          <MoveLeft className="h-5 w-5" />{' '}
+        </Button>
         Create role
-      </div >
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Label className="text-left" htmlFor="name">

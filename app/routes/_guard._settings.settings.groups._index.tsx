@@ -36,7 +36,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function Screen() {
   const loaderData = useLoaderData<{ groups: any }>();
   const globalData = useGlobalStore(state => state);
-  console.log(loaderData, globalData, '!!');
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
