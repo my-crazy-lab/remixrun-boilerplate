@@ -1,6 +1,6 @@
 # Clean and Solid boilerplate for Remix
 
-**What is inside?**
+**What is inside ?**
 
 - :bulb: [**TypeScript**](https://www.typescriptlang.org/): A language for application-scale JavaScript
 - :heart_decoration: **Back-office Systems Templates**: Typical for enterprise "backend" applications
