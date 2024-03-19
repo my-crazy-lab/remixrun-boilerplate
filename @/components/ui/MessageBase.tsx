@@ -13,7 +13,9 @@ function ErrorMessageBase<TFieldErrors extends FieldErrors, T = any>(
   return (
     <ErrorMessage<TFieldErrors, any>
       {...props}
-      render={({ message }) => <p className="italic mt-2 text-sm text-red-500">{message}</p>}
+      render={({ message }) => (
+        <p className="italic mt-2 text-sm text-red-500">{message}</p>
+      )}
     />
   );
 }

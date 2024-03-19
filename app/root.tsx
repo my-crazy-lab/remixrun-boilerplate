@@ -19,7 +19,6 @@ import {
   ScrollRestoration,
   useLoaderData,
   useNavigate,
-  useRouteError,
 } from '@remix-run/react';
 import { useChangeLanguage } from 'remix-i18next/react';
 import i18next from '~/i18next.server';
@@ -27,19 +26,20 @@ import styles from './tailwind.css';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const locale = await i18next.getLocale(request);
-
   return json({ locale });
 };
 
-const clientCache: {
+interface DataCache {
   locale?: string;
-} = {};
+}
+const clientCache: DataCache = {};
+
 export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
   if (clientCache.locale) {
     return { locale: clientCache.locale };
   }
 
-  const dataServerLoader: any = await serverLoader();
+  const dataServerLoader = await serverLoader<DataCache>();
   clientCache.locale = dataServerLoader?.locale;
 
   return { locale: clientCache.locale };
@@ -58,11 +58,10 @@ export const links: LinksFunction = () => {
 export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
-  const error = useRouteError();
   const navigate = useNavigate();
-  console.error(error);
+
   return (
-    <html>
+    <html lang="en">
       <head>
         <title>Oh no!</title>
         <Meta />
@@ -94,11 +93,11 @@ export function ErrorBoundary() {
 }
 
 export default function App() {
-  const { locale } = useLoaderData<typeof loader>();
-  useChangeLanguage(locale);
+  const loaderData = useLoaderData<Required<DataCache>>();
+  useChangeLanguage(loaderData.locale);
 
   return (
-    <html lang={locale}>
+    <html lang={loaderData.locale}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -1,4 +1,5 @@
 import { PERMISSIONS } from '~/constants/common';
+import type { Document } from 'mongodb';
 import { mongodb } from '~/utils/db.server';
 import {
   convertRolesToPermissions,
@@ -209,7 +210,15 @@ export async function searchUser(searchText: string) {
   return users;
 }
 
-export async function getGroupDetail({ userId, groupId, projection }: any) {
+export async function getGroupDetail<T = Document>({
+  userId,
+  groupId,
+  projection,
+}: {
+  userId: string;
+  groupId: string;
+  projection: Document;
+}) {
   const group = await mongodb
     .collection('groups')
     .aggregate([
@@ -244,7 +253,7 @@ export async function getGroupDetail({ userId, groupId, projection }: any) {
     ])
     .toArray();
 
-  return group?.[0];
+  return group?.[0] as T | undefined;
 }
 
 export async function getGroupPermissions(groupId: string) {
@@ -296,7 +305,13 @@ export async function getGroupPermissions(groupId: string) {
   return data;
 }
 
-export async function getGroupsOfUser({ projection, userId }: any) {
+export async function getGroupsOfUser<T = Document>({
+  projection,
+  userId,
+}: {
+  projection: Document;
+  userId: string;
+}) {
   const groupCol = mongodb.collection('groups');
   const lookupUser = {
     $lookup: {
@@ -327,7 +342,7 @@ export async function getGroupsOfUser({ projection, userId }: any) {
       { $project: projection },
     ])
     .toArray();
-  return groups;
+  return groups as Array<T>;
 }
 
 export async function createRole({
@@ -482,7 +497,7 @@ export async function verifyUserCanModifyGroup({
       },
     ])
     .toArray();
-  return group;
+  return Boolean(!!group.length);
 }
 
 // TODO

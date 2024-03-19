@@ -1,4 +1,5 @@
-import { TActionPermissionModule } from '~/constants/common';
+import type { TActionPermissionModule } from '~/constants/common';
+import type { Document } from 'mongodb';
 
 export interface Permissions {
   _id: string;
@@ -71,6 +72,8 @@ export interface Groups {
 
   * */
 
+export type MustBeAny = any;
+
 export type NonEmptyArray<T> = [T, ...T[]];
 
 export type AddArguments<
@@ -87,4 +90,8 @@ export interface IActionPermission {
     module: TActionPermissionModule;
     children?: Array<{ _id: string }>;
   }>;
+}
+
+export interface CollectionIdString extends Document {
+  _id: string;
 }

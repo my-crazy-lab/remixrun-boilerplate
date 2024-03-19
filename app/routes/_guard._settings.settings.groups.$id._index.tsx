@@ -22,15 +22,25 @@ import {
   verifyUserCanModifyGroup,
 } from '~/services/role-base-access-control.server';
 
+interface LoaderData {
+  group: {
+    roles: Array<any>;
+    users: Array<any>;
+    children: any;
+    name: string;
+    description: string;
+  };
+}
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+  const groupId = params.id || '';
   const userId = await getUserId({ request });
 
-  const test = await verifyUserCanModifyGroup({
+  const isWritten = await verifyUserCanModifyGroup({
     userId,
-    groupId: params.id || '',
+    groupId,
   });
 
-  const group = await getGroupDetail({
+  const group = await getGroupDetail<LoaderData>({
     projection: {
       roles: 1,
       users: 1,
@@ -41,7 +51,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       description: 1,
     },
     userId,
-    groupId: params.id,
+    groupId,
   });
 
   if (!group) {
@@ -50,16 +60,17 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       statusText: 'Not Found',
     });
   }
-  return json({ group, test });
+  return json({ group, isWritten });
 };
 
 export default function Screen() {
   const params = useParams();
   const navigate = useNavigate();
   const goBack = () => navigate(-1);
-  const loaderData = useLoaderData<any>();
+  const loaderData = useLoaderData<LoaderData>();
   const globalData = useGlobalStore(state => state);
   console.log(loaderData);
+
   return (
     <>
       <div className="flex justify-between items-center text-xl px-0 pb-6">

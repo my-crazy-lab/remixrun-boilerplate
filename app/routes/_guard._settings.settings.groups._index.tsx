@@ -11,31 +11,33 @@ import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
-import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 
+interface LoaderData {
+  groups: Array<{
+    _id: string;
+    name: string;
+    description: string;
+  }>;
+}
+
+// don't need permission Read
+// Users added to groups obviously know how many groups they have
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
-  const groups = await getGroupsOfUser({
+  const groups = await getGroupsOfUser<LoaderData['groups']>({
     userId,
     projection: {
       name: 1,
       description: 1,
-      'users.username': 1,
-      'users.email': 1,
-      roles: 1,
-      createdAt: 1,
-      parent: 1,
-      hierarchy: 1,
     },
   });
   return json({ groups });
 };
 
 export default function Screen() {
-  const loaderData = useLoaderData<{ groups: any }>();
-  const globalData = useGlobalStore(state => state);
+  const loaderData = useLoaderData<LoaderData>();
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
@@ -50,7 +52,7 @@ export default function Screen() {
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
-        {loaderData.groups.map((group: any, index: number) => {
+        {loaderData.groups.map((group, index: number) => {
           return (
             <Link key={index} to={`/settings/groups/${group._id}`}>
               <Card>
@@ -74,7 +76,7 @@ export default function Screen() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </CardHeader>
-                <CardContent>.desc here</CardContent>
+                <CardContent>{group.description}</CardContent>
               </Card>
             </Link>
           );
