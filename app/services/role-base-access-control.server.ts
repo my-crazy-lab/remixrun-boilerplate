@@ -15,7 +15,7 @@ export async function isRoot(userId: string) {
 }
 
 export async function verifyPermissions(
-  { request }: any,
+  { request }: { request: Request },
   permissions: Array<string>,
 ) {
   const userId = await getUserId({ request });
@@ -37,7 +37,7 @@ export async function verifyPermissions(
 }
 
 export function requirePermissions(
-  { request }: any,
+  { request }: { request: Request },
   permissions: Array<string>,
 ) {
   const isAccepted = verifyPermissions({ request }, permissions);
@@ -186,10 +186,7 @@ export async function getRolesOfGroups(groupId: string) {
     ])
     .toArray();
 
-  const setOfRoles = new Set(
-    groups.reduce((acc: any, arr: any) => [...acc, ...(arr.roles || [])], []),
-  );
-  return [...setOfRoles];
+  return groups[0]?.roles || [];
 }
 
 export async function searchUser(searchText: string) {
@@ -211,18 +208,80 @@ export async function searchUser(searchText: string) {
 }
 
 export async function getGroupDetail<T = Document>({
+  isParent,
   userId,
   groupId,
   projection,
 }: {
+  isParent: boolean;
   userId: string;
   groupId: string;
   projection: Document;
 }) {
+  if (isParent) {
+    const root = await isRoot(userId);
+    const matchParent = root
+      ? {}
+      : {
+          'parents.userIds': userId,
+        };
+
+    const group = await mongodb
+      .collection('groups')
+      .aggregate([
+        {
+          $match: { _id: groupId },
+        },
+        {
+          $lookup: {
+            from: 'groups',
+            localField: 'genealogy',
+            foreignField: '_id',
+            as: 'parents',
+          },
+        },
+        {
+          $lookup: {
+            from: 'groups',
+            localField: '_id',
+            foreignField: 'genealogy',
+            as: 'children',
+          },
+        },
+        {
+          $lookup: {
+            from: 'roles',
+            localField: 'roleIds',
+            foreignField: '_id',
+            as: 'roles',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userIds',
+            foreignField: '_id',
+            as: 'users',
+          },
+        },
+        { $match: matchParent },
+        {
+          $project: {
+            ...projection,
+          },
+        },
+      ])
+      .toArray();
+
+    return group?.[0] as T | undefined;
+  }
+
   const group = await mongodb
     .collection('groups')
     .aggregate([
-      { $match: { _id: groupId, userIds: userId } },
+      {
+        $match: { _id: groupId, userds: userId },
+      },
       {
         $lookup: {
           from: 'groups',
@@ -248,7 +307,9 @@ export async function getGroupDetail<T = Document>({
         },
       },
       {
-        $project: projection,
+        $project: {
+          ...projection,
+        },
       },
     ])
     .toArray();
@@ -469,13 +530,19 @@ export async function getPermissionsOfGroup(groupId: string) {
   return [...setOfPermissions];
 }
 
-export async function verifyUserCanModifyGroup({
+export async function isParentOfGroup({
   userId,
   groupId,
+  getParent,
 }: {
   userId: string;
   groupId: string;
+  getParent?: boolean;
 }) {
+  // because root group don't have genealogy (hierarchy 1)
+  const root = await isRoot(userId);
+  if (!getParent && root) return true;
+
   const group = await mongodb
     .collection('groups')
     .aggregate([
@@ -497,7 +564,15 @@ export async function verifyUserCanModifyGroup({
       },
     ])
     .toArray();
-  return Boolean(!!group.length);
+
+  if (getParent) {
+    console.log(group);
+    const parents = group[0]?.parents;
+
+    if (root && !parents?.length) return groupId;
+    return parents[parents.length - 1]._id;
+  }
+  return Boolean(group.length);
 }
 
 // TODO

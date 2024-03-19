@@ -15,11 +15,12 @@ import {
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader } from '~/hoc/remix';
+import { hoc404, hocAction, hocLoader, res403GroupParent } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
   getGroupDetail,
   getRolesOfGroups,
+  isParentOfGroup,
   searchUser,
   updateGroups,
 } from '~/services/role-base-access-control.server';
@@ -37,41 +38,69 @@ export const action = hocAction(async ({ params }, { formData }) => {
 
     return redirect(`/settings/groups/${params.id}`);
   } catch (err: any) {
-    console.log(err);
     return json({ err });
   }
 }, PERMISSIONS.WRITE_GROUP);
 
+interface LoaderData {
+  group: {
+    _id: string;
+    roles: Array<{
+      _id: string;
+      name: string;
+      description: string;
+    }>;
+    users: Array<{
+      _id: string;
+      email: string;
+      username: string;
+    }>;
+    children: Array<{
+      _id: string;
+      name?: string;
+      description?: string;
+    }>;
+    name: string;
+    description: string;
+  };
+  isParent: boolean;
+}
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const roles = await getRolesOfGroups(params.id || '');
+    const groupId = params.id || '';
 
     const url = new URL(request.url);
     const searchText = url.searchParams.get('users') || '';
     const users = await searchUser(searchText);
     const userId = await getUserId({ request });
 
-    const group = await getGroupDetail({
-      projection: {
-        roles: 1,
-        users: 1,
-        'children.name': 1,
-        'children.description': 1,
-        parent: 1,
-        hierarchy: 1,
-        name: 1,
-        description: 1,
-      },
+    const isParent = await isParentOfGroup({
       userId,
-      groupId: params.id,
+      groupId,
     });
-
-    if (!group) {
-      throw new Response(null, {
-        status: 404,
-        statusText: 'Not Found',
-      });
+    if (!isParent) {
+      throw new Response(null, res403GroupParent);
     }
+
+    const group = await hoc404(async () =>
+      getGroupDetail<LoaderData>({
+        projection: {
+          roles: 1,
+          users: 1,
+          children: 1,
+          parent: 1,
+          hierarchy: 1,
+          name: 1,
+          description: 1,
+          parents: 1,
+        },
+        userId,
+        groupId,
+        isParent,
+      }),
+    );
+
     return json({ group, roles, users });
   },
   PERMISSIONS.WRITE_GROUP,
@@ -95,11 +124,11 @@ export default function Screen() {
     defaultValues: {
       name: group.name,
       description: group.description,
-      userIds: group.users.map(user => ({
+      userIds: group.users?.map((user: any) => ({
         value: user._id,
         label: user.username,
       })),
-      roleIds: group.roles.map(role => ({
+      roleIds: group.roles?.map((role: any) => ({
         value: role._id,
         label: role.name,
       })),
@@ -115,11 +144,11 @@ export default function Screen() {
     formData.append('description', data.description);
     formData.append(
       'userIds',
-      JSON.stringify(data.userIds.map(user => user.value)),
+      JSON.stringify(data.userIds.map((user: any) => user.value)),
     );
     formData.append(
       'roleIds',
-      JSON.stringify(data.roleIds.map(role => role.value)),
+      JSON.stringify(data.roleIds.map((role: any) => role.value)),
     );
 
     submit(formData, { method: 'post' });
@@ -172,7 +201,7 @@ export default function Screen() {
                       defaultSearchValue={searchParams.get('users') || ''}
                       searchRemix={{ searchKey: 'users', setSearchParams }}
                       isDisplayAllOptions
-                      options={users.map(user => ({
+                      options={users.map((user: any) => ({
                         value: user._id,
                         label: user.username,
                       }))}
@@ -194,7 +223,7 @@ export default function Screen() {
                   render={({ field: { onChange, value } }) => (
                     <MultiSelect
                       isDisplayAllOptions
-                      options={roles.map(role => ({
+                      options={roles.map((role: any) => ({
                         value: role._id,
                         label: role.name,
                       }))}

@@ -16,10 +16,12 @@ import _ from 'lodash';
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader } from '~/hoc/remix';
+import { hocAction, hocLoader, res403GroupParent } from '~/hoc/remix';
+import { getUserId } from '~/services/helpers.server';
 import {
   createRole,
   getGroupPermissions,
+  isParentOfGroup,
 } from '~/services/role-base-access-control.server';
 import { groupPermissionsByModule } from '~/utils/helpers';
 
@@ -43,14 +45,28 @@ export const action = hocAction(
   PERMISSIONS.WRITE_ROLE,
 );
 
-export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
-  const permissions = await getGroupPermissions(params.id || '');
+export const loader = hocLoader(
+  async ({ params, request }: LoaderFunctionArgs) => {
+    const groupId = params.id || '';
+    const userId = await getUserId({ request });
+    const isParent = await isParentOfGroup({
+      userId,
+      groupId,
+      getParent: true,
+    });
+    if (!isParent) {
+      throw new Response(null, res403GroupParent);
+    }
 
-  return json({
-    permissions,
-    permissionsGrouped: groupPermissionsByModule(permissions),
-  });
-}, PERMISSIONS.WRITE_ROLE);
+    const permissions = await getGroupPermissions(isParent);
+
+    return json({
+      permissions,
+      permissionsGrouped: groupPermissionsByModule(permissions),
+    });
+  },
+  PERMISSIONS.WRITE_ROLE,
+);
 
 export default function RolesDetail() {
   const loaderData = useLoaderData<any>();

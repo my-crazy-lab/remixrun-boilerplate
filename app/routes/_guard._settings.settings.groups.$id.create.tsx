@@ -20,6 +20,7 @@ import {
   getRolesOfGroups,
   searchUser,
 } from '~/services/role-base-access-control.server';
+
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
     const { name, description, userIds, roleIds } = formData;
@@ -33,7 +34,6 @@ export const action = hocAction(async ({ params }, { formData }) => {
 
     return redirect(`/settings/groups/${params.id}`);
   } catch (err: any) {
-    console.log(err);
     return json({ err });
   }
 }, PERMISSIONS.WRITE_GROUP);
@@ -135,7 +135,7 @@ export default function Screen() {
                     defaultSearchValue={searchParams.get('users') || ''}
                     searchRemix={{ searchKey: 'users', setSearchParams }}
                     isDisplayAllOptions
-                    options={loaderData.users.map(user => ({
+                    options={loaderData.users.map((user: any) => ({
                       value: user._id,
                       label: user.username,
                     }))}
@@ -156,7 +156,7 @@ export default function Screen() {
                 render={({ field: { onChange, value } }) => (
                   <MultiSelect
                     isDisplayAllOptions
-                    options={loaderData.roles.map(role => ({
+                    options={loaderData.roles.map((role: any) => ({
                       value: role._id,
                       label: role.name,
                     }))}

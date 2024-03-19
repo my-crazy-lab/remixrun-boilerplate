@@ -19,6 +19,7 @@ import {
   ScrollRestoration,
   useLoaderData,
   useNavigate,
+  useRouteError,
 } from '@remix-run/react';
 import { useChangeLanguage } from 'remix-i18next/react';
 import i18next from '~/i18next.server';
@@ -59,6 +60,9 @@ export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
   const navigate = useNavigate();
+  const routerError = useRouteError();
+
+  console.log(routerError);
 
   return (
     <html lang="en">
