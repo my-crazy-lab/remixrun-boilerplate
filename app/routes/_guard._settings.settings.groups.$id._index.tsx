@@ -95,17 +95,12 @@ export default function Screen() {
           </Button>
           {loaderData.group?.name}
         </div>
-
-        <Link to={`/settings/groups/${loaderData.group._id}/edit`}>
-          <Button variant="outline">Edit</Button>
-        </Link>
       </div>
       <p>{loaderData.group?.description}</p>
       <div>
         <div className="flex justify-between py-4">
           <h3 className="font-semibold uppercase">Children groups</h3>
-          {globalData.permissions?.includes(PERMISSIONS.WRITE_GROUP) &&
-          loaderData.isParent ? (
+          {globalData.permissions?.includes(PERMISSIONS.WRITE_GROUP) ? (
             <Link to={`/settings/groups/${params.id}/create`}>
               <Button>Create</Button>
             </Link>
@@ -130,11 +125,12 @@ export default function Screen() {
                           </DropdownMenuTrigger>
                           {globalData.permissions?.includes(
                             PERMISSIONS.WRITE_GROUP,
-                          ) && loaderData.isParent ? (
+                          ) ? (
                             <DropdownMenuContent
                               align="start"
                               className="w-[160px]">
-                              <Link to={`/settings/groups/${child._id}/edit`}>
+                              <Link
+                                to={`/settings/groups/${params.id}/edit/${child._id}`}>
                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                               </Link>
                               <DropdownMenuSeparator />
@@ -157,8 +153,7 @@ export default function Screen() {
             <h3 className="font-semibold uppercase py-4">
               set roles and permissions
             </h3>
-            {globalData.permissions?.includes(PERMISSIONS.WRITE_ROLE) &&
-            loaderData.isParent ? (
+            {globalData.permissions?.includes(PERMISSIONS.WRITE_ROLE) ? (
               <Link to={`/settings/groups/${params.id}/roles/create`}>
                 <Button>Create roles</Button>
               </Link>
@@ -181,8 +176,9 @@ export default function Screen() {
                         <span className="sr-only">Open menu</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    {globalData.permissions?.includes(PERMISSIONS.WRITE_ROLE) &&
-                    loaderData.isParent ? (
+                    {globalData.permissions?.includes(
+                      PERMISSIONS.WRITE_ROLE,
+                    ) ? (
                       <DropdownMenuContent align="end" className="w-[160px]">
                         <Link
                           to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>

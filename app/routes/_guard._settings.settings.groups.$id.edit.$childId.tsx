@@ -65,10 +65,14 @@ interface LoaderData {
   };
   isParent: boolean;
 }
+
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
-    const roles = await getRolesOfGroups(params.id || '');
     const groupId = params.id || '';
+    const childId = params.childId || '';
+
+    // roles must be get from parent
+    const roles = await getRolesOfGroups(groupId);
 
     const url = new URL(request.url);
     const searchText = url.searchParams.get('users') || '';
@@ -77,7 +81,7 @@ export const loader = hocLoader(
 
     const isParent = await isParentOfGroup({
       userId,
-      groupId,
+      groupId: childId,
     });
     if (!isParent) {
       throw new Response(null, res403GroupParent);
@@ -96,7 +100,7 @@ export const loader = hocLoader(
           parents: 1,
         },
         userId,
-        groupId,
+        groupId: childId,
         isParent,
       }),
     );
