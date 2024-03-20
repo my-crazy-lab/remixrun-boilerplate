@@ -57,9 +57,12 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     groupId,
   });
 
-  // accept parent and user with permission Read
+  // accept parent and user(in group) with permission Read
   const group = await hoc404(async () =>
     getGroupDetail<LoaderData>({
+      userId,
+      groupId,
+      isParent,
       projection: {
         roles: 1,
         users: 1,
@@ -70,9 +73,6 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
         description: 1,
         parents: 1,
       },
-      userId,
-      groupId,
-      isParent,
     }),
   );
   return json({ group, isParent });
@@ -86,7 +86,6 @@ export default function Screen() {
   const navigate = useNavigate();
   const goBack = useCallback(() => navigate(-1), [navigate]);
 
-  console.log(globalData, loaderData);
   return (
     <>
       <div className="flex justify-between items-center text-xl px-0 pb-6">

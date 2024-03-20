@@ -141,7 +141,7 @@ export async function updateGroups({
   );
 }
 
-export async function getRoleDetail({ roleId, userId, groupdId }: any) {
+export async function getRoleDetail(roleId: string) {
   const roles = await mongodb
     .collection('roles')
     .aggregate([
@@ -363,7 +363,23 @@ export async function getGroupPermissions(groupId: string) {
 
     return allPermissions;
   }
-  return data;
+  return mongodb
+    .collection('permissions')
+    .find({ _id: { $in: permissions } })
+    .toArray();
+}
+
+export async function verifyUserInGroup({
+  userId,
+  groupId,
+}: {
+  userId: string;
+  groupId: string;
+}) {
+  const group = await mongodb
+    .collection('groups')
+    .findOne({ _id: groupId, userIds: userId });
+  return Boolean(group);
 }
 
 export async function getGroupsOfUser<T = Document>({
@@ -533,15 +549,13 @@ export async function getPermissionsOfGroup(groupId: string) {
 export async function isParentOfGroup({
   userId,
   groupId,
-  getParent,
 }: {
   userId: string;
   groupId: string;
-  getParent?: boolean;
 }) {
   // because root group don't have genealogy (hierarchy 1)
   const root = await isRoot(userId);
-  if (!getParent && root) return true;
+  if (root) return true;
 
   const group = await mongodb
     .collection('groups')
@@ -565,13 +579,6 @@ export async function isParentOfGroup({
     ])
     .toArray();
 
-  if (getParent) {
-    console.log(group);
-    const parents = group[0]?.parents;
-
-    if (root && !parents?.length) return groupId;
-    return parents[parents.length - 1]._id;
-  }
   return Boolean(group.length);
 }
 

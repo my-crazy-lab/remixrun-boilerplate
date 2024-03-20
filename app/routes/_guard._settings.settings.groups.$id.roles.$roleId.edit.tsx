@@ -18,28 +18,54 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { redirect } from '@remix-run/node';
 import _ from 'lodash';
 import { Slash } from 'lucide-react';
 import { PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader } from '~/hoc/remix';
+import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { useForm, Controller } from 'react-hook-form';
 import {
+  getGroupPermissions,
   getRoleDetail,
+  isParentOfGroup,
   updateRole,
+  verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import ROUTE_LINK from '~/constants/routeURL';
+import { getUserId } from '~/services/helpers.server';
+import { groupPermissionsByModule } from '~/utils/helpers';
 
-export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
-  if (!params.roleId) return json({ role: {} });
-  const role = await getRoleDetail(params.roleId);
+export const loader = hocLoader(
+  async ({ params, request }: LoaderFunctionArgs) => {
+    const groupId = params.id || '';
+    const userId = await getUserId({ request });
 
-  return json({ role });
-}, PERMISSIONS.WRITE_ROLE);
+    const isParent = await isParentOfGroup({
+      userId,
+      groupId,
+    });
+    const userInGroup = await verifyUserInGroup({ userId, groupId });
+    if (!isParent && !userInGroup) {
+      throw new Response(null, res403);
+    }
+
+    if (!params.roleId) return json({ role: {} });
+    const role = await getRoleDetail(params.roleId);
+
+    const permissions = await getGroupPermissions(groupId);
+    return json({
+      role,
+      groupPermissions: {
+        permissions,
+        actionPermissions: groupPermissionsByModule(permissions),
+      },
+    });
+  },
+  PERMISSIONS.WRITE_ROLE,
+);
 
 export interface IFormData {
   formData: {
@@ -68,8 +94,10 @@ export const action = hocAction(
   PERMISSIONS.WRITE_ROLE,
 );
 
-export default function EditRole() {
-  const { role } = useLoaderData<typeof loader>();
+export default function Screen() {
+  const { role, groupPermissions } = useLoaderData<typeof loader>();
+  console.log(role, groupPermissions);
+
   const submit = useSubmit();
 
   const getDefaultValues = () => {

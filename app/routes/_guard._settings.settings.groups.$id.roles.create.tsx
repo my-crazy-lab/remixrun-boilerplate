@@ -16,12 +16,13 @@ import _ from 'lodash';
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader, res403GroupParent } from '~/hoc/remix';
+import { hocAction, hocLoader, res403, res403GroupParent } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
   createRole,
   getGroupPermissions,
   isParentOfGroup,
+  verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 import { groupPermissionsByModule } from '~/utils/helpers';
 
@@ -49,16 +50,17 @@ export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
     const userId = await getUserId({ request });
+
     const isParent = await isParentOfGroup({
       userId,
       groupId,
-      getParent: true,
     });
-    if (!isParent) {
-      throw new Response(null, res403GroupParent);
+    const userInGroup = await verifyUserInGroup({ userId, groupId });
+    if (!isParent && !userInGroup) {
+      throw new Response(null, res403);
     }
 
-    const permissions = await getGroupPermissions(isParent);
+    const permissions = await getGroupPermissions(groupId);
 
     return json({
       permissions,
@@ -68,7 +70,7 @@ export const loader = hocLoader(
   PERMISSIONS.WRITE_ROLE,
 );
 
-export default function RolesDetail() {
+export default function Screen() {
   const loaderData = useLoaderData<any>();
   const navigate = useNavigate();
   const goBack = () => navigate(-1);

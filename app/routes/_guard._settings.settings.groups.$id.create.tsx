@@ -14,11 +14,14 @@ import {
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader } from '~/hoc/remix';
+import { hocAction, hocLoader, res403 } from '~/hoc/remix';
+import { getUserId } from '~/services/helpers.server';
 import {
   createGroup,
   getRolesOfGroups,
+  isParentOfGroup,
   searchUser,
+  verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 
 export const action = hocAction(async ({ params }, { formData }) => {
@@ -40,6 +43,16 @@ export const action = hocAction(async ({ params }, { formData }) => {
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
+    const groupId = params.id || '';
+    const userId = await getUserId({ request });
+    const isParent = await isParentOfGroup({
+      userId,
+      groupId,
+    });
+    const userInGroup = await verifyUserInGroup({ userId, groupId });
+    if (!isParent && !userInGroup) {
+      throw new Response(null, res403);
+    }
     const roles = await getRolesOfGroups(params.id || '');
 
     const url = new URL(request.url);

@@ -13,15 +13,35 @@ import { useLoaderData, useNavigate } from '@remix-run/react';
 import _ from 'lodash';
 import { MoveLeft } from 'lucide-react';
 import { PERMISSIONS } from '~/constants/common';
-import { hocLoader } from '~/hoc/remix';
-import { getRoleDetail } from '~/services/role-base-access-control.server';
+import { hocLoader, res403 } from '~/hoc/remix';
+import { getUserId } from '~/services/helpers.server';
+import {
+  getRoleDetail,
+  isParentOfGroup,
+  verifyUserInGroup,
+} from '~/services/role-base-access-control.server';
 
-export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
-  if (!params.roleId) return json({ role: {} });
-  const role = await getRoleDetail(params.roleId);
+export const loader = hocLoader(
+  async ({ params, request }: LoaderFunctionArgs) => {
+    const groupId = params.id || '';
+    const userId = await getUserId({ request });
 
-  return json({ role });
-}, PERMISSIONS.READ_ROLE);
+    const isParent = await isParentOfGroup({
+      userId,
+      groupId,
+    });
+    const userInGroup = await verifyUserInGroup({ userId, groupId });
+    if (!isParent && !userInGroup) {
+      throw new Response(null, res403);
+    }
+
+    if (!params.roleId) return json({ role: {} });
+    const role = await getRoleDetail(params.roleId);
+
+    return json({ role });
+  },
+  PERMISSIONS.READ_ROLE,
+);
 
 export default function RolesDetail() {
   const loaderData = useLoaderData<any>();
@@ -35,11 +55,9 @@ export default function RolesDetail() {
           <Button onClick={goBack}>
             <MoveLeft className="h-5 w-5" />{' '}
           </Button>
-          {loaderData.role.actionPermissions[0].actions[0].name}
+          {loaderData.role.name}
         </div>
-        <p className="text-base mt-2">
-          {loaderData.role.actionPermissions[0].actions[0].description}
-        </p>
+        <p className="text-base mt-2">{loaderData.role.description}</p>
       </div>
       <ScrollArea>
         {_.map(loaderData.role.actionPermissions, (actionPermission: any) => (
