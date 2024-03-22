@@ -94,13 +94,3 @@ export const mapReviver: Parameters<JSON['parse']>[1] = (
   }
   return value;
 };
-
-export function convertRolesToPermissions(roles: any) {
-  const setOfPermissions = new Set(
-    roles.reduce(
-      (acc: any, role: any) => [...acc, ...(role?.permissions || [])],
-      [],
-    ),
-  );
-  return [...setOfPermissions] as Array<string>;
-}

@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 
 import { mongodb } from '~/utils/db.server';
 import { dotenv } from './dotenv.server';
-import { getFutureTimeFromToday, momentTz } from '~/utils/helpers.server';
+import { getFutureTimeFromToday, momentTz } from '~/utils/common';
 import { sendEmail } from './mail.server';
 import { v4 as uuidv4 } from 'uuid';
 import { json } from '@remix-run/node';
