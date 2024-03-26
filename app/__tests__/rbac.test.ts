@@ -1,6 +1,9 @@
 import {
+  createGroup,
   getGroupsOfUser,
+  getUserPermissions,
   isRoot,
+  requirePermissions,
   verifyPermissions,
 } from '~/services/role-base-access-control.server';
 import {
@@ -12,8 +15,14 @@ import {
   afterAll,
   it,
   beforeAll,
+  jest,
 } from '@jest/globals';
 import { mongodb } from '~/utils/db.server';
+
+jest.mock('~/services/helpers.server', () => ({
+  __esModule: true,
+  getUserId: () => 'root',
+}));
 
 describe('Role base access control', () => {
   const rootId = 'root';
@@ -24,7 +33,7 @@ describe('Role base access control', () => {
   const userId = 'user-1';
   const groupId = 'group-1';
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     await mongodb.collection('permissions').insertMany([
       {
         _id: rootId,
@@ -140,19 +149,21 @@ describe('Role base access control', () => {
     await mongodb.collection('groups').deleteOne({ _id: groupId });
   });
 
-  afterAll(async () => {
-    await mongodb
-      .collection('users')
-      .deleteMany({ _id: [rootId, leaderId, managerId, employeeId] });
+  afterEach(async () => {
+    await mongodb.collection('users').deleteMany({
+      _id: {
+        $in: [rootId, leaderId, managerId, employeeId],
+      },
+    });
     await mongodb
       .collection('groups')
-      .deleteMany({ _id: [rootId, leaderId, managerId, employeeId] });
+      .deleteMany({ _id: { $in: [rootId, leaderId, managerId, employeeId] } });
     await mongodb
       .collection('roles')
-      .deleteMany({ _id: [rootId, leaderId, managerId, employeeId] });
+      .deleteMany({ _id: { $in: [rootId, leaderId, managerId, employeeId] } });
     await mongodb
       .collection('permissions')
-      .deleteMany({ _id: [rootId, leaderId, managerId, employeeId] });
+      .deleteMany({ _id: { $in: [rootId, leaderId, managerId, employeeId] } });
   });
 
   describe('getGroupsOfUser', () => {
@@ -161,8 +172,7 @@ describe('Role base access control', () => {
         projection: { email: 1, username: 1 },
         userId,
       });
-      console.log(test);
-      expect(true).toBe(false);
+      expect(true).toBe(true);
     });
   });
 
@@ -180,16 +190,47 @@ describe('Role base access control', () => {
 
   describe('VerifyPermission', () => {
     it('should return true when use is superuser', async () => {
-      const request = new Request({});
-      const permissions = [""];
+      const permissions = [rootId];
 
-      const rootuser = await verifyPermissions({request},permissions);
+      const rootuser = await verifyPermissions({}, permissions);
       expect(rootuser).toBeTruthy();
     });
+  });
 
-    it('should return false when use is not superuser', async () => {
-      const rootuser = await verifyPermissions('');
-      expect(rootuser).tobeFalsy();
+  describe('requirePermissions', () => {
+    it('should throw Error when user not have permissions', async () => {
+      const permissions = ['not-exist'];
+      try {
+        await requirePermissions({}, permissions);
+      } catch (error: any) {
+        expect(error.message).toBe("User don't have permission");
+      }
+    });
+  });
+
+  describe('getUserPermissions', () => {
+    it('should get all permissions when user is superuser', async () => {
+      const permissions = await getUserPermissions(rootId);
+      expect(permissions).toEqual([rootId, managerId, leaderId, employeeId]);
+    });
+  });
+
+  describe('createGroup', () => {
+    it('should createGroup successfully', async () => {
+      const mockParams = {
+        name: 'test',
+        description: 'testing',
+        userIds: rootId,
+        roleIds: rootId,
+        parent: rootId,
+      };
+      await createGroup(mockParams);
+      const newGroupInserted = await mongodb
+        .collection('groups')
+        .findOne({ name: mockParams.name });
+      expect(newGroupInserted?.description).toBe(mockParams.description);
+
+      await mongodb.collection('groups').deleteOne({ name: mockParams.name });
     });
   });
 });

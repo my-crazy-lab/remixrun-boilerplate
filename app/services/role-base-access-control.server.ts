@@ -2,7 +2,7 @@ import { PERMISSIONS } from '~/constants/common';
 import type { Document } from 'mongodb';
 import { mongodb } from '~/utils/db.server';
 import { newRecordCommonField, statusOriginal } from './constants.server';
-import { getUserId } from './helpers.server';
+import { getUserId } from '~/services/helpers.server';
 import {
   momentTz,
   convertRolesToPermissions,
@@ -25,10 +25,9 @@ export async function verifyPermissions(
     .toArray();
 
   const groupFound = await mongodb.collection('groups').findOne({
-    users: userId,
-    roles: { $in: roles.map(role => role._id) },
+    userIds: userId,
+    roleIds: { $in: roles.map(role => role._id) },
   });
-
   if (groupFound) {
     return true;
   }
@@ -36,12 +35,11 @@ export async function verifyPermissions(
   return false;
 }
 
-export function requirePermissions(
+export async function requirePermissions(
   { request }: { request: Request },
   permissions: Array<string>,
 ) {
-  const isAccepted = verifyPermissions({ request }, permissions);
-
+  const isAccepted = await verifyPermissions({ request }, permissions);
   if (!isAccepted) {
     throw new Error("User don't have permission");
   }
