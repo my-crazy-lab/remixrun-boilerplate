@@ -1,9 +1,14 @@
 import {
   createGroup,
+  getGroupDetail,
   getGroupsOfUser,
+  getRoleDetail,
+  getRolesOfGroups,
   getUserPermissions,
   isRoot,
   requirePermissions,
+  searchUser,
+  updateGroups,
   verifyPermissions,
 } from '~/services/role-base-access-control.server';
 import {
@@ -33,7 +38,12 @@ describe('Role base access control', () => {
   const userId = 'user-1';
   const groupId = 'group-1';
 
-  beforeEach(async () => {
+  const dataRootRole ={
+        name: 'Root role',
+        description: 'Root description',
+  } 
+
+  beforeAll(async () => {
     await mongodb.collection('permissions').insertMany([
       {
         _id: rootId,
@@ -88,8 +98,7 @@ describe('Role base access control', () => {
       {
         _id: rootId,
         permissions: [rootId],
-        name: 'Root role',
-        description: 'Root description',
+        ...dataRootRole,
       },
       {
         _id: managerId,
@@ -149,7 +158,7 @@ describe('Role base access control', () => {
     await mongodb.collection('groups').deleteOne({ _id: groupId });
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await mongodb.collection('users').deleteMany({
       _id: {
         $in: [rootId, leaderId, managerId, employeeId],
@@ -231,6 +240,74 @@ describe('Role base access control', () => {
       expect(newGroupInserted?.description).toBe(mockParams.description);
 
       await mongodb.collection('groups').deleteOne({ name: mockParams.name });
+    });
+  });
+
+  describe('updateGroup', () => {
+    const mockGroupId = 'group-test';
+    const mockData = {
+      name: 'Test',
+      description: 'Test',
+      userIds: ['1'],
+      roleIds: ['1'],
+    };
+
+    beforeEach(async () => {
+      await mongodb.collection('groups').insertOne({
+        _id: mockGroupId,
+        ...mockData,
+      });
+    });
+
+    afterEach(async () => {
+      await mongodb.collection('groups').deleteOne({ _id: mockGroupId });
+    });
+
+    it('should update group successfully', async () => {
+      const mockParams = {
+        groupId: mockGroupId,
+        ...mockData,
+        name: 'updated',
+        description: 'updated',
+      };
+      await updateGroups(mockParams);
+
+      const group = await mongodb
+        .collection('groups')
+        .findOne({ _id: mockGroupId });
+      expect(group?.name).toEqual('updated');
+    });
+  });
+
+  describe('getRoleDetail', () => {
+    it('should return detail of role correctly', async () => {
+      const role = await getRoleDetail(rootId);
+      expect(role?.name).toEqual(dataRootRole.name);
+    });
+  });
+
+  describe('getRolesOfGroup', () => {
+    it('should return detail list roles of group correctly', async () => {
+      const roles = await getRolesOfGroups(rootId);
+      expect(roles.length).toEqual(1);
+    });
+  });
+
+  describe('searchUser', () => {
+    it('should search user correctly by text', async () => {
+      const users= await searchUser("root");
+      expect(users.length).toEqual(1);
+    });
+  });
+
+  describe.skip('getGroupDetail', () => {
+    it('should search user correctly by text', async () => {
+      const group= await getGroupDetail({
+        userId:rootId,
+        groupId:rootId,
+        projection: {_id:1}
+      });
+      expect(group?._id).toEqual(rootId);
     });
   });
 });
