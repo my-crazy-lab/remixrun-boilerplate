@@ -23,6 +23,7 @@ import {
   jest,
 } from '@jest/globals';
 import { mongodb } from '~/utils/db.server';
+import { groupPermissionsByModule } from '~/utils/common';
 
 jest.mock('~/services/helpers.server', () => ({
   __esModule: true,
