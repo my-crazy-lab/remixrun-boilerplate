@@ -1,12 +1,12 @@
 import Typography from '@/components/btaskee/Typography';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import TabGroupIcon from '@/images/tab-group.svg';
+import UsersIcon from '@/images/user-group.svg';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
-import { Boxes, UserRoundCogIcon } from 'lucide-react';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
-
 interface LoaderData {
   groups: Array<{
     _id: string;
@@ -54,17 +54,25 @@ export default function Screen() {
                   <Typography variant='p' affects='muted'>{group.description}</Typography>
                 </CardHeader>
                 <CardContent className='flex flex-row gap-4'>
-                  <div className='flex'>
-                    <Boxes className='text-primary h-6 w-6' />
+                  <div className='flex items-center gap-2'>
+                    <div className='bg-primary-50 p-3 rounded-md'>
+                      <img src={TabGroupIcon} alt='tab-group-icon' />
+                    </div>
+
                     <div>
                       <Typography variant='p'>Children Group</Typography>
-                      <Typography className='text-primary' variant='h1'>2</Typography>
+                      <Typography className='text-primary' variant='h3'>2</Typography>
                     </div>
 
                   </div>
-                  <div>
-                    <UserRoundCogIcon className='text-secondary h-6 w-6' />
-                    <Typography variant='p'>Users</Typography>
+                  <div className='flex items-center gap-2'>
+                    <div className='bg-secondary p-3 rounded-md'>
+                      <img src={UsersIcon} alt='user-group-icon' />
+                    </div>
+                    <div>
+                      <Typography variant='p'>Users</Typography>
+                      <Typography className='text-secondary-foreground' variant='h3'>2</Typography>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
