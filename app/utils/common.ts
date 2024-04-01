@@ -5,9 +5,9 @@ moment.locale('en');
 
 export const momentTz = moment;
 
-export const getFutureTime = (date: Date, ...args) =>
+export const getFutureTime = (date: Date, ...args: any) =>
   momentTz(date).add(...args);
-export const getFutureTimeFromToday = (...args) => momentTz().add(...args);
+export const getFutureTimeFromToday = (...args: any) => momentTz().add(...args);
 
 export function groupPermissionsByModule(
   permissions: any,

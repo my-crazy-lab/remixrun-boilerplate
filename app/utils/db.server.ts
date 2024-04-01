@@ -1,4 +1,5 @@
-import { MongoClient, BSON, Db } from 'mongodb';
+import { MongoClient, BSON } from 'mongodb';
+import type { Db } from 'mongodb';
 import { dotenv } from '~/services/dotenv.server';
 
 let connectionString = dotenv.URI_APP;
@@ -19,19 +20,15 @@ else
 
 let mongodb: Db;
 
-declare global {
-  var __db: MongoClient | undefined;
-}
-
 if (process.env.NODE_ENV === 'production') {
   mongodb = new MongoClient(connectionString).db(process.env.DB_APP);
 } else {
-  if (!global.__db) {
+  if (!global?.__db) {
     global.__db = new MongoClient(connectionString);
   }
   mongodb = global.__db.db(process.env.DB_APP);
 }
 
-let ObjectId = BSON.ObjectId;
+const ObjectId = BSON.ObjectId;
 
 export { mongodb, ObjectId };

@@ -1,4 +1,5 @@
-import { FindOptions, ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
+import type { FindOptions } from 'mongodb';
 import { momentTz } from '~/utils/common';
 
 export const statusOriginal = {

@@ -21,21 +21,7 @@ import {
   verifyPermissions,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import * as constantService from '~/services/constants.server';
-import React from 'react';
-import {
-  describe,
-  expect,
-  test,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  beforeAll,
-  jest,
-} from '@jest/globals';
 import { mongodb } from '~/utils/db.server';
-import { groupPermissionsByModule } from '~/utils/common';
 
 const mockRecordCommonField = {
   createdAt: new Date('2024-03-24T00:00:00.000Z'),
@@ -163,22 +149,6 @@ describe('Role base access control', () => {
     await mongodb
       .collection('groups')
       .insertOne({ _id: groupId, userIds: [userId] });
-    /*
-    await mongodb.collection('permissions').insertMany([
-      {
-        _id: 'write/marketing-report',
-        name: 'marketing report: export',
-        description: 'Marketing report: write',
-        module: 'marketing',
-      },
-      {
-        _id: 'read/marketing-report',
-        name: 'marketing report: read',
-        description: 'Marketing report: read',
-        module: 'marketing',
-      },
-    ]);
-    */
   });
 
   afterEach(async () => {

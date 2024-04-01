@@ -1,6 +1,6 @@
 import { defaultPageSize } from '@/components/ui/table-data/data-table-pagination';
-import { PaginationState } from '@tanstack/react-table';
-import { NonEmptyArray } from '~/types';
+import type { PaginationState } from '@tanstack/react-table';
+import type { NonEmptyArray } from '~/types';
 
 export function findClosest({
   arr,
