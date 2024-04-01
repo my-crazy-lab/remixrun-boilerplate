@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toBase64 } from "@/lib/utils";
-import { PencilIcon, User2Icon } from "lucide-react";
+import { UploadCloud, User2Icon } from "lucide-react";
 import React from "react";
 
 type AvatarUploadProps = {
@@ -27,7 +27,7 @@ export function AvatarUpload({
   }
 
   return (
-    <div className="relative w-40 h-40">
+    <div className="w-40 h-40 text-center flex flex-col justify-center mt-10">
       <Avatar className="w-full h-full">
         <AvatarImage src={value} className="object-cover" />
         <AvatarFallback className="bg-secondary">
@@ -35,15 +35,15 @@ export function AvatarUpload({
         </AvatarFallback>
       </Avatar>
       <Button
-        variant="ghost"
-        size="icon"
-        className="rounded-full p-1 bg-secondary-foreground/90 hover:bg-secondary-foreground absolute bottom-0 right-0"
+        variant="default"
+        className="p-2 gap-2 mt-4"
         onClick={e => {
           e.preventDefault()
           inputRef.current?.click()
         }}
       >
-        <PencilIcon className="w-4 h-4 text-black" />
+        <UploadCloud className="w-4 h-4" />
+        Upload
       </Button>
       <Input
         ref={inputRef}

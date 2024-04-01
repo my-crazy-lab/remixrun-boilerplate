@@ -1,29 +1,19 @@
 import ErrorMessageBase from '@/components/btaskee/MessageBase';
+import Typography from '@/components/btaskee/Typography';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
-import { Slash } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
 import ROUTE_LINK from '~/constants/routeURL';
@@ -155,30 +145,8 @@ export default function Screen() {
 
   return (
     <>
-      <div className="text-2xl px-0 pb-6 flex justify-between items-center">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={ROUTE_LINK.GROUP_SETTING}>
-                Groups
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={ROUTE_LINK.GROUP_SETTING}>
-                Group root
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <Slash />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-lg">Edit role</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="flex justify-between items-center bg-secondary p-4 rounded-md">
+        <Typography variant='h3'>Edit role</Typography>
         <div className="gap-4 flex mt-4">
           <Button
             onClick={handleSubmit(onSubmit)}
@@ -189,7 +157,7 @@ export default function Screen() {
           </Button>
         </div>
       </div>
-      <form>
+      <form className='mt-2'>
         <p>Name</p>
         <Input
           {...register('name', { required: 'Please enter name role' })}
@@ -203,57 +171,57 @@ export default function Screen() {
             required: 'Please enter name description',
           })}
           className="mt-2"
-          placeholder="Enter description..."
+          placeholder="Enter description"
         />
         <ErrorMessageBase name="description" errors={errors} />
-        <Separator className="my-4" />
-        <p className="mt-2">Permissions</p>
-        <ScrollArea className="mt-4 rounded-md border p-4">
-          {_.map(role?.actionPermissions, actionPermission => (
-            <Accordion
-              key={actionPermission.module}
-              defaultValue={role?.actionPermissions[0].module}
-              type="single"
-              collapsible>
-              <AccordionItem value={actionPermission.module}>
-                <AccordionTrigger>
-                  {actionPermission?.module?.toUpperCase()} features
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {_.map(actionPermission.actions, action => (
-                      <Controller
-                        key={action._id}
-                        control={control}
-                        name={`permissions.${actionPermission.module}.${action._id}`}
-                        render={({ field: { onChange, value } }) => (
-                          <div key={action._id} className="my-2">
+
+        {_.map(role?.actionPermissions, actionPermission => (
+          <Accordion
+            key={actionPermission.module}
+            defaultValue={role?.actionPermissions[0].module}
+            type="single"
+            collapsible
+            className='mt-4'
+          >
+            <AccordionItem value={actionPermission.module}>
+              <AccordionTrigger>
+                {actionPermission?.module}
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {_.map(actionPermission.actions, action => (
+                    <Controller
+                      key={action._id}
+                      control={control}
+                      name={`permissions.${actionPermission.module}.${action._id}`}
+                      render={({ field: { onChange, value } }) => (
+                        <div key={action._id} className="my-2">
+                          <Label
+                            htmlFor={action._id}
+                            className="block text-base font-medium text-gray-700">
+                            {action.name}
+                          </Label>
+                          <div className="mt-1 flex items-center gap-2">
+                            <Switch
+                              onCheckedChange={onChange}
+                              checked={value}
+                            />
                             <Label
-                              htmlFor={action._id}
-                              className="block text-base font-medium text-gray-700">
-                              {action.name}
+                              className="text-sm text-gray-500"
+                              htmlFor={action._id}>
+                              {action.description}
                             </Label>
-                            <div className="mt-1 flex items-center gap-2">
-                              <Switch
-                                onCheckedChange={onChange}
-                                checked={value}
-                              />
-                              <Label
-                                className="text-sm text-gray-500"
-                                htmlFor={action._id}>
-                                {action.description}
-                              </Label>
-                            </div>
                           </div>
-                        )}
-                      />
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          ))}
-        </ScrollArea>
+                        </div>
+                      )}
+                    />
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        ))}
+        {/* </ScrollArea> */}
       </form>
     </>
   );

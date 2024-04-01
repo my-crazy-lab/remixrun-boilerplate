@@ -2,12 +2,11 @@ import { AvatarUpload } from '@/components/btaskee/AvatarUpload';
 import Typography from '@/components/btaskee/Typography';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 
-export default function UserProfile() {
+export default function Screen() {
   const form = useForm();
 
   const dataUser = {
@@ -38,7 +37,7 @@ export default function UserProfile() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col p-4 rounded-lg bg-secondary">
-        <h3 className="text-lg font-medium">Profile</h3>
+        <Typography variant='h3'>Profile</Typography>
         <p className="text-sm text-muted-foreground">
           This is how others will see you on the site.
         </p>
@@ -53,14 +52,14 @@ export default function UserProfile() {
             <Separator />
             <CardContent className='py-4'>
               <div className='flex flex-col gap-5'>
-                <Typography variant='h4' affects='small'>City</Typography>
+                <Typography variant='h4' affects='small'>Email</Typography>
                 <Input defaultValue={dataUser.emails}></Input>
-                <Typography variant='h4' affects='small'>City</Typography>
-                <Input defaultValue={dataUser.emails}></Input>
-                <Typography variant='h4' affects='small'>City</Typography>
-                <Input defaultValue={dataUser.emails}></Input>
-                <Typography variant='h4' affects='small'>City</Typography>
-                <Input defaultValue={dataUser.emails}></Input>
+                <Typography variant='h4' affects='small'>User Name</Typography>
+                <Input defaultValue={dataUser.username}></Input>
+                <Typography variant='h4' affects='small'>Language</Typography>
+                <Input defaultValue={dataUser.profile.language}></Input>
+                <Typography variant='h4' affects='small'>Timezone</Typography>
+                <Input defaultValue={dataUser.profile.timezone}></Input>
               </div>
             </CardContent>
           </Card>
@@ -105,28 +104,17 @@ export default function UserProfile() {
           </Card>
 
         </div>
-        <Card>
+        <Card className='h-1/2'>
           <CardHeader>
-            <CardTitle className='text-lg'>Personal Details</CardTitle>
-            <CardDescription>To change your personal detail, edit and save from here</CardDescription>
+            <CardTitle className='text-lg'>Change Profile</CardTitle>
+            <CardDescription>Change your profile picture from here</CardDescription>
           </CardHeader>
           <Separator />
-          <CardContent>
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <AvatarUpload value={field.value} onChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />            <Typography variant='p' affects='muted'>Allowed JPG or PNG. Max size of 100Kb</Typography>
-          </CardContent>
+          <div className='justify-ceter flex flex-col items-center'>
+            <AvatarUpload />
+            <Typography variant='p' affects='muted' className='pt-4'>Allowed JPG or PNG. Max size of 100Kb.</Typography>
+          </div>
         </Card>
-
       </div>
     </div>
   );

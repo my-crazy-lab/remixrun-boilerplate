@@ -7,7 +7,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
@@ -16,7 +15,7 @@ import _ from 'lodash';
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader, res403, res403GroupParent } from '~/hoc/remix';
+import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
   createRole,
@@ -114,19 +113,28 @@ export default function Screen() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Label className="text-left" htmlFor="name">
-          Role name
-        </Label>
-        <Input
-          placeholder="Role"
-          {...register('name' as const, { required: true })}></Input>
-        <Label className="text-left mt-4" htmlFor="description">
-          Description
-        </Label>
-        <Input
-          placeholder="Description"
-          {...register('description' as const, { required: true })}></Input>
-        <Separator className="my-4" />
+        <div className='grid grid-cols-2 gap-4'>
+          <div>
+            <Label htmlFor="name">
+              Role name
+            </Label>
+            <Input
+              placeholder="Enter role name"
+              className="mt-2"
+              {...register('name' as const, { required: true })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="description">
+              Description
+            </Label>
+            <Input
+              placeholder="Enter description"
+              className="mt-2"
+              {...register('description' as const, { required: true })}
+            />
+          </div>
+        </div>
 
         {_.map(loaderData.permissionsGrouped, (actionPermission: any) => (
           <Accordion type="single" collapsible key={actionPermission._id}>

@@ -26,7 +26,7 @@ export default function Header() {
           <Link
             to="/"
             className="text-sm font-medium text-muted-foreground transition-colors">
-            <img src={banner} alt='btaskee-logo' className='w-44' />
+            <img src={banner} alt='btaskee-logo' className='w-40' />
           </Link>
           <Link
             to="/settings/profile"
@@ -38,7 +38,7 @@ export default function Header() {
           <Input
             type="search"
             placeholder="Search..."
-            className="md:w-[100px] lg:w-[300px]"
+            className="md:w-[100px] lg:w-[270px]"
           />
           <TimezoneSwitcher />
           <LanguageSelector />

@@ -29,7 +29,7 @@ const LanguageSelector = () => {
     <Select
       defaultValue={`${defaultLanguage[0].key}`}
       onValueChange={value => changeLanguage(value)}>
-      <SelectTrigger className="h-10">
+      <SelectTrigger className="h-10 w-[180px]">
         <SelectValue placeholder={`${defaultLanguage[0].name}`} />
       </SelectTrigger>
       <SelectContent side="top">
