@@ -13,7 +13,7 @@ import {
 } from '@remix-run/react';
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
-import { PERMISSIONS } from '~/constants/common';
+import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
@@ -23,6 +23,8 @@ import {
   searchUser,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
+import { type Users } from '~/types';
+import { type GetRolesOfGroupsProjection } from '~/types/bridge';
 
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
@@ -32,14 +34,22 @@ export const action = hocAction(async ({ params }, { formData }) => {
       description,
       userIds: JSON.parse(userIds),
       roleIds: JSON.parse(roleIds),
-      parent: params.id,
+      parent: params.id || '',
     });
 
     return redirect(`/settings/groups/${params.id}`);
-  } catch (err: any) {
-    return json({ err });
+  } catch (error) {
+    if (error instanceof Error) {
+      return json({ error: error.message });
+    }
+    return json({ error: ERROR.UNKNOWN_ERROR });
   }
 }, PERMISSIONS.WRITE_GROUP);
+
+interface LoaderData {
+  roles: Array<GetRolesOfGroupsProjection['roles']>;
+  users: Users[];
+}
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
@@ -64,20 +74,22 @@ export const loader = hocLoader(
   PERMISSIONS.WRITE_GROUP,
 );
 
+interface FormData {
+  name: string;
+  description: string;
+  userIds: Array<{ label: string; value: string }>;
+  roleIds: Array<{ label: string; value: string }>;
+}
+
 export default function Screen() {
   const navigate = useNavigate();
   const goBack = () => navigate(-1);
-  const loaderData = useLoaderData<any>();
   const navigation = useNavigation();
 
+  const loaderData = useLoaderData<LoaderData>();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<any>({
+  const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
       name: '',
       description: '',
@@ -87,18 +99,18 @@ export default function Screen() {
   });
   const submit = useSubmit();
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const formData = new FormData();
 
     formData.append('name', data.name);
     formData.append('description', data.description);
     formData.append(
       'userIds',
-      JSON.stringify(data.userIds.map((user: any) => user.value)),
+      JSON.stringify(data.userIds.map(user => user.value)),
     );
     formData.append(
       'roleIds',
-      JSON.stringify(data.roleIds.map((role: any) => role.value)),
+      JSON.stringify(data.roleIds.map(role => role.value)),
     );
 
     submit(formData, { method: 'post' });
@@ -148,7 +160,7 @@ export default function Screen() {
                     defaultSearchValue={searchParams.get('users') || ''}
                     searchRemix={{ searchKey: 'users', setSearchParams }}
                     isDisplayAllOptions
-                    options={loaderData.users.map((user: any) => ({
+                    options={loaderData.users.map(user => ({
                       value: user._id,
                       label: user.username,
                     }))}
@@ -169,7 +181,7 @@ export default function Screen() {
                 render={({ field: { onChange, value } }) => (
                   <MultiSelect
                     isDisplayAllOptions
-                    options={loaderData.roles.map((role: any) => ({
+                    options={loaderData.roles.map(role => ({
                       value: role._id,
                       label: role.name,
                     }))}

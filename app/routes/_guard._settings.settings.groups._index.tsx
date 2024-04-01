@@ -8,9 +8,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 
@@ -22,7 +22,7 @@ interface LoaderData {
   }>;
 }
 
-// don't need permission Read
+// Don't need permission Read
 // Users added to groups obviously know how many groups they have
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
@@ -37,6 +37,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
+  const { t } = useTranslation(['common', 'settings', 'groups']);
   const loaderData = useLoaderData<LoaderData>();
 
   return (
@@ -44,7 +45,7 @@ export default function Screen() {
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Groups management
+            {t('GROUPS_MANAGEMENT')}
           </h2>
           <p className="text-muted-foreground">
             Here&apos;s a list of your groups!
@@ -52,7 +53,7 @@ export default function Screen() {
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
-        {loaderData.groups.map((group, index: number) => {
+        {loaderData.groups?.map((group, index: number) => {
           return (
             <Link key={index} to={`/settings/groups/${group._id}`}>
               <Card>

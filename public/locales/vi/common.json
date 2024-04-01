@@ -1,4 +1,8 @@
 {
   "CREATE_ACCOUNT": "Hello",
-  "SEND_EMAIL": "Gửi đến Email"
+  "SEND_EMAIL": "Gửi đến Email",
+  "GROUPS_MANAGEMENT": "Groups management",
+  "test": {
+    "GROUPS_MANAGEMENT": "Groups management"
+  }
 }

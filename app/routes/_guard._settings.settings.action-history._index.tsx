@@ -110,7 +110,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ actionsHistory, total });
 };
 
-const renderSubComponent = ({ row }: { row: Row<any> }) => (
+const renderSubComponent = ({ row }: { row: Row }) => (
   <pre style={{ fontSize: '10px' }}>
     <code>{JSON.stringify(row.getValue('data'), null, 2)}</code>
   </pre>
@@ -124,21 +124,19 @@ export default function Screen() {
   }>();
 
   return (
-    <div>
-      <BTaskeeTable
-        total={total || 0}
-        data={actionsHistory || []}
-        columns={columns}
-        pagination={getPageSizeAndPageIndex({
-          total: total || 0,
-          pageSize: Number(searchParams.get('pageSize') || 0),
-          pageIndex: Number(searchParams.get('pageIndex') || 0),
-        })}
-        searchField="username"
-        setSearchParams={setSearchParams}
-        renderSubComponent={renderSubComponent}
-        getRowCanExpand={() => true}
-      />
-    </div>
+    <BTaskeeTable
+      total={total || 0}
+      data={actionsHistory || []}
+      columns={columns}
+      pagination={getPageSizeAndPageIndex({
+        total: total || 0,
+        pageSize: Number(searchParams.get('pageSize') || 0),
+        pageIndex: Number(searchParams.get('pageIndex') || 0),
+      })}
+      searchField="username"
+      setSearchParams={setSearchParams}
+      renderSubComponent={renderSubComponent}
+      getRowCanExpand={() => true}
+    />
   );
 }

@@ -11,7 +11,8 @@ import {
   convertRolesToPermissions,
   groupPermissionsByModule,
 } from '~/utils/common';
-import { type Permissions, type Roles, type Users, type Groups } from '~/types';
+import { type Permissions, type Roles, type Groups, type Users } from '~/types';
+import { type GetRolesOfGroupsProjection } from '~/types/bridge';
 
 /**
  * @description verify the user is super-user or not
@@ -21,12 +22,6 @@ export async function isRoot(userId: string) {
   return Boolean(permissions.includes(PERMISSIONS.ROOT));
 }
 
-/**
- *
- * @param param0
- * @param permissions
- * @returns
- */
 export async function verifyPermissions(
   { request }: { request: Request },
   permissions: Array<string>,
@@ -113,8 +108,11 @@ export async function createGroup({
   parent: string;
 }) {
   const groupCol = mongodb.collection<Groups>('groups');
+
   const parentGroup = await groupCol.findOne({ _id: parent });
-  if (!parentGroup) return;
+  if (!parentGroup) {
+    throw new Error('PARENT_GROUP_NOT_FOUND');
+  }
 
   await groupCol.insertOne({
     ...newRecordCommonField(),
@@ -123,7 +121,7 @@ export async function createGroup({
     userIds: userIds,
     roleIds: roleIds,
     genealogy: [...(parentGroup.genealogy || []), parent],
-    hierarchy: parentGroup.hierarchy + 1,
+    hierarchy: parentGroup.hierarchy + 1, // increase hierarchy
   });
 }
 
@@ -176,8 +174,8 @@ export async function getRoleDetail(roleId: string) {
 
 export async function getRolesOfGroups(groupId: string) {
   const groups = await mongodb
-    .collection('groups')
-    .aggregate([
+    .collection<Groups>('groups')
+    .aggregate<GetRolesOfGroupsProjection>([
       {
         $match: { $or: [{ genealogy: { $in: [groupId] } }, { _id: groupId }] },
       },
@@ -201,7 +199,7 @@ export async function getRolesOfGroups(groupId: string) {
 export async function searchUser(searchText: string) {
   const pattern = new RegExp(searchText, 'i');
   const users = await mongodb
-    .collection('users')
+    .collection<Users>('users')
     .find({
       $or: [
         {
@@ -216,6 +214,10 @@ export async function searchUser(searchText: string) {
   return users;
 }
 
+/**
+ * @description get groups detail with 2 cases: parent or not
+ * @param isParent have another logic to get data if user is parent of group
+ */
 export async function getGroupDetail<T = Document>({
   isParent,
   userId,
@@ -386,19 +388,18 @@ export async function verifyUserInGroup({
   groupId: string;
 }) {
   const group = await mongodb
-    .collection<any>('groups')
+    .collection<Groups>('groups')
     .findOne({ _id: groupId, userIds: userId });
   return Boolean(group);
 }
 
-export async function getGroupsOfUser<T = Document>({
+export async function getGroupsOfUser<T extends Document = Document>({
   projection,
   userId,
 }: {
   projection: Document;
   userId: string;
 }) {
-  const groupCol = mongodb.collection('groups');
   const lookupUser = {
     $lookup: {
       from: 'users',
@@ -416,8 +417,9 @@ export async function getGroupsOfUser<T = Document>({
     },
   };
 
-  const groups = await groupCol
-    .aggregate([
+  const groups = await mongodb
+    .collection<Groups>('groups')
+    .aggregate<T>([
       {
         $match: {
           userIds: userId,
@@ -428,17 +430,20 @@ export async function getGroupsOfUser<T = Document>({
       { $project: projection },
     ])
     .toArray();
-  return groups as Array<T>;
+  return groups;
 }
 
+/**
+ * @description create role and add roleId into group
+ * (the role must be existed in a group)
+ */
 export async function createRole({
   groupId,
   name,
   permissions,
   description,
-}: any) {
-  const roleCol = mongodb.collection<any>('roles');
-  const { insertedId } = await roleCol.insertOne({
+}: Pick<Roles, 'name' | 'description' | 'permissions'> & { groupId: string }) {
+  const { insertedId } = await mongodb.collection<Roles>('roles').insertOne({
     ...newRecordCommonField(),
     name,
     slug: name.toLocaleLowerCase().split(' ').join('-'),
@@ -447,7 +452,7 @@ export async function createRole({
   });
 
   await mongodb
-    .collection('groups')
+    .collection<Groups>('groups')
     .updateOne({ _id: groupId }, { $push: { roleIds: insertedId } });
 }
 
@@ -555,6 +560,9 @@ export async function getPermissionsOfGroup(groupId: string) {
   return [...setOfPermissions];
 }
 
+/**
+ * @description verify the current user is parent of group or not
+ */
 export async function isParentOfGroup({
   userId,
   groupId,

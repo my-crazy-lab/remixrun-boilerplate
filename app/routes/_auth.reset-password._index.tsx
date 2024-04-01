@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useActionData, Form } from '@remix-run/react';
+import { useActionData, Form, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/components/ui/use-toast';
 import { type ActionFunctionArgs } from '@remix-run/node';
@@ -40,6 +40,7 @@ export async function loader() {
 
 export default function Screen() {
   const { t } = useTranslation('common');
+  const { state } = useNavigation();
 
   const actionData = useActionData<ActionData>();
   if (actionData?.error) {
@@ -58,7 +59,7 @@ export default function Screen() {
       </div>
       <div className="grid gap-6">
         {actionData?.isSent ? (
-          'Check your mail'
+          t('CHECK_YOUR_EMAIL')
         ) : (
           <Form method="post">
             <div className="grid gap-2">
@@ -71,7 +72,7 @@ export default function Screen() {
                   placeholder="name@btaskee.com"
                 />
               </div>
-              <Button>{t('SEND')}</Button>
+              <Button>{state !== 'idle' ? t('LOADING') : t('SEND')}</Button>
             </div>
           </Form>
         )}

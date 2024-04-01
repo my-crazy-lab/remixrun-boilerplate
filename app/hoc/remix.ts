@@ -5,7 +5,7 @@ import { getUserId, saveActionHistory } from '~/services/helpers.server';
 import { getUserPermissions } from '~/services/role-base-access-control.server';
 
 export function hocAction(
-  callback: (args: ActionFunctionArgs, { formData }: any) => any,
+  callback: (args: ActionFunctionArgs, { formData }: {formData: any}) => any,
   permission: string,
 ) {
   async function action(args: ActionFunctionArgs) {

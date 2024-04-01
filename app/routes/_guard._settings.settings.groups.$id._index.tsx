@@ -15,13 +15,15 @@ import { json } from '@remix-run/node';
 import { Link, useLoaderData, useNavigate, useParams } from '@remix-run/react';
 import { MoveLeft } from 'lucide-react';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '~/constants/common';
-import { hoc404 } from '~/hoc/remix';
+import { hoc404, res403 } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import {
   getGroupDetail,
   isParentOfGroup,
+  verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 
 interface LoaderData {
@@ -51,13 +53,17 @@ interface LoaderData {
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const groupId = params.id || '';
   const userId = await getUserId({ request });
-
   const isParent = await isParentOfGroup({
     userId,
     groupId,
   });
 
-  // accept parent and user(in group) with permission Read
+  const userInGroup = await verifyUserInGroup({ userId, groupId });
+  // just accept user is parent or member of group
+  if (!isParent && !userInGroup) {
+    throw new Response(null, res403);
+  }
+
   const group = await hoc404(async () =>
     getGroupDetail<LoaderData>({
       userId,
@@ -79,6 +85,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
+  const { t } = useTranslation(['common']);
   const params = useParams();
   const loaderData = useLoaderData<LoaderData>();
   const globalData = useGlobalStore(state => state);
@@ -134,7 +141,7 @@ export default function Screen() {
                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                               </Link>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
+                              <DropdownMenuItem>{t('DELETE')}</DropdownMenuItem>
                             </DropdownMenuContent>
                           ) : null}
                         </DropdownMenu>

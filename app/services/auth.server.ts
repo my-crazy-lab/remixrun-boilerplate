@@ -2,14 +2,16 @@ import { Authenticator } from 'remix-auth';
 import { sessionStorage } from '~/services/session.server';
 import { FormStrategy } from 'remix-auth-form';
 import bcrypt from 'bcrypt';
-
+import { redirect } from '@remix-run/node';
 import { mongodb } from '~/utils/db.server';
 import { dotenv } from './dotenv.server';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
 import { sendEmail } from './mail.server';
 import { v4 as uuidv4 } from 'uuid';
-import { json } from '@remix-run/node';
-import { EXPIRED_RESET_PASSWORD } from './constants.server';
+import {
+  EXPIRED_RESET_PASSWORD,
+  EXPIRED_VERIFICATION_CODE,
+} from './constants.server';
 import ROUTE_NAME from '~/constants/route';
 import { ERROR } from '~/constants/common';
 import { type Users } from '~/types';
@@ -40,25 +42,25 @@ export async function verifyAndSendCode({
   password: string;
   username: string;
 }) {
-  const usersCol = mongodb.collection('users');
+  const user = await mongodb.collection<Users>('users').findOne({ username });
+  const bcrypt = user?.services?.password?.bcrypt;
 
-  const user = await usersCol.findOne({ username });
-
-  if (!user) {
-    throw json({ message: 'User not found !' }, { status: 404 });
+  // always display incorrect account error
+  if (!user || !bcrypt) {
+    throw new Error('INCORRECT_ACCOUNT');
   }
   const verified = await compareHash({
     password,
-    hash: user?.services?.password?.bcrypt,
+    hash: bcrypt,
   });
 
-  if (!verified) throw new Error('Not correct account');
+  if (!verified) throw new Error('INCORRECT_ACCOUNT');
 
-  const verificationCode = await sendVerificationCode({ email: user.email });
+  const verificationCode = await sendVerificationCode(user.email);
   return verificationCode;
 }
 
-export async function sendVerificationCode({ email }: { email: string }) {
+export async function sendVerificationCode(email: string) {
   const verificationCode = Math.floor(
     100000 + Math.random() * 900000,
   ).toString();
@@ -73,7 +75,10 @@ export async function sendVerificationCode({ email }: { email: string }) {
       $set: {
         verification: {
           code: verificationCode,
-          expired: getFutureTimeFromToday(10, 'minutes').toDate(),
+          expired: getFutureTimeFromToday(
+            EXPIRED_VERIFICATION_CODE,
+            'minutes',
+          ).toDate(),
           token,
         },
       },
@@ -182,8 +187,9 @@ export async function changePassword({
     },
   );
 
+  // update failure, redirect into reset password page
   if (!account?._id) {
-    throw new Error('This link expired !');
+    return redirect(ROUTE_NAME.RESET_PASSWORD);
   }
 }
 
@@ -194,7 +200,6 @@ authenticator.use(
     if (!code) {
       throw new Error('Login failure');
     }
-
     const user = await verifyCode(code);
     // the type of this user must match the type you pass to the Authenticator
     // the strategy will automatically inherit the type if you instantiate

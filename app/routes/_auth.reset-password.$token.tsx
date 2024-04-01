@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { useActionData, Form } from '@remix-run/react';
+import { useActionData, Form, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/components/ui/use-toast';
 
@@ -9,6 +9,7 @@ import { json, redirect } from '@remix-run/node';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { ERROR } from '~/constants/common';
+import ROUTE_NAME from '~/constants/route';
 
 interface ActionData {
   error?: string;
@@ -19,18 +20,19 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const formData = await request.formData();
     const { newPassword, reEnterPassword } = Object.fromEntries(formData);
 
+    // client validation
     if (
       typeof newPassword !== 'string' ||
       typeof reEnterPassword !== 'string'
     ) {
-      throw new Error('UNKNOWN_ERROR');
+      throw new Error(ERROR.UNKNOWN_ERROR);
     }
     if (newPassword !== reEnterPassword) {
-      throw new Error('PASSWORD_NOT_MATCH');
+      throw new Error(ERROR.PASSWORD_NOT_MATCH);
     }
-    await changePassword({ newPassword, token: params.token || '' });
 
-    return redirect('/sign-in');
+    await changePassword({ newPassword, token: params.token || '' });
+    return redirect(ROUTE_NAME.SIGN_IN);
   } catch (error) {
     if (error instanceof Error) {
       return json({ error: error.message });
@@ -41,13 +43,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const isExpired = await isResetPassExpired({ token: params.token || '' });
-  if (isExpired) return redirect('/reset-password');
+  if (isExpired) return redirect(ROUTE_NAME.RESET_PASSWORD);
 
   return null;
 }
 
 export default function Screen() {
   const { t } = useTranslation();
+  const { state } = useNavigation();
 
   const actionData = useActionData<ActionData>();
   if (actionData?.error) {
@@ -85,8 +88,7 @@ export default function Screen() {
                 placeholder="Re-enter New Password"
               />
             </div>
-
-            <Button>Reset</Button>
+            <Button>{state !== 'idle' ? t('LOADING') : t('RESET')}</Button>
           </div>
         </Form>
       </div>
