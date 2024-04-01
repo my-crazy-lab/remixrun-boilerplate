@@ -34,7 +34,7 @@ import {
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 import { useLoaderData, useSubmit } from '@remix-run/react';
-import ROUTE_LINK from '~/constants/routeURL';
+import ROUTE_NAME from '~/constants/route';
 import { getUserId } from '~/services/helpers.server';
 import { groupPermissionsByModule } from '~/utils/helpers';
 
@@ -86,7 +86,7 @@ export const action = hocAction(
         roleId: params.roleId,
       });
 
-      return redirect(`${ROUTE_LINK.GROUP_SETTING}/${params.id}`);
+      return redirect(`${ROUTE_NAME.GROUP_SETTING}/${params.id}`);
     } catch (err: any) {
       return json({ err });
     }
@@ -159,7 +159,7 @@ export default function Screen() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={ROUTE_LINK.GROUP_SETTING}>
+              <BreadcrumbLink className="text-lg" to={ROUTE_NAME.GROUP_SETTING}>
                 Groups
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -167,7 +167,7 @@ export default function Screen() {
               <Slash />
             </BreadcrumbSeparator>
             <BreadcrumbItem>
-              <BreadcrumbLink className="text-lg" to={ROUTE_LINK.GROUP_SETTING}>
+              <BreadcrumbLink className="text-lg" to={ROUTE_NAME.GROUP_SETTING}>
                 Group root
               </BreadcrumbLink>
             </BreadcrumbItem>

@@ -15,3 +15,8 @@ export enum IActionPermissionModule {
 }
 
 export type TActionPermissionModule = keyof typeof IActionPermissionModule;
+
+export const ERROR = {
+  EMAIL_INCORRECT: 'EMAIL_INCORRECT',
+  UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+};

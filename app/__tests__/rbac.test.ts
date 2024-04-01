@@ -21,6 +21,7 @@ import {
   verifyPermissions,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
+import type { Permissions, Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
 
 const mockRecordCommonField = {
@@ -44,10 +45,10 @@ jest.mock('~/services/constants.server', () => ({
 }));
 
 describe('Role base access control', () => {
-  const rootId: any = 'root';
-  const managerId: any = 'manager';
-  const leaderId: any = 'leader';
-  const employeeId: any = 'employee';
+  const rootId = 'root';
+  const managerId = 'manager';
+  const leaderId = 'leader';
+  const employeeId = 'employee';
 
   const userId = 'user-1';
   const groupId = 'group-1';
@@ -56,36 +57,42 @@ describe('Role base access control', () => {
     name: 'Root role',
     description: 'Root description',
   };
-  const mockPermission = [
+  const mockPermission: Array<Permissions> = [
     {
       _id: rootId,
       name: 'ROOT',
       description: 'ROOT',
       module: 'admin',
+      'slug-module': 'root',
     },
     {
       _id: managerId,
       name: 'MANAGER',
       description: 'MANAGER',
       module: 'admin',
+      'slug-module': 'admin',
     },
     {
       _id: leaderId,
       name: 'LEADER',
       module: 'admin',
-      descriiiption: 'LEADER',
+      description: 'LEADER',
+      'slug-module': 'leader',
     },
     {
       _id: employeeId,
       name: 'EMPLOYEE',
       description: 'EMPLOYEE',
       module: 'admin',
+      'slug-module': 'employee',
     },
   ];
 
   beforeAll(async () => {
-    await mongodb.collection('permissions').insertMany(mockPermission);
-    await mongodb.collection('users').insertMany([
+    await mongodb
+      .collection<Permissions>('permissions')
+      .insertMany(mockPermission);
+    await mongodb.collection<Users>('users').insertMany([
       {
         _id: rootId,
         email: 'root@gmail.com',
@@ -183,7 +190,7 @@ describe('Role base access control', () => {
     });
   });
 
-  describe('isroot', () => {
+  describe('isRoot', () => {
     it('should return true when use is superuser', async () => {
       const rootuser = await isRoot(rootId);
       expect(rootuser).toBeTruthy();

@@ -1,35 +1,46 @@
 import { Button } from '@/components/ui/button';
-import { useActionData } from '@remix-run/react';
+import { useActionData, Form } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/components/ui/use-toast';
 
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { Form } from '@remix-run/react';
 import { changePassword, isResetPassExpired } from '~/services/auth.server';
 import { json, redirect } from '@remix-run/node';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { useEffect } from 'react';
+import { ERROR } from '~/constants/common';
+
+interface ActionData {
+  error?: string;
+}
 
 export async function action({ request, params }: ActionFunctionArgs) {
   try {
     const formData = await request.formData();
     const { newPassword, reEnterPassword } = Object.fromEntries(formData);
 
-    if (newPassword !== reEnterPassword) {
-      throw new Error('Password not match !');
+    if (
+      typeof newPassword !== 'string' ||
+      typeof reEnterPassword !== 'string'
+    ) {
+      throw new Error('UNKNOWN_ERROR');
     }
-    await changePassword({ newPassword, token: params.token });
+    if (newPassword !== reEnterPassword) {
+      throw new Error('PASSWORD_NOT_MATCH');
+    }
+    await changePassword({ newPassword, token: params.token || '' });
 
     return redirect('/sign-in');
-  } catch (error: any) {
-    console.log(error);
-    return json({ error: error.message });
+  } catch (error) {
+    if (error instanceof Error) {
+      return json({ error: error.message });
+    }
+    return json({ error: ERROR.UNKNOWN_ERROR });
   }
 }
 
-export async function loader({ request, params }: LoaderFunctionArgs) {
-  const isExpired = await isResetPassExpired({ token: params.token });
+export async function loader({ params }: LoaderFunctionArgs) {
+  const isExpired = await isResetPassExpired({ token: params.token || '' });
   if (isExpired) return redirect('/reset-password');
 
   return null;
@@ -38,18 +49,16 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
 export default function Screen() {
   const { t } = useTranslation();
 
-  const actionData = useActionData<any>();
-  useEffect(() => {
-    if (actionData?.error) {
-      toast({ description: actionData.error });
-    }
-  }, [actionData?.error]);
+  const actionData = useActionData<ActionData>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
 
   return (
     <>
       <div className="flex flex-col space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Reset Password
+          {t('RESET_PASSWORD')}
         </h1>
         <p className="text-sm text-muted-foreground">
           You are a step away from accessing your account!

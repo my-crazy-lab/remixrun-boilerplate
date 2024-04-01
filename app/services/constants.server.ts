@@ -17,3 +17,5 @@ export type FindOptionsClient = Pick<
   FindOptions,
   'limit' | 'sort' | 'projection' | 'skip'
 >;
+
+export const EXPIRED_RESET_PASSWORD = 15; // by minutes

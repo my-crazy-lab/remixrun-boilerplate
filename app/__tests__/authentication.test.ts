@@ -1,4 +1,5 @@
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
+import type { Groups, Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
 
 describe('Authentication: getGroupsOfUser', () => {
@@ -7,10 +8,10 @@ describe('Authentication: getGroupsOfUser', () => {
 
   beforeEach(async () => {
     await mongodb
-      .collection('users')
+      .collection<Users>('users')
       .insertOne({ _id: userId, email: 'test1@gmail.com', username: 'Test 1' });
     await mongodb
-      .collection('groups')
+      .collection<Groups>('groups')
       .insertOne({ _id: groupId, userIds: [userId] });
   });
 
