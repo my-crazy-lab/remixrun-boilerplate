@@ -79,7 +79,7 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
     .toArray();
 
   const permissions = convertRolesToPermissions(
-    groups.map(group => group.roles),
+    groups.map((group: any) => group.roles),
   );
 
   if (permissions.includes(PERMISSIONS.ROOT)) {
@@ -106,7 +106,7 @@ export async function createGroup({
   userIds,
   roleIds,
 }: any) {
-  const groupCol = mongodb.collection('groups');
+  const groupCol = mongodb.collection<any>('groups');
   const parentGroup = await groupCol.findOne({ _id: parent });
   if (!parentGroup) return;
 
@@ -365,7 +365,7 @@ export async function getGroupPermissions(groupId: string) {
     return allPermissions;
   }
   return mongodb
-    .collection('permissions')
+    .collection<any>('permissions')
     .find({ _id: { $in: permissions } })
     .toArray();
 }
@@ -378,7 +378,7 @@ export async function verifyUserInGroup({
   groupId: string;
 }) {
   const group = await mongodb
-    .collection('groups')
+    .collection<any>('groups')
     .findOne({ _id: groupId, userIds: userId });
   return Boolean(group);
 }
@@ -429,7 +429,7 @@ export async function createRole({
   permissions,
   description,
 }: any) {
-  const roleCol = mongodb.collection('roles');
+  const roleCol = mongodb.collection<any>('roles');
   const { insertedId } = await roleCol.insertOne({
     ...newRecordCommonField(),
     name,
@@ -477,7 +477,7 @@ export async function getAllPermissions({ projection }: any) {
 }
 
 export async function deleteUser(userId: string) {
-  await mongodb.collection('users').updateOne(
+  await mongodb.collection<any>('users').updateOne(
     { _id: userId },
     {
       $set: {
@@ -489,7 +489,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function deleteRole(roleId: string) {
-  await mongodb.collection('roles').updateOne(
+  await mongodb.collection<any>('roles').updateOne(
     { _id: roleId },
     {
       $set: {
@@ -501,7 +501,7 @@ export async function deleteRole(roleId: string) {
 }
 
 export async function deleteGroup(groupId: string) {
-  await mongodb.collection('groups').updateOne(
+  await mongodb.collection<any>('groups').updateOne(
     {
       _id: groupId,
     },

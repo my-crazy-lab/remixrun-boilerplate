@@ -60,7 +60,7 @@ export async function getActionsHistory({
   const $search: ISearch = { $match: {} };
 
   if (searchText) {
-    $search.$match.username = {
+    $search.$match['user.username'] = {
       $regex: searchText,
       $options: 'i',
     };
@@ -127,7 +127,7 @@ export async function createNewUser({
   email,
   cities,
 }: any) {
-  const usersCol = mongodb.collection('users');
+  const usersCol = mongodb.collection<any>('users');
   const passwordHashed = await hashPassword(password);
 
   await usersCol.insertOne({
