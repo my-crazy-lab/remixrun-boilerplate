@@ -1,7 +1,10 @@
 import { PERMISSIONS } from '~/constants/common';
 import type { Document } from 'mongodb';
 import { mongodb } from '~/utils/db.server';
-import { newRecordCommonField, statusOriginal } from './constants.server';
+import {
+  newRecordCommonField,
+  statusOriginal,
+} from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
 import {
   momentTz,
