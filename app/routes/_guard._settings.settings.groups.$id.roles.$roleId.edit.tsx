@@ -1,3 +1,4 @@
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import {
   Accordion,
   AccordionContent,
@@ -13,19 +14,21 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import ErrorMessageBase from '@/components/ui/MessageBase';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { json, redirect } from '@remix-run/node';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
+import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { Slash } from 'lucide-react';
+import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
+import ROUTE_LINK from '~/constants/routeURL';
 import { hocAction, hocLoader, res403 } from '~/hoc/remix';
-import { useForm, Controller } from 'react-hook-form';
+import { getUserId } from '~/services/helpers.server';
 import {
   getGroupPermissions,
   getRoleDetail,
@@ -33,9 +36,6 @@ import {
   updateRole,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import { useLoaderData, useSubmit } from '@remix-run/react';
-import ROUTE_LINK from '~/constants/routeURL';
-import { getUserId } from '~/services/helpers.server';
 import { groupPermissionsByModule } from '~/utils/helpers';
 
 export const loader = hocLoader(

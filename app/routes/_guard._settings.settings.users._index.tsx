@@ -13,25 +13,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
 
-import { DataTableColumnHeader } from '@/components/ui/table-data/data-table-column-header';
-import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-actions';
+import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-table-column-header';
+import { DataTableRowActions } from '@/components/btaskee/table-data/data-table-row-actions';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData, useSearchParams, useSubmit } from '@remix-run/react';
 
+import BTaskeeTable from '@/components/btaskee/TableBase';
+import type { ColumnDef } from '@tanstack/react-table';
+import { Plus } from 'lucide-react';
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
-import { getSession } from '~/services/session.server';
 import {
   createNewUser,
   getTotalUsers,
   getUsers,
 } from '~/services/settings.server';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
-import BTaskeeTable from '@/components/ui/btaskee-table';
-import type { ColumnDef } from '@tanstack/react-table';
 
 const columns: ColumnDef<any>[] = [
   {
@@ -95,7 +95,7 @@ const columns: ColumnDef<any>[] = [
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {row
               ?.getValue('cities')
-              .map((e: any, index: number) => <Badge key={index}>{e}</Badge>)}
+              .map((e: any, index: number) => <Badge variant="secondary" key={index}>{e}</Badge>)}
           </span>
         </div>
       );
@@ -108,7 +108,7 @@ const columns: ColumnDef<any>[] = [
   },
 ];
 
-export const action = hocAction(async ({}, { formData }: any) => {
+export const action = hocAction(async ({ }, { formData }: any) => {
   try {
     const { username, email, password, cities } = formData;
 
@@ -143,7 +143,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     limit,
     projection: { cities: 1, username: 1, email: 1 },
   });
-  const session = await getSession(request.headers.get('cookie'));
   return json({ users, total });
 };
 
@@ -186,7 +185,7 @@ export default function Screen() {
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex items-center justify-between space-y-2 bg-secondary p-4 rounded-xl">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
             Users management
@@ -204,7 +203,7 @@ export default function Screen() {
             setOpen(open);
           }}>
           <DialogTrigger asChild>
-            <Button variant="outline">Add new user</Button>
+            <Button className='gap-2' variant="default"><Plus /> Add new user</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[560px]">
             <form onSubmit={handleSubmit(onSubmit)}>

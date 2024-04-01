@@ -106,16 +106,16 @@ export default function Screen() {
 
   return (
     <>
-      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
+      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4 bg-secondary p-4">
         <Button onClick={goBack}>
           <MoveLeft className="h-5 w-5" />{' '}
         </Button>
-        New group
+        Create group
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-3 items-center gap-4">
-            <Label htmlFor="group" className="text-left">
+        <div className="grid grid-cols-2 gap-4 py-4">
+          <div className="grid items-center gap-4">
+            <Label htmlFor="group_name">
               Group name
             </Label>
             <Input
@@ -123,10 +123,11 @@ export default function Screen() {
                 required: true,
               })}
               className="col-span-2"
+              placeholder='Enter group name'
             />
           </div>
-          <div className="grid grid-cols-3 items-center gap-4">
-            <Label htmlFor="group" className="text-left">
+          <div className="grid items-center gap-4">
+            <Label htmlFor="group_description">
               Group description
             </Label>
             <Input
@@ -134,10 +135,11 @@ export default function Screen() {
                 required: true,
               })}
               className="col-span-2"
+              placeholder='Enter description'
             />
           </div>
-          <div className="grid grid-cols-3 items-center gap-4">
-            <Label className="text-left">Users</Label>
+          <div className="grid items-center gap-4">
+            <Label htmlFor="users">Users</Label>
             <div className="col-span-2">
               <Controller
                 control={control}
@@ -160,7 +162,7 @@ export default function Screen() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-3 items-center gap-4">
+          <div className="grid items-center gap-4">
             <Label className="text-left">Roles</Label>
             <div className="col-span-2">
               <Controller

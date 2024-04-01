@@ -1,14 +1,13 @@
+import { DataTablePagination } from '@/components/btaskee/table-data/data-table-pagination';
+import { DataTableToolbar } from '@/components/btaskee/table-data/data-table-toolbar';
 import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getExpandedRowModel,
-} from '@tanstack/react-table';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import type {
   ColumnDef,
   ColumnFiltersState,
@@ -18,15 +17,16 @@ import type {
   VisibilityState,
 } from '@tanstack/react-table';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { DataTableToolbar } from './table-data/data-table-toolbar';
-import { DataTablePagination } from './table-data/data-table-pagination';
+  flexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
 import React from 'react';
 
 interface DataTableProps<TData, TValue> {
@@ -103,9 +103,9 @@ const BTaskeeTable = <TData, TValue>({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                   </TableHead>
                 ))}
               </TableRow>

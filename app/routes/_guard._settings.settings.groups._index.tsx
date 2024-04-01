@@ -1,16 +1,9 @@
-import { Button } from '@/components/ui/button';
+import Typography from '@/components/btaskee/Typography';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
+import { Boxes, UserRoundCogIcon } from 'lucide-react';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 
@@ -41,10 +34,10 @@ export default function Screen() {
 
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex items-center justify-between space-y-2 bg-secondary p-4 rounded-xl">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Groups management
+            Groups
           </h2>
           <p className="text-muted-foreground">
             Here&apos;s a list of your groups!
@@ -56,27 +49,24 @@ export default function Screen() {
           return (
             <Link key={index} to={`/settings/groups/${group._id}`}>
               <Card>
-                <CardHeader className="font-semibold flex flex-row justify-between items-center">
-                  {group.name}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-                        <DotsHorizontalIcon className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[160px]">
-                      <Link to={`/settings/groups/${group._id}/edit`}>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                      </Link>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <CardHeader>
+                  <Typography variant='h4' affects='removePMargin'> {group.name}</Typography>
+                  <Typography variant='p' affects='muted'>{group.description}</Typography>
                 </CardHeader>
-                <CardContent>{group.description}</CardContent>
+                <CardContent className='flex flex-row gap-4'>
+                  <div className='flex'>
+                    <Boxes className='text-primary h-6 w-6' />
+                    <div>
+                      <Typography variant='p'>Children Group</Typography>
+                      <Typography className='text-primary' variant='h1'>2</Typography>
+                    </div>
+
+                  </div>
+                  <div>
+                    <UserRoundCogIcon className='text-secondary h-6 w-6' />
+                    <Typography variant='p'>Users</Typography>
+                  </div>
+                </CardContent>
               </Card>
             </Link>
           );

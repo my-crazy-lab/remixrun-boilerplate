@@ -17,8 +17,8 @@ import {
 } from '@/components/ui/popover';
 import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
-import { Skeleton } from './skeleton';
 import type { SetURLSearchParams } from 'react-router-dom';
+import { Skeleton } from './skeleton';
 
 export type OptionType = {
   label: string;
@@ -70,9 +70,8 @@ export function MultiSelectAsync({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${
-            selected.length > 1 ? 'h-full' : 'h-10'
-          }`}
+          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
+            }`}
           onClick={() => setOpen(!open)}>
           <div className="flex gap-1 flex-wrap">
             {selected.map(item => (
@@ -83,7 +82,7 @@ export function MultiSelectAsync({
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button
-                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="ml-1 ring-offset-background rounded-md outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       handleUnselect(item.value);
@@ -200,9 +199,8 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${
-            selected.length > 1 ? 'h-full' : 'h-10'
-          }`}
+          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
+            }`}
           onClick={() => setOpen(!open)}>
           <div className="flex gap-1 flex-wrap">
             {selected.map(item => (
