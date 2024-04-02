@@ -40,37 +40,37 @@ import {
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import ROUTE_NAME from '~/constants/route';
 import { getUserId } from '~/services/helpers.server';
-import { groupPermissionsByModule } from '~/utils/helpers';
 import { type ReturnValueIgnorePromise } from '~/types';
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { groupPermissionsByModule } from '~/utils/common';
 
 interface LoaderData {
   role: ReturnValueIgnorePromise<typeof getRoleDetail>;
+  activePermissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
+  allPermissionsAvailable: ReturnType<typeof groupPermissionsByModule>;
 }
-
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
     const userId = await getUserId({ request });
-
     const isParent = await isParentOfGroup({
       userId,
       groupId,
     });
     const userInGroup = await verifyUserInGroup({ userId, groupId });
+
     if (!isParent && !userInGroup) {
       throw new Response(null, res403);
     }
 
-    if (!params.roleId) return json({ role: {} });
-    const role = await getRoleDetail(params.roleId);
-
+    const role = await getRoleDetail(params.roleId || '');
     const permissions = await getGroupPermissions(groupId);
+
     return json({
       role,
-      groupPermissions: {
-        permissions,
-        actionPermissions: groupPermissionsByModule(permissions),
-      },
+      activePermissions: permissions,
+      allPermissionsAvailable: groupPermissionsByModule(permissions), // use to display in UI
     });
   },
   PERMISSIONS.WRITE_ROLE,
@@ -79,7 +79,7 @@ export const loader = hocLoader(
 export interface FormData {
   name: string;
   description: string;
-  permissions: string;
+  permissions: { [key: string]: boolean };
 }
 
 export const action = hocAction(
@@ -105,53 +105,57 @@ export const action = hocAction(
 );
 
 export default function Screen() {
-  const { role } = useLoaderData<LoaderData>();
-
-  const submit = useSubmit();
-
-  const getDefaultValues = () => {
-    const defaultValues = {
-      permissions: {},
-      name: role.name || '',
-      description: role.description || '',
-    };
-
-    role?.actionPermissions?.forEach(permissionFromServer => {
-      defaultValues.permissions[permissionFromServer.module] = {};
-
-      permissionFromServer.actions.forEach(action => {
-        defaultValues.permissions[permissionFromServer.module][action._id] =
-          role?.permissions?.includes(action._id) || false;
-      });
-    });
-
-    return {
-      defaultValues,
-    };
-  };
+  const { t } = useTranslation(['common']);
+  const loaderData = useLoaderData<LoaderData>();
 
   const {
     register,
     control,
+    setValue,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>(getDefaultValues());
+  } = useForm<FormData>({
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+  });
 
-  const onSubmit = ({ name, permissions, description }: FormData) => {
-    const selectedPermissions: string[] = [];
+  useEffect(() => {
+    setValue('name', loaderData.role.name);
+    setValue('description', loaderData.role.description);
 
-    role?.actionPermissions?.forEach(actionPermission => {
-      actionPermission.actions.forEach(action => {
-        if (permissions?.[actionPermission.module]?.[action._id]) {
-          selectedPermissions.push(action._id);
-        }
-      });
+    const permissionMap: Record<string, boolean> = {};
+    const currentPermissionsMap: Record<string, boolean> = {};
+    for (const permission of loaderData.role.actionPermissions) {
+      currentPermissionsMap[permission._id] = true;
+    }
+    for (const permission of loaderData.activePermissions) {
+      permissionMap[permission._id] = Boolean(
+        currentPermissionsMap[permission._id],
+      );
+    }
+
+    setValue('permissions', permissionMap);
+  }, [loaderData.role, loaderData.activePermissions, setValue]);
+
+  const submit = useSubmit();
+
+  const onSubmit = (data: FormData) => {
+    const formData = new FormData();
+    const permissions: string[] = [];
+
+    Object.entries(data.permissions).forEach(item => {
+      if (item[1]) {
+        permissions.push(item[0]);
+      }
     });
 
-    submit(
-      { name, description, permissions: JSON.stringify(selectedPermissions) },
-      { method: 'post' },
-    );
+    formData.append('name', data.name);
+    formData.append('description', data.description);
+    formData.append('permissions', JSON.stringify(permissions));
+
+    submit(formData, { method: 'post' });
   };
 
   return (
@@ -161,7 +165,7 @@ export default function Screen() {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink className="text-lg" to={ROUTE_NAME.GROUP_SETTING}>
-                Groups
+                {t('GROUPS')}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator>
@@ -210,15 +214,11 @@ export default function Screen() {
         <Separator className="my-4" />
         <p className="mt-2">Permissions</p>
         <ScrollArea className="mt-4 rounded-md border p-4">
-          {_.map(role?.actionPermissions, actionPermission => (
-            <Accordion
-              key={actionPermission.module}
-              defaultValue={role?.actionPermissions[0].module}
-              type="single"
-              collapsible>
+          {_.map(loaderData.allPermissionsAvailable, actionPermission => (
+            <Accordion key={actionPermission.module} type="single" collapsible>
               <AccordionItem value={actionPermission.module}>
                 <AccordionTrigger>
-                  {actionPermission?.module?.toUpperCase()} features
+                  {actionPermission?.module?.toUpperCase()}
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -226,7 +226,7 @@ export default function Screen() {
                       <Controller
                         key={action._id}
                         control={control}
-                        name={`permissions.${actionPermission.module}.${action._id}`}
+                        name={`permissions.${action._id}`}
                         render={({ field: { onChange, value } }) => (
                           <div key={action._id} className="my-2">
                             <Label

@@ -2,7 +2,7 @@ import moment, {
   type DurationInputArg1,
   type DurationInputArg2,
 } from 'moment-timezone';
-import { type Permissions } from '~/types';
+import { type Permissions, type Roles } from '~/types';
 import { type ActionPermissions } from '~/types/bridge';
 
 moment.tz.setDefault('Asia/Jakarta');
@@ -38,12 +38,9 @@ export function groupPermissionsByModule(permissions: Permissions[]) {
   );
 }
 
-export function convertRolesToPermissions(roles: any) {
+export function convertRolesToPermissions(roles: Roles[]) {
   const setOfPermissions = new Set(
-    roles.reduce(
-      (acc: any, role: any) => [...acc, ...(role?.permissions || [])],
-      [],
-    ),
+    roles.reduce((acc, role) => [...acc, ...(role?.permissions || [])], []),
   );
   return [...setOfPermissions] as Array<string>;
 }

@@ -23,9 +23,12 @@ import {
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 import { type ReturnValueIgnorePromise } from '~/types';
+import { groupPermissionsByModule } from '~/utils/common';
 
 interface LoaderData {
-  role: ReturnValueIgnorePromise<typeof getRoleDetail>;
+  role: ReturnValueIgnorePromise<typeof getRoleDetail> & {
+    actionPermissions: ReturnType<typeof groupPermissionsByModule>;
+  };
 }
 
 export const loader = hocLoader(
@@ -45,7 +48,12 @@ export const loader = hocLoader(
     }
 
     const role = await getRoleDetail(params.roleId || '');
-    return json({ role });
+    return json({
+      role: {
+        ...role,
+        actionPermissions: groupPermissionsByModule(role.actionPermissions),
+      },
+    });
   },
   PERMISSIONS.READ_ROLE,
 );

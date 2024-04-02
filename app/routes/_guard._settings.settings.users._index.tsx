@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MultiSelect } from '@/components/ui/multi-select';
+import { MultiSelect, type OptionType } from '@/components/ui/multi-select';
 
 import { DataTableColumnHeader } from '@/components/ui/table-data/data-table-column-header';
 import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-actions';
@@ -21,9 +21,8 @@ import { useLoaderData, useSearchParams, useSubmit } from '@remix-run/react';
 
 import * as React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { PERMISSIONS } from '~/constants/common';
+import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
-import { getSession } from '~/services/session.server';
 import {
   createNewUser,
   getTotalUsers,
@@ -31,9 +30,11 @@ import {
 } from '~/services/settings.server';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 import BTaskeeTable from '@/components/ui/btaskee-table';
-import type { ColumnDef } from '@tanstack/react-table';
+import { type ColumnDef } from '@tanstack/react-table';
+import { type ReturnValueIgnorePromise } from '~/types';
+import { useTranslation } from 'react-i18next';
 
-const columns: ColumnDef<any>[] = [
+const columns: ColumnDef<LoaderData['users'][0]>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -89,26 +90,25 @@ const columns: ColumnDef<any>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="City" />
     ),
-    cell: ({ row }: any) => {
+    cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
-            {row
-              ?.getValue('cities')
-              .map((e: any, index: number) => <Badge key={index}>{e}</Badge>)}
+            {row.getValue('cities')?.map((e, index) => (
+              <Badge key={index}>{e}</Badge>
+            ))}
           </span>
         </div>
       );
     },
   },
-
   {
     id: 'actions',
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ];
 
-export const action = hocAction(async ({}, { formData }: any) => {
+export const action = hocAction(async (_, { formData }) => {
   try {
     const { username, email, password, cities } = formData;
 
@@ -120,12 +120,18 @@ export const action = hocAction(async ({}, { formData }: any) => {
     });
 
     return null;
-  } catch (error: any) {
-    console.log(error);
-    return error;
+  } catch (error) {
+    if (error instanceof Error) {
+      return json({ error: error.message });
+    }
+    return json({ error: ERROR.UNKNOWN_ERROR });
   }
 }, PERMISSIONS.WRITE_USER);
 
+interface LoaderData {
+  users: ReturnValueIgnorePromise<typeof getUsers>;
+  total: number;
+}
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const total = await getTotalUsers();
@@ -143,21 +149,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     limit,
     projection: { cities: 1, username: 1, email: 1 },
   });
-  const session = await getSession(request.headers.get('cookie'));
   return json({ users, total });
 };
 
+interface FormData {
+  email: string;
+  password: string;
+  cities: Array<OptionType>;
+  username: string;
+}
 export default function Screen() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const loaderData = useLoaderData();
+  const { t } = useTranslation();
 
-  const {
-    register,
-    control,
-    reset,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<any>({
+  const [searchParams, setSearchParams] = useSearchParams();
+  const loaderData = useLoaderData<LoaderData>();
+
+  const { register, control, reset, handleSubmit } = useForm<FormData>({
     defaultValues: {
       email: '',
       password: '',
@@ -173,7 +180,7 @@ export default function Screen() {
     reset();
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const formData = new FormData();
     formData.append('email', data.email);
     formData.append('password', data.password);
@@ -189,7 +196,7 @@ export default function Screen() {
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Users management
+            {t('USER_MANAGEMENT')}
           </h2>
           <p className="text-muted-foreground">
             Here&apos;s a list of your users!

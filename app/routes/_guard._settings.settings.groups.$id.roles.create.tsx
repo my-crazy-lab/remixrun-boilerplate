@@ -15,8 +15,8 @@ import { useLoaderData, useNavigate, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
-import { PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader, res403, res403GroupParent } from '~/hoc/remix';
+import { ERROR, PERMISSIONS } from '~/constants/common';
+import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
   createRole,
@@ -24,28 +24,35 @@ import {
   isParentOfGroup,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import { groupPermissionsByModule } from '~/utils/helpers';
+import { type ReturnValueIgnorePromise } from '~/types';
+import { groupPermissionsByModule } from '~/utils/common';
 
 export const action = hocAction(
-  async ({ params }: ActionFunctionArgs, { formData }: any) => {
+  async ({ params }: ActionFunctionArgs, { formData }) => {
     try {
       const { name, description, permissions } = formData;
       await createRole({
         name,
-        groupId: params.id,
+        groupId: params.id || '',
         description,
         permissions: JSON.parse(permissions),
       });
 
       return redirect(`/settings/groups/${params.id}`);
-    } catch (err: any) {
-      console.log(err);
-      return json({ err });
+    } catch (error) {
+      if (error instanceof Error) {
+        return json({ error: error.message });
+      }
+      return json({ error: ERROR.UNKNOWN_ERROR });
     }
   },
   PERMISSIONS.WRITE_ROLE,
 );
 
+interface LoaderData {
+  permissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
+  permissionsGrouped: ReturnType<typeof groupPermissionsByModule>;
+}
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
@@ -70,16 +77,16 @@ export const loader = hocLoader(
   PERMISSIONS.WRITE_ROLE,
 );
 
+interface FormData {
+  name: string;
+  description: string;
+  permissions: { [key: string]: boolean };
+}
 export default function Screen() {
-  const loaderData = useLoaderData<any>();
+  const loaderData = useLoaderData<LoaderData>();
   const navigate = useNavigate();
   const goBack = () => navigate(-1);
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<any>({
+  const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
       name: '',
       description: '',
@@ -87,7 +94,7 @@ export default function Screen() {
   });
   const submit = useSubmit();
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const formData = new FormData();
     const permissions: string[] = [];
 
@@ -128,11 +135,11 @@ export default function Screen() {
           {...register('description' as const, { required: true })}></Input>
         <Separator className="my-4" />
 
-        {_.map(loaderData.permissionsGrouped, (actionPermission: any) => (
-          <Accordion type="single" collapsible key={actionPermission._id}>
+        {_.map(loaderData.permissionsGrouped, actionPermission => (
+          <Accordion type="single" collapsible key={actionPermission.module}>
             <AccordionItem value={actionPermission.module}>
               <AccordionTrigger>
-                {actionPermission?.module?.toUpperCase()}
+                {actionPermission.module?.toUpperCase()}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

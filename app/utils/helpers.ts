@@ -1,6 +1,6 @@
 import { defaultPageSize } from '@/components/ui/table-data/data-table-pagination';
-import type { PaginationState } from '@tanstack/react-table';
-import type { NonEmptyArray } from '~/types';
+import { type PaginationState } from '@tanstack/react-table';
+import { type NonEmptyArray, type Permissions } from '~/types';
 
 export function findClosest({
   arr,
@@ -57,20 +57,6 @@ export function getPageSizeAndPageIndex({
     pageSize: pageSizeVerified,
     pageIndex,
   };
-}
-
-export function groupPermissionsByModule(
-  permissions: any,
-): Array<{ module: string; actions: Array<any> }> {
-  return Object.values(
-    permissions.reduce((acc: any, { module, ...rest }: any) => {
-      if (!acc[module]) {
-        acc[module] = { module, actions: [] };
-      }
-      acc[module].actions.push({ ...rest });
-      return acc;
-    }, {}),
-  );
 }
 
 export const mapReplacer = (key: any, value: any) => {
