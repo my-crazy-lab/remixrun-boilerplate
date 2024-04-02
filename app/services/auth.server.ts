@@ -2,19 +2,31 @@ import { Authenticator } from 'remix-auth';
 import { sessionStorage } from '~/services/session.server';
 import { FormStrategy } from 'remix-auth-form';
 import bcrypt from 'bcrypt';
-
+import { redirect } from '@remix-run/node';
 import { mongodb } from '~/utils/db.server';
 import { dotenv } from './dotenv.server';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
 import { sendEmail } from './mail.server';
 import { v4 as uuidv4 } from 'uuid';
-import { json } from '@remix-run/node';
+import {
+  EXPIRED_RESET_PASSWORD,
+  EXPIRED_VERIFICATION_CODE,
+} from './constants.server';
+import ROUTE_NAME from '~/constants/route';
+import { ERROR } from '~/constants/common';
+import { type Users } from '~/types';
 
+interface AuthenticatorSessionData {
+  userId: string;
+}
 // Create an instance of the authenticator, pass a generic with what
 // strategies will return and will store in the session
-export const authenticator = new Authenticator<any>(sessionStorage, {
-  throwOnError: true,
-});
+export const authenticator = new Authenticator<AuthenticatorSessionData>(
+  sessionStorage,
+  {
+    throwOnError: true,
+  },
+);
 
 export function hashPassword(password: string) {
   return bcrypt.hashSync(`${dotenv.PLAIN_TEXT}${password}`, dotenv.SALT_ROUND);
@@ -30,25 +42,25 @@ export async function verifyAndSendCode({
   password: string;
   username: string;
 }) {
-  const usersCol = mongodb.collection('users');
+  const user = await mongodb.collection<Users>('users').findOne({ username });
+  const bcrypt = user?.services?.password?.bcrypt;
 
-  const user = await usersCol.findOne({ username });
-
-  if (!user) {
-    throw json({ message: 'User not found !' }, { status: 404 });
+  // always display incorrect account error
+  if (!user || !bcrypt) {
+    throw new Error('INCORRECT_ACCOUNT');
   }
   const verified = await compareHash({
     password,
-    hash: user?.services?.password?.bcrypt,
+    hash: bcrypt,
   });
 
-  if (!verified) throw new Error('Not correct account');
+  if (!verified) throw new Error('INCORRECT_ACCOUNT');
 
-  const verificationCode = await sendVerificationCode({ email: user.email });
+  const verificationCode = await sendVerificationCode(user.email);
   return verificationCode;
 }
 
-export async function sendVerificationCode({ email }: { email: string }) {
+export async function sendVerificationCode(email: string) {
   const verificationCode = Math.floor(
     100000 + Math.random() * 900000,
   ).toString();
@@ -63,7 +75,10 @@ export async function sendVerificationCode({ email }: { email: string }) {
       $set: {
         verification: {
           code: verificationCode,
-          expired: getFutureTimeFromToday(10, 'minutes').toDate(),
+          expired: getFutureTimeFromToday(
+            EXPIRED_VERIFICATION_CODE,
+            'minutes',
+          ).toDate(),
           token,
         },
       },
@@ -97,16 +112,12 @@ export async function isResetPassExpired({ token }: { token: string }) {
   return !account?._id;
 }
 
-export async function verifyCode({ code }: { code: string }) {
-  const isExpired = await mongodb.collection('users').findOne({
-    'verification.expired': { $gt: momentTz().toDate() },
-  });
-  if (!isExpired?._id) {
-    throw new Error('Verification code expired !');
-  }
-
-  const account = await mongodb.collection('users').findOneAndUpdate(
+export async function verifyCode(
+  code: string,
+): Promise<AuthenticatorSessionData> {
+  const account = await mongodb.collection<Users>('users').findOneAndUpdate(
     {
+      'verification.expired': { $gt: momentTz().toDate() },
       'verification.code': code,
     },
     {
@@ -116,12 +127,12 @@ export async function verifyCode({ code }: { code: string }) {
     },
   );
   if (!account?._id) {
-    throw new Error('Code incorrect!');
+    throw new Error('CODE_INCORRECT_OR_EXPIRED');
   }
   return { userId: account._id };
 }
 
-export async function resetPassword({ email }: { email: string }) {
+export async function resetPassword(email: string) {
   const resetToken = uuidv4();
 
   const account = await mongodb.collection('users').findOneAndUpdate(
@@ -131,21 +142,24 @@ export async function resetPassword({ email }: { email: string }) {
     {
       $set: {
         resetPassword: {
-          expired: getFutureTimeFromToday(15, 'minutes').toDate(),
+          expired: getFutureTimeFromToday(
+            EXPIRED_RESET_PASSWORD,
+            'minutes',
+          ).toDate(),
           token: resetToken,
         },
       },
     },
   );
   if (!account?._id) {
-    throw new Error('Email incorrect !');
+    throw new Error(ERROR.EMAIL_INCORRECT);
   }
 
   await sendEmail({
     to: email,
     from: dotenv.MAIL_FROM,
     subject: 'Your link to reset password',
-    text: `${dotenv.DOMAIN_BTASKEE_BE}/reset-password/${resetToken} is link to reset your password`,
+    text: `${dotenv.DOMAIN_BTASKEE_BE}${ROUTE_NAME.RESET_PASSWORD}/${resetToken} is link to reset your password`,
   });
 }
 
@@ -156,9 +170,9 @@ export async function changePassword({
   token: string;
   newPassword: string;
 }) {
-  if (!newPassword || !token) throw new Error('Not accept');
+  if (!newPassword || !token) throw new Error('UNKNOWN_ERROR');
 
-  const hashedPassword = await hashPassword(newPassword);
+  const hashedPassword = hashPassword(newPassword);
 
   const account = await mongodb.collection('users').findOneAndUpdate(
     {
@@ -173,8 +187,9 @@ export async function changePassword({
     },
   );
 
+  // update failure, redirect into reset password page
   if (!account?._id) {
-    throw new Error('This link expired !');
+    return redirect(ROUTE_NAME.RESET_PASSWORD);
   }
 }
 
@@ -185,10 +200,7 @@ authenticator.use(
     if (!code) {
       throw new Error('Login failure');
     }
-
-    const user = await verifyCode({
-      code,
-    });
+    const user = await verifyCode(code);
     // the type of this user must match the type you pass to the Authenticator
     // the strategy will automatically inherit the type if you instantiate
     // directly inside the `use` method

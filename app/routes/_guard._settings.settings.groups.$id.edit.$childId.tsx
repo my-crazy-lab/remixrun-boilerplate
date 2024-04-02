@@ -13,7 +13,7 @@ import {
 } from '@remix-run/react';
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
-import { PERMISSIONS } from '~/constants/common';
+import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hoc404, hocAction, hocLoader, res403GroupParent } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
@@ -23,6 +23,7 @@ import {
   searchUser,
   updateGroups,
 } from '~/services/role-base-access-control.server';
+import { type ReturnValueIgnorePromise } from '~/types';
 
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
@@ -32,37 +33,45 @@ export const action = hocAction(async ({ params }, { formData }) => {
       description,
       userIds: JSON.parse(userIds),
       roleIds: JSON.parse(roleIds),
-      groupId: params.id,
+      groupId: params.id || '',
     });
 
     return redirect(`/settings/groups/${params.id}`);
-  } catch (err: any) {
-    return json({ err });
+  } catch (error) {
+    if (error instanceof Error) {
+      return json({ error: error.message });
+    }
+    return json({ error: ERROR.UNKNOWN_ERROR });
   }
 }, PERMISSIONS.WRITE_GROUP);
 
 interface LoaderData {
-  group: {
-    _id: string;
-    roles: Array<{
+  group: ReturnValueIgnorePromise<
+    typeof getGroupDetail<{
       _id: string;
+      roles: Array<{
+        _id: string;
+        name: string;
+        description: string;
+      }>;
+      users: Array<{
+        _id: string;
+        email: string;
+        username: string;
+      }>;
+      children: Array<{
+        _id: string;
+        name?: string;
+        description?: string;
+      }>;
       name: string;
       description: string;
-    }>;
-    users: Array<{
-      _id: string;
-      email: string;
-      username: string;
-    }>;
-    children: Array<{
-      _id: string;
-      name?: string;
-      description?: string;
-    }>;
-    name: string;
-    description: string;
-  };
-  isParent: boolean;
+      parent: string;
+      hierarchy: number;
+    }>
+  >;
+  users: ReturnValueIgnorePromise<typeof searchUser>;
+  roles: ReturnValueIgnorePromise<typeof getRolesOfGroups>;
 }
 
 export const loader = hocLoader(
@@ -70,7 +79,6 @@ export const loader = hocLoader(
     const groupId = params.id || '';
     const childId = params.childId || '';
 
-    // roles must be get from parent
     const roles = await getRolesOfGroups(groupId);
 
     const url = new URL(request.url);
@@ -82,12 +90,13 @@ export const loader = hocLoader(
       userId,
       groupId: childId,
     });
+    // just parent can modify their children groups
     if (!isParent) {
       throw new Response(null, res403GroupParent);
     }
 
     const group = await hoc404(async () =>
-      getGroupDetail<LoaderData>({
+      getGroupDetail<LoaderData['group']>({
         projection: {
           roles: 1,
           users: 1,
@@ -109,49 +118,55 @@ export const loader = hocLoader(
   PERMISSIONS.WRITE_GROUP,
 );
 
+interface FormData {
+  name: string;
+  description: string;
+  userIds: Array<{
+    value: string;
+    label: string;
+  }>;
+  roleIds: Array<{
+    value: string;
+    label: string;
+  }>;
+}
+
 export default function Screen() {
-  const { group, roles, users } = useLoaderData<any>();
+  const { group, roles, users } = useLoaderData<LoaderData>();
   const navigation = useNavigation();
-
   const [searchParams, setSearchParams] = useSearchParams();
-
   const navigate = useNavigate();
+  const submit = useSubmit();
+
   const goBack = () => navigate(-1);
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<any>({
+  const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
       name: group.name,
       description: group.description,
-      userIds: group.users?.map((user: any) => ({
+      userIds: group.users?.map(user => ({
         value: user._id,
         label: user.username,
       })),
-      roleIds: group.roles?.map((role: any) => ({
+      roleIds: group.roles?.map(role => ({
         value: role._id,
         label: role.name,
       })),
     },
   });
 
-  const submit = useSubmit();
-
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const formData = new FormData();
 
     formData.append('name', data.name);
     formData.append('description', data.description);
     formData.append(
       'userIds',
-      JSON.stringify(data.userIds.map((user: any) => user.value)),
+      JSON.stringify(data.userIds.map(user => user.value)),
     );
     formData.append(
       'roleIds',
-      JSON.stringify(data.roleIds.map((role: any) => role.value)),
+      JSON.stringify(data.roleIds.map(role => role.value)),
     );
 
     submit(formData, { method: 'post' });

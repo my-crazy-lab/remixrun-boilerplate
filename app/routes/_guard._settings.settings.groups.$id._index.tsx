@@ -1,3 +1,4 @@
+import { Breadcrumbs } from '@/components/btaskee/Breadcrumbs';
 import Typography from '@/components/btaskee/Typography';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,16 +16,16 @@ import UsersIcon from '@/images/user-group.svg';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { Link, useLoaderData, useNavigate, useParams } from '@remix-run/react';
+import { Link, useLoaderData, useOutletContext, useParams } from '@remix-run/react';
 import { Plus } from 'lucide-react';
-import { useCallback } from 'react';
 import { PERMISSIONS } from '~/constants/common';
-import { hoc404 } from '~/hoc/remix';
+import { hoc404, res403 } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import { getUserId } from '~/services/helpers.server';
 import {
   getGroupDetail,
   isParentOfGroup,
+  verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 
 interface LoaderData {
@@ -54,13 +55,17 @@ interface LoaderData {
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const groupId = params.id || '';
   const userId = await getUserId({ request });
-
   const isParent = await isParentOfGroup({
     userId,
     groupId,
   });
 
-  // accept parent and user(in group) with permission Read
+  const userInGroup = await verifyUserInGroup({ userId, groupId });
+  // just accept user is parent or member of group
+  if (!isParent && !userInGroup) {
+    throw new Response(null, res403);
+  }
+
   const group = await hoc404(async () =>
     getGroupDetail<LoaderData>({
       userId,
@@ -80,25 +85,34 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   );
   return json({ group, isParent });
 };
+// export const handle = {
+//   breadcrumb: (data: { group: any }) => {
 
+//     const { group } = data
+
+//     return <BreadcrumbsLink to={`/settings/groups/${group._id}`} label={group.name} />
+//   },
+// }
 export default function Screen() {
+  const test = useOutletContext();
+
   const params = useParams();
   const loaderData = useLoaderData<LoaderData>();
+  console.log(test)
   const globalData = useGlobalStore(state => state);
-
-  const navigate = useNavigate();
-  const goBack = useCallback(() => navigate(-1), [navigate]);
 
   return (
     <>
-      <div className="flex justify-between items-center text-xl bg-secondary p-6 rounded-md">
-        <div className="flex items-center gap-4">
+      <div className="flex justify-between items-center bg-secondary p-6 rounded-md">
+        <div className="flex flex-col gap-4">
           {/* <Button onClick={goBack}>
             <MoveLeft className="h-5 w-5" />
           </Button> */}
           <Typography variant='h4'>{loaderData.group?.name}</Typography>
+          <Breadcrumbs className='mr-auto' />
 
         </div>
+
         {globalData.permissions?.includes(PERMISSIONS.WRITE_GROUP) ? (
           <Link to={`/settings/groups/${params.id}/create`}>
             <Button className='gap-2'><Plus />Create new group</Button>

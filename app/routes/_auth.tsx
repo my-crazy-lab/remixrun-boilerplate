@@ -1,22 +1,14 @@
 import { Outlet } from '@remix-run/react';
-import { useTranslation } from 'react-i18next';
-
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 
-export async function action({ request, params }: ActionFunctionArgs) {
-  return null;
-}
-
-export async function loader({ request, params }: LoaderFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   return await authenticator.isAuthenticated(request, {
     successRedirect: '/',
   });
 }
 
 export default function Screen() {
-  const { t } = useTranslation();
-
   return (
     <div className="container relative hidden h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">

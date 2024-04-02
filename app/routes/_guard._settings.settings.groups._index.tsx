@@ -1,3 +1,4 @@
+import { Breadcrumbs } from '@/components/btaskee/Breadcrumbs';
 import Typography from '@/components/btaskee/Typography';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import TabGroupIcon from '@/images/tab-group.svg';
@@ -5,6 +6,7 @@ import UsersIcon from '@/images/user-group.svg';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 interface LoaderData {
@@ -15,7 +17,7 @@ interface LoaderData {
   }>;
 }
 
-// don't need permission Read
+// Don't need permission Read
 // Users added to groups obviously know how many groups they have
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
@@ -30,6 +32,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
+  const { t } = useTranslation(['common', 'settings', 'groups']);
   const loaderData = useLoaderData<LoaderData>();
 
   return (
@@ -39,13 +42,14 @@ export default function Screen() {
           <h2 className="text-2xl font-bold tracking-tight">
             Groups
           </h2>
-          <p className="text-muted-foreground">
+          <Breadcrumbs className='mr-auto' />
+          {/* <p className="text-muted-foreground">
             Here&apos;s a list of your groups!
-          </p>
+          </p> */}
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4">
-        {loaderData.groups.map((group, index: number) => {
+        {loaderData.groups?.map((group, index: number) => {
           return (
             <Link key={index} to={`/settings/groups/${group._id}`}>
               <Card>

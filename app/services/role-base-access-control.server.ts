@@ -1,5 +1,5 @@
 import { PERMISSIONS } from '~/constants/common';
-import type { Document } from 'mongodb';
+import { type Document } from 'mongodb';
 import { mongodb } from '~/utils/db.server';
 import {
   newRecordCommonField,
@@ -11,7 +11,13 @@ import {
   convertRolesToPermissions,
   groupPermissionsByModule,
 } from '~/utils/common';
+import { type Permissions, type Roles, type Groups, type Users } from '~/types';
+import { type GetRolesOfGroupsProjection } from '~/types/bridge';
+import { res404 } from '~/hoc/remix';
 
+/**
+ * @description verify the user is super-user or not
+ */
 export async function isRoot(userId: string) {
   const permissions: Array<string> = await getUserPermissions(userId);
   return Boolean(permissions.includes(PERMISSIONS.ROOT));
@@ -22,19 +28,19 @@ export async function verifyPermissions(
   permissions: Array<string>,
 ) {
   const userId = await getUserId({ request });
-  const rolesCol = mongodb.collection('roles');
+  const rolesCol = mongodb.collection<Roles>('roles');
   const roles = await rolesCol
     .find({ permissions: { $in: permissions } }, { projection: { _id: 1 } })
     .toArray();
 
-  const groupFound = await mongodb.collection('groups').findOne({
+  const groupFound = await mongodb.collection<Groups>('groups').findOne({
     userIds: userId,
     roleIds: { $in: roles.map(role => role._id) },
   });
+
   if (groupFound) {
     return true;
   }
-
   return false;
 }
 
@@ -48,7 +54,7 @@ export async function requirePermissions(
   }
 }
 
-export async function getUserPermissions(userId: string, moreDetail?: boolean) {
+export async function getUserPermissions(userId: string) {
   const matchGroups = {
     $match: {
       userIds: userId,
@@ -73,13 +79,13 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
 
   const aggregate = [matchGroups, lookupRole, unwindRole];
 
-  const groups: any = await mongodb
-    .collection('groups')
+  const groups = await mongodb
+    .collection<Groups>('groups')
     .aggregate(aggregate)
     .toArray();
 
   const permissions = convertRolesToPermissions(
-    groups.map((group: any) => group.roles),
+    groups.map(group => group.roles),
   );
 
   if (permissions.includes(PERMISSIONS.ROOT)) {
@@ -87,15 +93,9 @@ export async function getUserPermissions(userId: string, moreDetail?: boolean) {
       _id: 1,
     });
 
-    if (moreDetail) {
-      return allPermissions;
-    }
-
     return allPermissions.map(p => p._id);
   }
-  if (moreDetail) {
-    return groups;
-  }
+
   return permissions;
 }
 
@@ -105,10 +105,15 @@ export async function createGroup({
   parent,
   userIds,
   roleIds,
-}: any) {
-  const groupCol = mongodb.collection<any>('groups');
+}: Pick<Groups, 'name' | 'description' | 'userIds' | 'roleIds'> & {
+  parent: string;
+}) {
+  const groupCol = mongodb.collection<Groups>('groups');
+
   const parentGroup = await groupCol.findOne({ _id: parent });
-  if (!parentGroup) return;
+  if (!parentGroup) {
+    throw new Error('PARENT_GROUP_NOT_FOUND');
+  }
 
   await groupCol.insertOne({
     ...newRecordCommonField(),
@@ -117,7 +122,7 @@ export async function createGroup({
     userIds: userIds,
     roleIds: roleIds,
     genealogy: [...(parentGroup.genealogy || []), parent],
-    hierarchy: parentGroup.hierarchy + 1,
+    hierarchy: parentGroup.hierarchy + 1, // increase hierarchy
   });
 }
 
@@ -127,8 +132,10 @@ export async function updateGroups({
   description,
   userIds,
   roleIds,
-}: any) {
-  await mongodb.collection('groups').updateOne(
+}: Pick<Groups, 'name' | 'description' | 'userIds' | 'roleIds'> & {
+  groupId: string;
+}) {
+  await mongodb.collection<Groups>('groups').updateOne(
     { _id: groupId },
     {
       $set: {
@@ -145,7 +152,7 @@ export async function updateGroups({
 export async function getRoleDetail(roleId: string) {
   const roles = await mongodb
     .collection('roles')
-    .aggregate([
+    .aggregate<Roles & { actionPermissions: Permissions[] }>([
       { $match: { _id: roleId } },
       {
         $lookup: {
@@ -158,7 +165,7 @@ export async function getRoleDetail(roleId: string) {
     ])
     .toArray();
 
-  if (!roles.length) return {};
+  if (!roles.length) throw new Response(null, res404);
 
   return {
     ...roles[0],
@@ -169,7 +176,7 @@ export async function getRoleDetail(roleId: string) {
 export async function getRolesOfGroups(groupId: string) {
   const groups = await mongodb
     .collection('groups')
-    .aggregate([
+    .aggregate<GetRolesOfGroupsProjection>([
       {
         $match: { $or: [{ genealogy: { $in: [groupId] } }, { _id: groupId }] },
       },
@@ -193,7 +200,7 @@ export async function getRolesOfGroups(groupId: string) {
 export async function searchUser(searchText: string) {
   const pattern = new RegExp(searchText, 'i');
   const users = await mongodb
-    .collection('users')
+    .collection<Users>('users')
     .find({
       $or: [
         {
@@ -208,6 +215,10 @@ export async function searchUser(searchText: string) {
   return users;
 }
 
+/**
+ * @description get groups detail with 2 cases: parent or not
+ * @param isParent have another logic to get data if user is parent of group
+ */
 export async function getGroupDetail<T = Document>({
   isParent,
   userId,
@@ -274,7 +285,10 @@ export async function getGroupDetail<T = Document>({
       ])
       .toArray();
 
-    return group?.[0] as T | undefined;
+    if (!group?.[0]) {
+      throw new Response(null, res404);
+    }
+    return group?.[0] as T;
   }
 
   const group = await mongodb
@@ -315,7 +329,10 @@ export async function getGroupDetail<T = Document>({
     ])
     .toArray();
 
-  return group?.[0] as T | undefined;
+  if (!group?.[0]) {
+    throw new Response(null, res404);
+  }
+  return group[0] as T;
 }
 
 export async function getGroupPermissions(groupId: string) {
@@ -378,19 +395,18 @@ export async function verifyUserInGroup({
   groupId: string;
 }) {
   const group = await mongodb
-    .collection<any>('groups')
+    .collection<Groups>('groups')
     .findOne({ _id: groupId, userIds: userId });
   return Boolean(group);
 }
 
-export async function getGroupsOfUser<T = Document>({
+export async function getGroupsOfUser<T extends Document = Document>({
   projection,
   userId,
 }: {
   projection: Document;
   userId: string;
 }) {
-  const groupCol = mongodb.collection('groups');
   const lookupUser = {
     $lookup: {
       from: 'users',
@@ -408,8 +424,9 @@ export async function getGroupsOfUser<T = Document>({
     },
   };
 
-  const groups = await groupCol
-    .aggregate([
+  const groups = await mongodb
+    .collection<Groups>('groups')
+    .aggregate<T>([
       {
         $match: {
           userIds: userId,
@@ -420,17 +437,20 @@ export async function getGroupsOfUser<T = Document>({
       { $project: projection },
     ])
     .toArray();
-  return groups as Array<T>;
+  return groups;
 }
 
+/**
+ * @description create role and add roleId into group
+ * (the role must be existed in a group)
+ */
 export async function createRole({
   groupId,
   name,
   permissions,
   description,
-}: any) {
-  const roleCol = mongodb.collection<any>('roles');
-  const { insertedId } = await roleCol.insertOne({
+}: Pick<Roles, 'name' | 'description' | 'permissions'> & { groupId: string }) {
+  const { insertedId } = await mongodb.collection<Roles>('roles').insertOne({
     ...newRecordCommonField(),
     name,
     slug: name.toLocaleLowerCase().split(' ').join('-'),
@@ -439,7 +459,7 @@ export async function createRole({
   });
 
   await mongodb
-    .collection('groups')
+    .collection<Groups>('groups')
     .updateOne({ _id: groupId }, { $push: { roleIds: insertedId } });
 }
 
@@ -448,13 +468,8 @@ export async function updateRole({
   name,
   permissions,
   description,
-}: {
-  roleId: any;
-  name: string;
-  permissions: string[];
-  description: string;
-}) {
-  await mongodb.collection('roles').updateOne(
+}: Pick<Roles, 'name' | 'permissions' | 'description'> & { roleId: string }) {
+  await mongodb.collection<Roles>('roles').updateOne(
     { _id: roleId },
     {
       $set: {
@@ -470,7 +485,7 @@ export async function updateRole({
 
 export async function getAllPermissions({ projection }: any) {
   const data = await mongodb
-    .collection('permissions')
+    .collection<Permissions>('permissions')
     .find({}, { projection })
     .toArray();
   return data;
@@ -547,6 +562,9 @@ export async function getPermissionsOfGroup(groupId: string) {
   return [...setOfPermissions];
 }
 
+/**
+ * @description verify the current user is parent of group or not
+ */
 export async function isParentOfGroup({
   userId,
   groupId,

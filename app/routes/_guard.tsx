@@ -3,16 +3,16 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import ROUTE_NAME from '~/constants/route';
 import type { GlobalProps, GlobalStore } from '~/hooks/useGlobalStore';
 import { GlobalContext, createGlobalStore } from '~/hooks/useGlobalStore';
 import { authenticator } from '~/services/auth.server';
 import { getUserPermissions } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request, {
-    failureRedirect: '/sign-in',
+    failureRedirect: ROUTE_NAME.SIGN_IN,
   });
   const session = await getSession(request.headers.get('cookie'));
 
@@ -29,7 +29,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export default function Screen() {
-  const { t } = useTranslation();
   const { user } = useLoaderData<{ user: GlobalProps }>();
 
   const storeRef = React.useRef<GlobalStore>();

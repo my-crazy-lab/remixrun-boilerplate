@@ -113,7 +113,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ actionsHistory, total });
 };
 
-const renderSubComponent = ({ row }: { row: Row<any> }) => (
+const renderSubComponent = ({ row }: { row: Row }) => (
   <pre style={{ fontSize: '10px' }}>
     <code>{JSON.stringify(row.getValue('data'), null, 2)}</code>
   </pre>

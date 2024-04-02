@@ -1,3 +1,9 @@
 {
-  "CREATE_ACCOUNT": "Hello"
+  "CREATE_ACCOUNT": "Hello",
+  "SEND_EMAIL": "Send Email",
+  "settings": {
+    "groups": {
+      "GROUPS_MANAGEMENT": "Groups management"
+    }
+  }
 }

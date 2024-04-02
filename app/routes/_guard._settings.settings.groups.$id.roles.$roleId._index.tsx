@@ -12,6 +12,8 @@ import { json } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
 import _ from 'lodash';
 import { MoveLeft } from 'lucide-react';
+import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '~/constants/common';
 import { hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
@@ -20,6 +22,11 @@ import {
   isParentOfGroup,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
+import { type ReturnValueIgnorePromise } from '~/types';
+
+interface LoaderData {
+  role: ReturnValueIgnorePromise<typeof getRoleDetail>;
+}
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
@@ -31,22 +38,24 @@ export const loader = hocLoader(
       groupId,
     });
     const userInGroup = await verifyUserInGroup({ userId, groupId });
+
+    // just parent or member in group can view role detail of group
     if (!isParent && !userInGroup) {
       throw new Response(null, res403);
     }
 
-    if (!params.roleId) return json({ role: {} });
-    const role = await getRoleDetail(params.roleId);
-
+    const role = await getRoleDetail(params.roleId || '');
     return json({ role });
   },
   PERMISSIONS.READ_ROLE,
 );
 
 export default function RolesDetail() {
-  const loaderData = useLoaderData<any>();
+  const { t } = useTranslation();
+
+  const loaderData = useLoaderData<LoaderData>();
   const navigate = useNavigate();
-  const goBack = () => navigate(-1);
+  const goBack = useCallback(() => navigate(-1), [navigate]);
 
   return (
     <>
@@ -60,11 +69,11 @@ export default function RolesDetail() {
         <p className="text-base mt-2">{loaderData.role.description}</p>
       </div>
       <ScrollArea>
-        {_.map(loaderData.role.actionPermissions, (actionPermission: any) => (
+        {_.map(loaderData.role.actionPermissions, actionPermission => (
           <Accordion type="single" collapsible>
             <AccordionItem value={actionPermission.module}>
               <AccordionTrigger>
-                {actionPermission?.module?.toUpperCase()} features
+                {actionPermission?.module?.toUpperCase()} {t('FEATURE')}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
