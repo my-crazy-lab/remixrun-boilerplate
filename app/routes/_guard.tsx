@@ -20,10 +20,11 @@ import React from 'react';
 import type { GlobalProps, GlobalStore } from '~/hooks/useGlobalStore';
 import { GlobalContext, createGlobalStore } from '~/hooks/useGlobalStore';
 import { getUserPermissions } from '~/services/role-base-access-control.server';
+import ROUTE_NAME from '~/constants/route';
 
-export async function loader({ params, request }: LoaderFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request, {
-    failureRedirect: '/sign-in',
+    failureRedirect: ROUTE_NAME.SIGN_IN,
   });
   const session = await getSession(request.headers.get('cookie'));
 
@@ -61,7 +62,7 @@ export default function Screen() {
             <Link
               to="/settings/profile"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
-              Settings
+              {t('SETTINGS')}
             </Link>
           </nav>
           <div className="ml-auto flex items-center space-x-4">

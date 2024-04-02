@@ -13,6 +13,7 @@ import {
 } from '~/utils/common';
 import { type Permissions, type Roles, type Groups, type Users } from '~/types';
 import { type GetRolesOfGroupsProjection } from '~/types/bridge';
+import { res404 } from '~/hoc/remix';
 
 /**
  * @description verify the user is super-user or not
@@ -150,8 +151,8 @@ export async function updateGroups({
 
 export async function getRoleDetail(roleId: string) {
   const roles = await mongodb
-    .collection<Roles>('roles')
-    .aggregate([
+    .collection('roles')
+    .aggregate<Roles & { actionPermissions: Permissions[] }>([
       { $match: { _id: roleId } },
       {
         $lookup: {
@@ -164,7 +165,7 @@ export async function getRoleDetail(roleId: string) {
     ])
     .toArray();
 
-  if (!roles.length) return {};
+  if (!roles.length) throw new Response(null, res404);
 
   return {
     ...roles[0],
@@ -174,7 +175,7 @@ export async function getRoleDetail(roleId: string) {
 
 export async function getRolesOfGroups(groupId: string) {
   const groups = await mongodb
-    .collection<Groups>('groups')
+    .collection('groups')
     .aggregate<GetRolesOfGroupsProjection>([
       {
         $match: { $or: [{ genealogy: { $in: [groupId] } }, { _id: groupId }] },
@@ -284,7 +285,10 @@ export async function getGroupDetail<T = Document>({
       ])
       .toArray();
 
-    return group?.[0] as T | undefined;
+    if (!group?.[0]) {
+      throw new Response(null, res404);
+    }
+    return group?.[0] as T;
   }
 
   const group = await mongodb
@@ -325,7 +329,10 @@ export async function getGroupDetail<T = Document>({
     ])
     .toArray();
 
-  return group?.[0] as T | undefined;
+  if (!group?.[0]) {
+    throw new Response(null, res404);
+  }
+  return group[0] as T;
 }
 
 export async function getGroupPermissions(groupId: string) {
@@ -461,13 +468,8 @@ export async function updateRole({
   name,
   permissions,
   description,
-}: {
-  roleId: any;
-  name: string;
-  permissions: string[];
-  description: string;
-}) {
-  await mongodb.collection('roles').updateOne(
+}: Pick<Roles, 'name' | 'permissions' | 'description'> & { roleId: string }) {
+  await mongodb.collection<Roles>('roles').updateOne(
     { _id: roleId },
     {
       $set: {

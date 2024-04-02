@@ -17,13 +17,17 @@ import ErrorMessageBase from '@/components/ui/MessageBase';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { json, redirect } from '@remix-run/node';
+import {
+  json,
+  redirect,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+} from '@remix-run/node';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import _ from 'lodash';
 import { Slash } from 'lucide-react';
-import { PERMISSIONS } from '~/constants/common';
+import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { useForm, Controller } from 'react-hook-form';
 import {
@@ -37,6 +41,11 @@ import { useLoaderData, useSubmit } from '@remix-run/react';
 import ROUTE_NAME from '~/constants/route';
 import { getUserId } from '~/services/helpers.server';
 import { groupPermissionsByModule } from '~/utils/helpers';
+import { type ReturnValueIgnorePromise } from '~/types';
+
+interface LoaderData {
+  role: ReturnValueIgnorePromise<typeof getRoleDetail>;
+}
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
@@ -67,50 +76,50 @@ export const loader = hocLoader(
   PERMISSIONS.WRITE_ROLE,
 );
 
-export interface IFormData {
-  formData: {
-    name: string;
-    description: string;
-    permissions: string;
-  };
+export interface FormData {
+  name: string;
+  description: string;
+  permissions: string;
 }
 
 export const action = hocAction(
-  async ({ params }: ActionFunctionArgs, { formData }: IFormData) => {
+  async ({ params }: ActionFunctionArgs, { formData }) => {
     try {
       const { name, description, permissions } = formData;
-      updateRole({
+      await updateRole({
         name,
         description,
         permissions: JSON.parse(permissions),
-        roleId: params.roleId,
+        roleId: params.roleId || '',
       });
 
       return redirect(`${ROUTE_NAME.GROUP_SETTING}/${params.id}`);
-    } catch (err: any) {
-      return json({ err });
+    } catch (error) {
+      if (error instanceof Error) {
+        return json({ error: error.message });
+      }
+      return json({ error: ERROR.UNKNOWN_ERROR });
     }
   },
   PERMISSIONS.WRITE_ROLE,
 );
 
 export default function Screen() {
-  const { role, groupPermissions } = useLoaderData<typeof loader>();
-  console.log(role, groupPermissions);
+  const { role } = useLoaderData<LoaderData>();
 
   const submit = useSubmit();
 
   const getDefaultValues = () => {
-    const defaultValues: any = {
+    const defaultValues = {
       permissions: {},
       name: role.name || '',
       description: role.description || '',
     };
 
-    role?.actionPermissions?.forEach((permissionFromServer: any) => {
+    role?.actionPermissions?.forEach(permissionFromServer => {
       defaultValues.permissions[permissionFromServer.module] = {};
 
-      permissionFromServer.actions.forEach((action: any) => {
+      permissionFromServer.actions.forEach(action => {
         defaultValues.permissions[permissionFromServer.module][action._id] =
           role?.permissions?.includes(action._id) || false;
       });
@@ -126,21 +135,13 @@ export default function Screen() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<any>(getDefaultValues());
+  } = useForm<FormData>(getDefaultValues());
 
-  const onSubmit = ({
-    name,
-    permissions,
-    description,
-  }: {
-    name: string;
-    permissions: any;
-    description: string;
-  }) => {
+  const onSubmit = ({ name, permissions, description }: FormData) => {
     const selectedPermissions: string[] = [];
 
-    role?.actionPermissions?.forEach((actionPermission: any) => {
-      actionPermission.actions.forEach((action: any) => {
+    role?.actionPermissions?.forEach(actionPermission => {
+      actionPermission.actions.forEach(action => {
         if (permissions?.[actionPermission.module]?.[action._id]) {
           selectedPermissions.push(action._id);
         }

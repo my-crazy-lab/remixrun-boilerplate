@@ -13,6 +13,7 @@ import {
 } from '@remix-run/react';
 import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
@@ -23,8 +24,7 @@ import {
   searchUser,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import { type Users } from '~/types';
-import { type GetRolesOfGroupsProjection } from '~/types/bridge';
+import { type ReturnValueIgnorePromise } from '~/types';
 
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
@@ -47,8 +47,8 @@ export const action = hocAction(async ({ params }, { formData }) => {
 }, PERMISSIONS.WRITE_GROUP);
 
 interface LoaderData {
-  roles: Array<GetRolesOfGroupsProjection['roles']>;
-  users: Users[];
+  roles: ReturnValueIgnorePromise<typeof getRolesOfGroups>;
+  users: ReturnValueIgnorePromise<typeof searchUser>;
 }
 
 export const loader = hocLoader(
@@ -82,6 +82,8 @@ interface FormData {
 }
 
 export default function Screen() {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const goBack = () => navigate(-1);
   const navigation = useNavigation();
@@ -195,7 +197,7 @@ export default function Screen() {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button type="submit">Save changes</Button>
+          <Button type="submit">{t('SAVE')}</Button>
         </div>
       </form>
     </>

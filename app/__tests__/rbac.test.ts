@@ -21,7 +21,7 @@ import {
   verifyPermissions,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import type { Permissions, Users } from '~/types';
+import { type Permissions, type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
 
 const mockRecordCommonField = {
@@ -440,8 +440,8 @@ describe('Role base access control', () => {
     it('Should delete user successfully', async () => {
       await deleteUser(managerId);
 
-      const deletedUserFound: any = await mongodb
-        .collection('users')
+      const deletedUserFound = await mongodb
+        .collection<Users>('users')
         .findOne({ _id: managerId });
 
       expect(deletedUserFound.status).toBe('REMOVED');
