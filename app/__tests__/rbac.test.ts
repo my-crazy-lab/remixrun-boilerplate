@@ -7,7 +7,6 @@ import {
   getAllPermissions,
   getGroupDetail,
   getGroupPermissions,
-  getGroupsOfUser,
   getPermissionsOfGroup,
   getRoleDetail,
   getRolesOfGroups,
@@ -21,8 +20,19 @@ import {
   verifyPermissions,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import type { Permissions, Users } from '~/types';
+import type { Groups, Permissions, Roles, Users } from '~/types';
+import {
+  describe,
+  expect,
+  beforeEach,
+  afterEach,
+  afterAll,
+  it,
+  beforeAll,
+  jest,
+} from '@jest/globals';
 import { mongodb } from '~/utils/db.server';
+import { WithId } from 'mongodb';
 
 const mockRecordCommonField = {
   createdAt: new Date('2024-03-24T00:00:00.000Z'),
@@ -97,28 +107,57 @@ describe('Role base access control', () => {
         _id: rootId,
         email: 'root@gmail.com',
         username: 'Root user',
+        createdAt: new Date(),
+        status: 'ACTIVE',
+        cities: ['Hồ Chí Minh'],
+        services: {
+          password: {
+            bcrypt: 'bcrypt',
+          },
+        },
+        verification: {
+          code: '123456',
+          token: 'xxxxx',
+          expired: new Date('2024-02-01'),
+        },
+        resetPassword: {
+          token: 'resetXxxx',
+          expired: new Date('2024-02-01'),
+        },
       },
       {
         _id: managerId,
         email: 'manager@gmail.com',
         username: 'Manager user',
+        createdAt: new Date(),
+        status: 'ACTIVE',
+        cities: ['Hà Nội'],
       },
       {
         _id: leaderId,
         email: 'leader@gmail.com',
         username: 'Leader user',
+        createdAt: new Date('2024-03-25'),
+        status: 'ACTIVE',
+        cities: ['Đà Nẵng'],
       },
       {
         _id: employeeId,
         email: 'employee@gmail.com',
         username: 'Employee user',
+        createdAt: new Date('2024-04-01'),
+        status: 'INACTIVE',
+        cities: ['Huế'],
       },
     ]);
 
-    await mongodb.collection('roles').insertMany([
+    await mongodb.collection<Roles>('roles').insertMany([
       {
         _id: rootId,
         permissions: [rootId],
+        createdAt: new Date('2024-02-01'),
+        status: 'ACTIVE',
+        slug: 'a-s-k-e-r',
         ...dataRootRole,
       },
       {
@@ -126,66 +165,124 @@ describe('Role base access control', () => {
         permissions: [managerId],
         name: 'Manager role',
         description: 'Manager description',
+        createdAt: new Date('2024-03-01'),
+        status: 'ACTIVE',
+        slug: 'm-a-n-a-g-e-r',
       },
       {
         _id: leaderId,
         permissions: [leaderId],
         name: 'Leader role',
         description: 'Leader description',
+        createdAt: new Date('2024-04-01'),
+        status: 'ACTIVE',
+        slug: 'l-e-a-d-e-r',
       },
       {
         _id: employeeId,
         permissions: [employeeId],
         name: 'Employee role',
         description: 'Employee description',
+        createdAt: new Date('2024-03-01'),
+        status: 'ACTIVE',
+        slug: 'm-a-n-a-g-e-r',
       },
     ]);
 
-    await mongodb.collection('groups').insertMany([
-      { _id: rootId, userIds: [rootId], roleIds: [rootId] },
-      { _id: managerId, userIds: [managerId], roleIds: [managerId] },
-      { _id: leaderId, userIds: [leaderId], roleIds: [leaderId] },
-      { _id: employeeId, userIds: [employeeId], roleIds: [employeeId] },
+    await mongodb.collection<Groups>('groups').insertMany([
+      {
+        _id: rootId,
+        userIds: [rootId],
+        roleIds: [rootId],
+        name: 'root',
+        description: 'root group desc',
+        genealogy: ['genealogy1'],
+        hierarchy: 2,
+        createdAt: new Date(),
+        status: 'ACTIVE',
+      },
+      {
+        _id: managerId,
+        userIds: [managerId],
+        roleIds: [managerId],
+        name: 'manager group',
+        description: 'manager group desc',
+        genealogy: ['genealogy1'],
+        hierarchy: 2,
+        createdAt: new Date('2024-02-01'),
+        status: 'ACTIVE',
+      },
+      {
+        _id: leaderId,
+        userIds: [leaderId],
+        roleIds: [leaderId],
+        name: 'leader',
+        description: 'leader group desc',
+        genealogy: ['genealogy1'],
+        hierarchy: 2,
+        createdAt: new Date('2024-01-01'),
+        status: 'ACTIVE',
+      },
+      {
+        _id: employeeId,
+        userIds: [employeeId],
+        roleIds: [employeeId],
+        name: 'employee',
+        description: 'employee group desc',
+        genealogy: ['genealogy1'],
+        hierarchy: 2,
+        createdAt: new Date('2024-02-05'),
+        status: 'ACTIVE',
+      },
     ]);
   });
 
   beforeEach(async () => {
-    await mongodb
-      .collection('users')
-      .insertOne({ _id: userId, email: 'test1@gmail.com', username: 'Test 1' });
-    await mongodb
-      .collection('groups')
-      .insertOne({ _id: groupId, userIds: [userId] });
+    await mongodb.collection<Users>('users').insertOne({
+      _id: userId,
+      email: 'test1@gmail.com',
+      username: 'Test 1',
+      createdAt: new Date(),
+      status: 'ACTIVE',
+      cities: ['Hồ Chí Minh'],
+    });
+    await mongodb.collection<Groups>('groups').insertOne({
+      _id: groupId,
+      userIds: [groupId],
+      roleIds: [groupId],
+      name: 'groupName1',
+      description: 'groupName1 desc',
+      genealogy: ['genealogy1'],
+      hierarchy: 2,
+      createdAt: new Date('2023-12-01'),
+      status: 'ACTIVE',
+    });
   });
 
   afterEach(async () => {
-    await mongodb.collection('users').deleteOne({ _id: userId });
-    await mongodb.collection('groups').deleteOne({ _id: groupId });
+    await mongodb.collection<Users>('users').deleteOne({ _id: userId });
+    await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
   });
 
   afterAll(async () => {
-    await mongodb.collection('users').deleteMany({
+    await mongodb.collection<Users>('users').deleteMany({
       _id: {
         $in: [rootId, leaderId, managerId, employeeId],
       },
     });
     await mongodb
-      .collection('groups')
+      .collection<Groups>('groups')
       .deleteMany({ _id: { $in: [rootId, leaderId, managerId, employeeId] } });
     await mongodb
-      .collection('roles')
+      .collection<Roles>('roles')
       .deleteMany({ _id: { $in: [rootId, leaderId, managerId, employeeId] } });
     await mongodb
-      .collection('permissions')
+      .collection<Permissions>('permissions')
       .deleteMany({ _id: { $in: [rootId, leaderId, managerId, employeeId] } });
   });
 
   describe('getGroupsOfUser', () => {
     it('return a response', async () => {
-      const test = await getGroupsOfUser({
-        projection: { email: 1, username: 1 },
-        userId,
-      });
       expect(true).toBe(true);
     });
   });
@@ -227,9 +324,11 @@ describe('Role base access control', () => {
     it('should throw Error when user not have permissions', async () => {
       const permissions = ['not-exist'];
       try {
-        await requirePermissions({ request: {} }, permissions);
-      } catch (error: any) {
-        expect(error.message).toBe("User don't have permission");
+        await requirePermissions({ request: {} as Request }, permissions);
+      } catch (error) {
+        expect((error as { message: string }).message).toEqual(
+          "User don't have permission",
+        );
       }
     });
   });
@@ -246,8 +345,8 @@ describe('Role base access control', () => {
       const mockParams = {
         name: 'test',
         description: 'testing',
-        userIds: rootId,
-        roleIds: rootId,
+        userIds: [rootId],
+        roleIds: [rootId],
         parent: rootId,
       };
       await createGroup(mockParams);
@@ -256,7 +355,9 @@ describe('Role base access control', () => {
         .findOne({ name: mockParams.name });
       expect(newGroupInserted?.description).toBe(mockParams.description);
 
-      await mongodb.collection('groups').deleteOne({ name: mockParams.name });
+      await mongodb
+        .collection<Groups>('groups')
+        .deleteOne({ name: mockParams.name });
     });
   });
 
@@ -267,17 +368,21 @@ describe('Role base access control', () => {
       description: 'Test',
       userIds: ['1'],
       roleIds: ['1'],
+      hierarchy: 1,
+      createdAt: new Date(),
     };
 
     beforeEach(async () => {
-      await mongodb.collection('groups').insertOne({
+      await mongodb.collection<Partial<Groups>>('groups').insertOne({
         _id: mockGroupId,
         ...mockData,
       });
     });
 
     afterEach(async () => {
-      await mongodb.collection('groups').deleteOne({ _id: mockGroupId });
+      await mongodb
+        .collection<Groups>('groups')
+        .deleteOne({ _id: mockGroupId });
     });
 
     it('should update group successfully', async () => {
@@ -289,8 +394,8 @@ describe('Role base access control', () => {
       };
       await updateGroups(mockParams);
 
-      const group = await mongodb
-        .collection('groups')
+      const group: WithId<Groups> | null = await mongodb
+        .collection<Groups>('groups')
         .findOne({ _id: mockGroupId });
       expect(group?.name).toEqual('updated');
     });
@@ -298,7 +403,7 @@ describe('Role base access control', () => {
 
   describe('getRoleDetail', () => {
     it('should return detail of role correctly', async () => {
-      const role = await getRoleDetail(rootId);
+      const role: Partial<Roles> = await getRoleDetail(rootId);
       expect(role?.name).toEqual(dataRootRole.name);
     });
   });
@@ -317,14 +422,84 @@ describe('Role base access control', () => {
     });
   });
 
-  describe.skip('getGroupDetail', () => {
+  describe('getGroupDetail', () => {
+    const groupId1 = 'groupId1';
+    const userId1 = 'userId1';
+    const roleId1 = 'roleId1';
+    const genealogyId1 = 'genealogyId1';
+    const groups = [
+      {
+        _id: groupId1,
+        userIds: [userId1],
+        roleIds: [roleId1],
+        name: 'groupName1',
+        genealogy: [genealogyId1],
+        description: 'groupName1 desc',
+        hierarchy: 2,
+        createdAt: new Date('2023-12-01'),
+        status: 'ACTIVE',
+      },
+      {
+        _id: genealogyId1,
+        userIds: [userId1],
+        roleIds: ['roleId2'],
+        name: 'groupName2',
+        description: 'groupName2 desc',
+        hierarchy: 2,
+        createdAt: new Date('2023-11-01'),
+        status: 'ACTIVE',
+      },
+    ];
+    const role = {
+      _id: roleId1,
+      permissions: [managerId],
+      name: 'Manager role',
+      description: 'Manager description',
+      createdAt: new Date('2024-03-01'),
+      status: 'ACTIVE',
+      slug: 'm-a-n-a-g-e-r',
+    };
+    const user = {
+      _id: userId1,
+      username: 'userName1',
+      email: 'userName1@gmail.com',
+      createdAt: new Date('2024-01-01'),
+      status: 'ACTIVE',
+      cities: ['Hồ Chí Minh'],
+    };
+    beforeEach(async () => {
+      groups.forEach(async group => {
+        await mongodb.collection<Groups>('groups').insertOne(group);
+      });
+      await mongodb.collection<Roles>('roles').insertOne(role);
+      await mongodb.collection<Users>('users').insertOne(user);
+    });
+    afterEach(async () => {
+      groups.forEach(async group => {
+        await mongodb.collection<Groups>('groups').deleteOne(group);
+      });
+      await mongodb.collection<Roles>('roles').deleteOne(role);
+      await mongodb.collection<Users>('users').deleteOne(user);
+    });
     it('should search user correctly by text', async () => {
-      const group = await getGroupDetail({
-        userId: rootId,
-        groupId: rootId,
+      const groupDetailFound = await getGroupDetail({
+        isParent: true,
+        userId: userId1,
+        groupId: groupId1,
         projection: { _id: 1 },
       });
-      expect(group?._id).toEqual(rootId);
+
+      expect(groupDetailFound?._id).toEqual(groupId1);
+    });
+    it('Should search group with root user successfully', async () => {
+      const groupDetailFound = await getGroupDetail({
+        isParent: true,
+        userId: rootId,
+        groupId: groupId1,
+        projection: { _id: 1 },
+      });
+
+      expect(groupDetailFound?._id).toEqual(groupId1);
     });
   });
 
@@ -365,26 +540,26 @@ describe('Role base access control', () => {
 
     it('Should create new role successfully', async () => {
       await createRole({ ...mockNewRoleInformation, groupId: managerId });
-      const newRoleFound: any = await mongodb
-        .collection('roles')
-        .findOne({ _id: mockRecordCommonField._id as any });
+      const newRoleFound = await mongodb
+        .collection<Roles>('roles')
+        .findOne({ _id: mockRecordCommonField._id });
 
-      const updatedGroupFound: any = await mongodb
-        .collection('groups')
+      const updatedGroupFound = await mongodb
+        .collection<Groups>('groups')
         .findOne({ _id: managerId });
 
       expect(newRoleFound).toEqual({
         ...mockRecordCommonField,
         ...mockNewRoleInformation,
-        slug: newRoleFound.slug,
+        slug: newRoleFound?.slug,
       });
-      expect(updatedGroupFound.roleIds).toContainEqual(
+      expect(updatedGroupFound?.roleIds).toContainEqual(
         mockRecordCommonField._id,
       );
 
       mongodb
-        .collection('roles')
-        .deleteOne({ _id: mockRecordCommonField._id as any });
+        .collection<Roles>('roles')
+        .deleteOne({ _id: mockRecordCommonField._id });
     });
   });
 
@@ -397,13 +572,13 @@ describe('Role base access control', () => {
       };
       await updateRole({ roleId: managerId, ...updateValue });
 
-      const updatedRoleFound: any = await mongodb
-        .collection('roles')
+      const updatedRoleFound = await mongodb
+        .collection<Roles>('roles')
         .findOne({ _id: managerId });
 
-      expect(updatedRoleFound.name).toStrictEqual(updateValue.name);
-      expect(updatedRoleFound.permissions).toEqual(updateValue.permissions);
-      expect(updatedRoleFound.description).toStrictEqual(
+      expect(updatedRoleFound?.name).toStrictEqual(updateValue.name);
+      expect(updatedRoleFound?.permissions).toEqual(updateValue.permissions);
+      expect(updatedRoleFound?.description).toStrictEqual(
         updateValue.description,
       );
     });
@@ -424,72 +599,87 @@ describe('Role base access control', () => {
   });
 
   describe('deleteUser', () => {
-    const user: any = {
+    const user = {
       _id: 'userId1',
       status: 'ACTIVE',
+      username: 'username1',
+      email: 'username1@gmail.com',
+      createdAt: new Date('2024-02-01'),
+      cities: ['Hồ Chí Minh'],
     };
 
     beforeEach(async () => {
-      await mongodb.collection('users').insertOne(user);
+      await mongodb.collection<Users>('users').insertOne(user);
     });
 
     afterEach(async () => {
-      await mongodb.collection('users').deleteOne({ _id: user._id });
+      await mongodb.collection<Users>('users').deleteOne({ _id: user._id });
     });
 
     it('Should delete user successfully', async () => {
       await deleteUser(managerId);
 
-      const deletedUserFound: any = await mongodb
-        .collection('users')
+      const deletedUserFound = await mongodb
+        .collection<Users>('users')
         .findOne({ _id: managerId });
 
-      expect(deletedUserFound.status).toBe('REMOVED');
+      expect(deletedUserFound?.status).toBe('REMOVED');
     });
   });
 
   describe('deleteRole', () => {
-    const role: any = {
+    const role = {
       _id: 'roleId1',
       status: 'ACTIVE',
+      name: 'roleName1',
+      description: 'role desc',
+      permissions: ['permission1'],
+      slug: 'r-o-l-e-n-a-m-e-1',
+      createdAt: new Date('2024-02-01'),
     };
     beforeEach(async () => {
-      await mongodb.collection('roles').insertOne(role);
+      await mongodb.collection<Roles>('roles').insertOne(role);
     });
     afterEach(async () => {
-      await mongodb.collection('roles').deleteOne({ _id: role._id });
+      await mongodb.collection<Roles>('roles').deleteOne({ _id: role._id });
     });
     it('Should delete role successfully', async () => {
       await deleteRole(role._id);
 
-      const deletedRoleFound: any = await mongodb
-        .collection('roles')
+      const deletedRoleFound = await mongodb
+        .collection<Roles>('roles')
         .findOne({ _id: role._id });
 
-      expect(deletedRoleFound.status).toEqual('REMOVED');
+      expect(deletedRoleFound?.status).toEqual('REMOVED');
     });
   });
 
   describe('deleteGroup', () => {
-    const group: any = {
+    const group = {
       _id: 'groupId1',
       status: 'ACTIVE',
+      name: 'groupName1',
+      description: 'groupName1 desc',
+      userIds: ['userId1'],
+      roleIds: ['roleId1'],
+      hierarchy: 12,
+      createdAt: new Date('2024-02-01'),
     };
     beforeEach(async () => {
-      await mongodb.collection('groups').insertOne(group);
+      await mongodb.collection<Groups>('groups').insertOne(group);
     });
     afterEach(async () => {
-      await mongodb.collection('groups').deleteOne({ _id: group._id });
+      await mongodb.collection<Groups>('groups').deleteOne({ _id: group._id });
     });
 
     it('Should delete group by id successfully', async () => {
       await deleteGroup(group._id);
 
-      const deletedGroupFound: any = await mongodb
-        .collection('groups')
+      const deletedGroupFound = await mongodb
+        .collection<Groups>('groups')
         .findOne({ _id: group._id });
 
-      expect(deletedGroupFound.status).toEqual('REMOVED');
+      expect(deletedGroupFound?.status).toEqual('REMOVED');
     });
   });
 
@@ -497,32 +687,49 @@ describe('Role base access control', () => {
     const groupId1 = 'groupId1';
     const roleId1 = 'roleId1';
     const roleId2 = 'roleId2';
-    const group: any = {
+    const group = {
       _id: groupId1,
+      name: 'groupName1',
+      description: 'groupName1 desc',
+      userIds: ['userId1'],
+      roleIds: ['roleId1'],
+      hierarchy: 10,
+      createdAt: new Date('2024-02-01'),
+      status: 'ACTIVE',
       roles: [{ _id: roleId1 }, { _id: roleId2 }],
     };
 
-    const roles: any = [
+    const roles = [
       {
         _id: roleId1,
         permissions: ['permission1'],
+        name: 'roleName1',
+        description: 'roleName1 desc',
+        slug: 'r-o-l-e-n-a-m-e-1',
+        createdAt: new Date('2024-02-01'),
+        status: 'ACTIVE',
       },
       {
         _id: roleId2,
         permissions: ['permission2'],
+        name: 'roleName2',
+        description: 'roleName2 desc',
+        slug: 'r-o-l-e-n-a-m-e-2',
+        createdAt: new Date('2024-03-01'),
+        status: 'ACTIVE',
       },
     ];
 
     beforeEach(async () => {
-      await mongodb.collection('groups').insertOne(group);
-      roles.forEach(async (role: any) => {
-        await mongodb.collection('roles').insertOne(role);
+      await mongodb.collection<Groups>('groups').insertOne(group);
+      roles.forEach(async role => {
+        await mongodb.collection<Roles>('roles').insertOne(role);
       });
     });
     afterEach(async () => {
-      await mongodb.collection('groups').deleteOne({ _id: group._id });
-      roles.forEach(async (role: any) => {
-        await mongodb.collection('roles').deleteOne(role);
+      await mongodb.collection<Groups>('groups').deleteOne({ _id: group._id });
+      roles.forEach(async role => {
+        await mongodb.collection<Roles>('roles').deleteOne(role);
       });
     });
     it('Should get permission of group successfully', async () => {
@@ -537,30 +744,51 @@ describe('Role base access control', () => {
   describe('isParentOfGroup', () => {
     const mockUserId1 = 'mockUserId1';
     const genealogyId = 'genealogyId';
-    const groups: any = [
+    const groups = [
       {
         _id: 'groupId1',
-        genealogy: genealogyId,
+        genealogy: [genealogyId],
+        name: 'groupName1',
+        description: 'groupName1 desc',
+        userIds: ['userId1'],
+        roleIds: ['roleId1'],
+        hierarchy: 10,
+        createdAt: new Date('2024-02-01'),
+        status: 'ACTIVE',
       },
       {
         _id: genealogyId,
         userIds: [mockUserId1],
+        genealogy: [genealogyId],
+        name: 'groupName2',
+        description: 'groupName2 desc',
+        roleIds: ['roleId2'],
+        hierarchy: 10,
+        createdAt: new Date('2024-03-01'),
+        status: 'ACTIVE',
       },
     ];
-    const user: any = {
+    const user = {
       _id: mockUserId1,
+      username: 'userName1',
+      email: 'user1@gmail.com',
+      createdAt: new Date('2024-02-01'),
+      status: 'ACTIVE',
+      cities: ['Hồ Chí Minh'],
     };
     beforeEach(async () => {
-      groups.forEach(async (group: any) => {
-        await mongodb.collection('groups').insertOne(group);
+      groups.forEach(async group => {
+        await mongodb.collection<Groups>('groups').insertOne(group);
       });
-      await mongodb.collection('users').insertOne(user);
+      await mongodb.collection<Users>('users').insertOne(user);
     });
     afterEach(async () => {
-      groups.forEach(async (group: any) => {
-        await mongodb.collection('groups').deleteOne({ _id: group._id });
+      groups.forEach(async group => {
+        await mongodb
+          .collection<Groups>('groups')
+          .deleteOne({ _id: group._id });
       });
-      await mongodb.collection('users').deleteOne({ _id: user._id });
+      await mongodb.collection<Users>('users').deleteOne({ _id: user._id });
     });
     it('Should return true when user is root successfully', async () => {
       const isRoot = await isParentOfGroup({

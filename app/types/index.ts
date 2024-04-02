@@ -24,6 +24,8 @@ export interface Users {
   };
 }
 
+export type IUserType = 'ACTIVE' | 'INACTIVE';
+
 export interface Permissions {
   _id: string;
   name: string;
@@ -41,7 +43,7 @@ export interface Roles {
   createdAt: Date;
   updatedAt?: Date;
   status: string;
-  }
+}
 
 export interface Groups {
   _id: string;
