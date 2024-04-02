@@ -24,9 +24,8 @@ import BTaskeeTable from '@/components/btaskee/TableBase';
 import Typography from '@/components/btaskee/Typography';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import * as React from 'react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
 import {
@@ -36,6 +35,10 @@ import {
 } from '~/services/settings.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
+
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings/users" label="Users management" />,
+}
 
 const columns: ColumnDef<LoaderData['users'][0]>[] = [
   {
@@ -135,6 +138,7 @@ interface LoaderData {
   users: ReturnValueIgnorePromise<typeof getUsers>;
   total: number;
 }
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const total = await getTotalUsers();
@@ -161,13 +165,8 @@ interface FormData {
   cities: Array<OptionType>;
   username: string;
 }
-export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/users" label="Users management" />,
-}
 
 export default function Screen() {
-  const { t } = useTranslation();
-
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData<LoaderData>();
 
@@ -179,8 +178,9 @@ export default function Screen() {
       username: '',
     },
   });
+
   const submit = useSubmit();
-  const [open, setOpen] = React.useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
 
   const onCloseAndReset = () => {
     setOpen(false);

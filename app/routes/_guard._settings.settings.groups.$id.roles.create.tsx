@@ -27,6 +27,10 @@ import {
 import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Create role" />,
+}
+
 export const action = hocAction(
   async ({ params }: ActionFunctionArgs, { formData }) => {
     try {
@@ -53,6 +57,7 @@ interface LoaderData {
   permissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
   permissionsGrouped: ReturnType<typeof groupPermissionsByModule>;
 }
+
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
@@ -76,10 +81,6 @@ export const loader = hocLoader(
   },
   PERMISSIONS.WRITE_ROLE,
 );
-
-export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Create role" />,
-}
 
 export default function Screen() {
   const loaderData = useLoaderData<any>();

@@ -1,5 +1,3 @@
-import { Form, Link } from '@remix-run/react';
-
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,20 +9,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { useTranslation } from 'react-i18next';
-
+import { Form, Link } from '@remix-run/react';
 import { Logo } from './BTaskeeLogo';
 import LanguageSelector from './LanguageSelector';
 import TimezoneSwitcher from './TimezoneSwitcher';
 
-
 export default function Header() {
-  const { t } = useTranslation()
-
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4">
-
         <nav className="flex items-center space-x-4 lg:space-x-6 mx-6">
           <Link
             to="/"
@@ -50,7 +43,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-10 w-10">
                   <AvatarFallback>SC</AvatarFallback>
                 </Avatar>
               </Button>

@@ -1,3 +1,4 @@
+import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import BTaskeeTable from '@/components/btaskee/TableBase';
 import Typography from '@/components/btaskee/Typography';
 import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-table-column-header';
@@ -12,6 +13,10 @@ import {
   getTotalActionsHistory,
 } from '~/services/settings.server';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
+
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings/action-history" label="Actions history" />,
+}
 
 interface IActionsHistory {
   _id: string;
@@ -128,8 +133,9 @@ export default function Screen() {
 
   return (
     <>
-      <div className="flex items-center justify-between space-y-2 bg-secondary p-4 rounded-xl mb-4">
+      <div className="grid space-y-2 bg-secondary p-4 rounded-xl mb-4">
         <Typography variant='h3'>Actions history</Typography>
+        <Breadcrumbs />
       </div>
 
       <BTaskeeTable

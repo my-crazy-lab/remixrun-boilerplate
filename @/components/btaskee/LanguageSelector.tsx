@@ -16,7 +16,7 @@ export const defaultLanguage = [
     name: '🇻🇳 Vietnamese',
     key: 'vi',
   },
-] as const;
+];
 
 const LanguageSelector = () => {
   const { i18n } = useTranslation();
@@ -28,7 +28,8 @@ const LanguageSelector = () => {
   return (
     <Select
       defaultValue={`${defaultLanguage[0].key}`}
-      onValueChange={value => changeLanguage(value)}>
+      onValueChange={value => changeLanguage(value)}
+    >
       <SelectTrigger className="h-10 w-[180px]">
         <SelectValue placeholder={`${defaultLanguage[0].name}`} />
       </SelectTrigger>

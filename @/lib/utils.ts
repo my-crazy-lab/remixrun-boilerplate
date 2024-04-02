@@ -12,7 +12,9 @@ export function toBase64(file: File) {
     fileReader.readAsDataURL(file);
 
     fileReader.onload = () => {
-      resolve(fileReader.result);
+      if (!(fileReader.result instanceof ArrayBuffer)) {
+        resolve(fileReader.result || '');
+      }
     };
 
     fileReader.onerror = (error) => {

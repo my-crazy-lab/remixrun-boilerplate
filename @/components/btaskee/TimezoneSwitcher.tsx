@@ -22,14 +22,15 @@ export const timezones = [
 ]
 
 export default function TimezoneSwitcher() {
-
   const handleSelect = (option: string) => {
     // TODO add logic for set timezone
   };
+
   return (
     <Select
       defaultValue={`${timezones[0].id}`}
-      onValueChange={value => handleSelect(value)}>
+      onValueChange={value => handleSelect(value)}
+    >
       <SelectTrigger className="h-10 w-[180px]">
         <SelectValue placeholder={`${timezones[0].name}`} />
       </SelectTrigger>

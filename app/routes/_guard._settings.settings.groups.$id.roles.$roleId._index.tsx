@@ -1,3 +1,5 @@
+import { Breadcrumbs } from '@/components/btaskee/Breadcrumbs';
+import Typography from '@/components/btaskee/Typography';
 import {
   Accordion,
   AccordionContent,
@@ -9,7 +11,6 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import _ from 'lodash';
-import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '~/constants/common';
 import { hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
@@ -50,29 +51,24 @@ export const loader = hocLoader(
         actionPermissions: groupPermissionsByModule(role.actionPermissions),
       },
     });
-  },
-  PERMISSIONS.READ_ROLE,
-);
+  }, PERMISSIONS.READ_ROLE);
 
 export default function RolesDetail() {
-  const { t } = useTranslation();
-
   const loaderData = useLoaderData<LoaderData>();
 
   return (
     <>
-      <div className="text-2xl px-0 pb-6">
-        <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
-
-          {loaderData.role.name}
-        </div>
-        <p className="text-base mt-2">{loaderData.role.description}</p>
+      <div className="grid space-y-2 bg-secondary p-4 rounded-xl mb-4">
+        <Typography className='capitalize' variant='h3'>{loaderData.role.name}</Typography>
+        <Breadcrumbs />
       </div>
+      <Typography variant='p'>{loaderData.role.description}</Typography>
+
       {_.map(loaderData.role.actionPermissions, actionPermission => (
         <Accordion type="single" collapsible>
           <AccordionItem value={actionPermission.module}>
-            <AccordionTrigger>
-              {actionPermission?.module?.toUpperCase()} {t('FEATURE')}
+            <AccordionTrigger className='capitalize'>
+              {actionPermission?.module}
             </AccordionTrigger>
             <AccordionContent>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">

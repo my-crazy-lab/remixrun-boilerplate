@@ -6,6 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings/profile" label="Profile" />,
+}
+
 const dataUser = {
   city: [
     'Hồ Chí Minh',
@@ -31,13 +35,7 @@ const dataUser = {
   teams: ['customer-service', 'tasker', 'marketing'],
 };
 
-
-export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/profile" label="Profile" />,
-}
-
 export default function Screen() {
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col p-4 rounded-lg bg-secondary">
@@ -68,7 +66,9 @@ export default function Screen() {
           <Card>
             <CardHeader>
               <CardTitle>Authorization</CardTitle>
-              <CardDescription>To change your personal detail, edit and save from here</CardDescription>
+              <CardDescription>
+                To change your personal detail, edit and save from here
+              </CardDescription>
             </CardHeader>
             <Separator />
             <CardContent>
@@ -78,7 +78,7 @@ export default function Screen() {
                   {dataUser.teams.map((team, index) => {
                     return (
                       <Badge
-                        className="text-center block rounded-md"
+                        className="text-center block rounded-md py-2 font-normal"
                         variant="secondary"
                         key={index}
                       >
@@ -92,7 +92,7 @@ export default function Screen() {
                   {dataUser.city.map((ct, index) => {
                     return (
                       <Badge
-                        className="text-center block rounded-md"
+                        className="text-center block rounded-md py-2 font-normal"
                         variant="secondary"
                         key={index}>
                         {ct}
@@ -101,10 +101,8 @@ export default function Screen() {
                   })}
                 </div>
               </div>
-
             </CardContent>
           </Card>
-
         </div>
         <Card className='h-1/2'>
           <CardHeader>

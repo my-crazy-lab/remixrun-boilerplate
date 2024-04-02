@@ -6,6 +6,10 @@ import { cn } from '@/lib/utils';
 import { Link, Outlet, useLocation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings" label="Setting" />,
+}
+
 const navigations = [
   {
     title: 'Profile',
@@ -24,10 +28,6 @@ const navigations = [
     href: '/settings/action-history',
   },
 ]
-
-export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings" label="Setting" />,
-}
 
 export default function Screen() {
   const { t } = useTranslation(['common', 'settings']);
