@@ -1,7 +1,8 @@
 import { mongodb } from '~/utils/db.server';
-import type { FindOptionsClient } from './constants.server';
+import { type FindOptionsClient } from './constants.server';
 import { newRecordCommonField } from './constants.server';
 import { hashPassword } from './auth.server';
+import { type Users } from '~/types';
 
 export interface ISearch {
   $match: {
@@ -101,8 +102,8 @@ export async function getTotalUsers() {
 }
 
 export async function getUsers({ skip, limit, projection }: FindOptionsClient) {
-  const usersCol = mongodb.collection('users');
-  const users = await usersCol
+  const users = await mongodb
+    .collection<Users>('users')
     .find(
       {},
       {
@@ -126,9 +127,9 @@ export async function createNewUser({
   password,
   email,
   cities,
-}: any) {
-  const usersCol = mongodb.collection<any>('users');
-  const passwordHashed = await hashPassword(password);
+}: Pick<Users, 'username' | 'email' | 'cities'> & { password: string }) {
+  const usersCol = mongodb.collection<Users>('users');
+  const passwordHashed = hashPassword(password);
 
   await usersCol.insertOne({
     ...newRecordCommonField(),

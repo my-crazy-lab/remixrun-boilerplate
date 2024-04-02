@@ -1,4 +1,5 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,13 +8,10 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import {
   useLoaderData,
-  useNavigate,
   useNavigation,
-  useOutletContext,
   useSearchParams,
-  useSubmit,
+  useSubmit
 } from '@remix-run/react';
-import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
@@ -77,8 +75,9 @@ export const loader = hocLoader(
 );
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Create" />,
+  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Create group" />,
 }
+
 interface FormData {
   name: string;
   description: string;
@@ -87,11 +86,6 @@ interface FormData {
 }
 export default function Screen() {
   const { t } = useTranslation();
-
-  const test = useOutletContext();
-  console.log(test)
-  const navigate = useNavigate();
-  const goBack = () => navigate(-1);
   const navigation = useNavigation();
 
   const loaderData = useLoaderData<LoaderData>();
@@ -126,11 +120,8 @@ export default function Screen() {
 
   return (
     <>
-      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4 bg-secondary p-4">
-        <Button onClick={goBack}>
-          <MoveLeft className="h-5 w-5" />{' '}
-        </Button>
-        Create group
+      <div className='grid space-y-2 bg-secondary p-4 rounded-xl'>
+        <Typography variant='h2'>Create group</Typography>
         <Breadcrumbs />
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>

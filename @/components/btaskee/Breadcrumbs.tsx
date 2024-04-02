@@ -4,6 +4,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { Fragment } from "react";
 
 import { cn } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
 import { NavigationLink } from "./NavigationLink";
 
 type BreadcrumbsItemProps = HTMLAttributes<HTMLElement> &
@@ -16,9 +17,10 @@ export const BreadcrumbsLink = ({ children, label, ...props }: BreadcrumbsItemPr
     <NavigationLink
       itemProp="item"
       className={cn([
-        "group-last:group-[&:not(:only-child)]:line-clamp-1",
-        "group-only:font-medium group-only:text-neutral-800 group-only:dark:text-neutral-200",
-        "max-md:font-medium max-md:text-neutral-800 max-md:dark:text-neutral-200",
+        "group-last:group-[&:not(:only-child)]:line-clamp-1 group-last:text-secondary-foreground",
+        "group-only:font-medium group-only:text-secondary",
+        "max-md:font-medium max-md:text-gray-400",
+        "text-gray-400"
       ])}
       end
       {...props}
@@ -32,8 +34,8 @@ export const BreadcrumbsLink = ({ children, label, ...props }: BreadcrumbsItemPr
 
 const BreadcrumbsSeparator = ({ ...props }: HTMLAttributes<HTMLElement>) => {
   return (
-    <span className="pointer-events-none text-sm text-neutral-300 dark:text-neutral-600" {...props}>
-      /
+    <span className="pointer-events-none text-sm text-gray" {...props}>
+      <ChevronRight className="h-4 w-4" />
     </span>
   )
 }

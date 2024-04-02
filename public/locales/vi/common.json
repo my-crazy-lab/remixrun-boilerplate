@@ -1,8 +1,10 @@
 {
   "CREATE_ACCOUNT": "Hello",
-  "SEND_EMAIL": "Gửi đến Email",
-  "GROUPS_MANAGEMENT": "Groups management",
-  "test": {
-    "GROUPS_MANAGEMENT": "Groups management"
+  "SEND_EMAIL": "Gửi đến email",
+  "settings": {
+    "SETTINGS": "Cài đặt",
+    "groups": {
+      "GROUPS_MANAGEMENT": "Groups management"
+    }
   }
 }

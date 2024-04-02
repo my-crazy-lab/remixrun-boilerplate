@@ -1,46 +1,48 @@
 import { AvatarUpload } from '@/components/btaskee/AvatarUpload';
+import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import Typography from '@/components/btaskee/Typography';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useForm } from 'react-hook-form';
+
+const dataUser = {
+  city: [
+    'Hồ Chí Minh',
+    'Hà Nội',
+    'Đà Nẵng',
+    'Bình Dương',
+    'Đồng Nai',
+    'Cần Thơ',
+    'Hải Phòng',
+    'Lâm Đồng',
+    'Khánh Hòa',
+    'Bangkok',
+  ],
+  isoCode: 'VN',
+  services: '',
+  username: 'myquyen.le',
+  emails: 'xnguyen9a101@gmail.com',
+  ipAddress: '127.0.0.1',
+  profile: {
+    language: 'vi',
+    timezone: 'Asia/Ho_Chi_Minh',
+  },
+  teams: ['customer-service', 'tasker', 'marketing'],
+};
+
+
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings/profile" label="Profile" />,
+}
 
 export default function Screen() {
-  const form = useForm();
-
-  const dataUser = {
-    city: [
-      'Hồ Chí Minh',
-      'Hà Nội',
-      'Đà Nẵng',
-      'Bình Dương',
-      'Đồng Nai',
-      'Cần Thơ',
-      'Hải Phòng',
-      'Lâm Đồng',
-      'Khánh Hòa',
-      'Bangkok',
-    ],
-    isoCode: 'VN',
-    services: '',
-    username: 'myquyen.le',
-    emails: 'xnguyen9a101@gmail.com',
-    ipAddress: '127.0.0.1',
-    profile: {
-      language: 'vi',
-      timezone: 'Asia/Ho_Chi_Minh',
-    },
-    teams: ['customer-service', 'tasker', 'marketing'],
-  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col p-4 rounded-lg bg-secondary">
         <Typography variant='h3'>Profile</Typography>
-        <p className="text-sm text-muted-foreground">
-          This is how others will see you on the site.
-        </p>
+        <Breadcrumbs />
       </div>
       <div className="gap-10 grid grid-cols-2">
         <div className='flex flex-col gap-5'>

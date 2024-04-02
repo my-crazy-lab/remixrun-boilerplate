@@ -1,3 +1,5 @@
+import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import Typography from '@/components/btaskee/Typography';
 import {
   Accordion,
   AccordionContent,
@@ -10,11 +12,10 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { useLoaderData, useNavigate, useSubmit } from '@remix-run/react';
+import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
-import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
-import { PERMISSIONS } from '~/constants/common';
+import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
@@ -23,28 +24,35 @@ import {
   isParentOfGroup,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import { groupPermissionsByModule } from '~/utils/helpers';
+import { type ReturnValueIgnorePromise } from '~/types';
+import { groupPermissionsByModule } from '~/utils/common';
 
 export const action = hocAction(
-  async ({ params }: ActionFunctionArgs, { formData }: any) => {
+  async ({ params }: ActionFunctionArgs, { formData }) => {
     try {
       const { name, description, permissions } = formData;
       await createRole({
         name,
-        groupId: params.id,
+        groupId: params.id || '',
         description,
         permissions: JSON.parse(permissions),
       });
 
       return redirect(`/settings/groups/${params.id}`);
-    } catch (err: any) {
-      console.log(err);
-      return json({ err });
+    } catch (error) {
+      if (error instanceof Error) {
+        return json({ error: error.message });
+      }
+      return json({ error: ERROR.UNKNOWN_ERROR });
     }
   },
   PERMISSIONS.WRITE_ROLE,
 );
 
+interface LoaderData {
+  permissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
+  permissionsGrouped: ReturnType<typeof groupPermissionsByModule>;
+}
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
@@ -69,10 +77,12 @@ export const loader = hocLoader(
   PERMISSIONS.WRITE_ROLE,
 );
 
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Create role" />,
+}
+
 export default function Screen() {
   const loaderData = useLoaderData<any>();
-  const navigate = useNavigate();
-  const goBack = () => navigate(-1);
   const {
     register,
     control,
@@ -86,7 +96,7 @@ export default function Screen() {
   });
   const submit = useSubmit();
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const formData = new FormData();
     const permissions: string[] = [];
 
@@ -105,15 +115,13 @@ export default function Screen() {
 
   return (
     <>
-      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
-        <Button onClick={goBack}>
-          <MoveLeft className="h-5 w-5" />{' '}
-        </Button>
-        Create role
+      <div className="grid p-4 space-y-2 bg-secondary rounded-xl">
+        <Typography variant='h4'>Create role</Typography>
+        <Breadcrumbs />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className='grid grid-cols-2 gap-4'>
+      <form className='mt-4' onSubmit={handleSubmit(onSubmit)}>
+        <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
           <div>
             <Label htmlFor="name">
               Role name
@@ -136,11 +144,11 @@ export default function Screen() {
           </div>
         </div>
 
-        {_.map(loaderData.permissionsGrouped, (actionPermission: any) => (
-          <Accordion type="single" collapsible key={actionPermission._id}>
+        {_.map(loaderData.permissionsGrouped, actionPermission => (
+          <Accordion type="single" collapsible key={actionPermission.module}>
             <AccordionItem value={actionPermission.module}>
-              <AccordionTrigger>
-                {actionPermission?.module?.toUpperCase()}
+              <AccordionTrigger className='capitalize'>
+                {actionPermission?.module}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

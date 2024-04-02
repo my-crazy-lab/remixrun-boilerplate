@@ -78,7 +78,7 @@ export function MultiSelectAsync({
               <Badge
                 variant="secondary"
                 key={item.value}
-                className="mr-1 mb-1"
+                className="mr-1 rounded-md"
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button
@@ -207,11 +207,11 @@ export function MultiSelect({
               <Badge
                 variant="secondary"
                 key={item.value}
-                className="mr-1 mb-1"
+                className="mr-1 rounded-md"
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button
-                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="ml-1 ring-offset-background rounded-md outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       handleUnselect(item.value);
