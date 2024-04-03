@@ -78,8 +78,7 @@ export default function Screen() {
                   {dataUser.teams.map((team, index) => {
                     return (
                       <Badge
-                        className="text-center block rounded-md py-2 font-normal"
-                        variant="secondary"
+                        className="text-center block rounded-md py-2 font-normal text-blue bg-blue-50"
                         key={index}
                       >
                         {team}
@@ -92,9 +91,9 @@ export default function Screen() {
                   {dataUser.city.map((ct, index) => {
                     return (
                       <Badge
-                        className="text-center block rounded-md py-2 font-normal"
-                        variant="secondary"
-                        key={index}>
+                        className="text-center block rounded-md py-2 font-normal text-blue bg-blue-50"
+                        key={index}
+                      >
                         {ct}
                       </Badge>
                     );

@@ -1,19 +1,18 @@
-import { PERMISSIONS } from '~/constants/common';
 import { type Document } from 'mongodb';
-import { mongodb } from '~/utils/db.server';
+import { PERMISSIONS } from '~/constants/common';
+import { res404 } from '~/hoc/remix';
 import {
   newRecordCommonField,
   statusOriginal,
 } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
-import {
-  momentTz,
-  convertRolesToPermissions,
-  groupPermissionsByModule,
-} from '~/utils/common';
-import { type Permissions, type Roles, type Groups, type Users } from '~/types';
+import { type Groups, type Permissions, type Roles, type Users } from '~/types';
 import { type GetRolesOfGroupsProjection } from '~/types/bridge';
-import { res404 } from '~/hoc/remix';
+import {
+  convertRolesToPermissions,
+  momentTz,
+} from '~/utils/common';
+import { mongodb } from '~/utils/db.server';
 
 /**
  * @description verify the user is super-user or not
@@ -232,8 +231,8 @@ export async function getGroupDetail<T = Document>({
     const matchParent = root
       ? {}
       : {
-          'parents.userIds': userId,
-        };
+        'parents.userIds': userId,
+      };
 
     const group = await mongodb
       .collection('groups')

@@ -56,6 +56,10 @@ module.exports = {
           DEFAULT: 'hsl(var(--gray-500))',
           400: 'hsl(var(--gray-400))',
           100: 'hsl(var(--gray-100))',
+        },
+        blue: {
+          DEFAULT: 'hsl(var(--blue-500))',
+          50: 'hsl(var(--blue-50))',
         }
       },
       borderRadius: {
