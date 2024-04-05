@@ -1,6 +1,6 @@
-import type { FieldErrors } from 'react-hook-form';
 import type { Props } from '@hookform/error-message';
 import { ErrorMessage } from '@hookform/error-message';
+import type { FieldErrors } from 'react-hook-form';
 
 export type IErrorMessage<TFieldErrors extends FieldErrors, T> = Props<
   TFieldErrors,

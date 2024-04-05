@@ -1,10 +1,9 @@
+import { cn } from "@/lib/utils";
 import type { NavLinkProps, UIMatch } from "@remix-run/react";
 import { useMatches } from "@remix-run/react";
+import { ChevronRight } from "lucide-react";
 import type { HTMLAttributes, ReactNode } from "react";
 import { Fragment } from "react";
-
-import { cn } from "@/lib/utils";
-import { ChevronRight } from "lucide-react";
 import { NavigationLink } from "./NavigationLink";
 
 type BreadcrumbsItemProps = HTMLAttributes<HTMLElement> &
@@ -26,7 +25,6 @@ export const BreadcrumbsLink = ({ children, label, ...props }: BreadcrumbsItemPr
       {...props}
     >
       {children}
-
       <span itemProp="name">{label}</span>
     </NavigationLink>
   )
@@ -40,10 +38,8 @@ const BreadcrumbsSeparator = ({ ...props }: HTMLAttributes<HTMLElement>) => {
   )
 }
 
-type BreadcrumbMatch = UIMatch<
-  Record<string, unknown>,
-  { breadcrumb: (data?: unknown) => JSX.Element }
->
+type BreadcrumbMatch = UIMatch<Record<string, unknown>,
+  { breadcrumb: (data?: unknown) => JSX.Element }>
 
 export const Breadcrumbs = ({ className, ...props }: HTMLAttributes<HTMLElement>) => {
   const matches = (useMatches() as unknown as BreadcrumbMatch[]).filter(

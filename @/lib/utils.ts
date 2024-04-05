@@ -12,9 +12,8 @@ export function toBase64(file: File) {
     fileReader.readAsDataURL(file);
 
     fileReader.onload = () => {
-      const result = fileReader.result;
-      if (!(result instanceof ArrayBuffer)) {
-        resolve(result || '');
+      if (!(fileReader.result instanceof ArrayBuffer)) {
+        resolve(fileReader.result || '');
       }
     };
 

@@ -8,6 +8,7 @@ import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
+
 interface LoaderData {
   groups: Array<{
     _id: string;
@@ -27,6 +28,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       description: 1,
     },
   });
+
   return json({ groups });
 };
 

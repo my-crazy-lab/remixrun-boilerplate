@@ -1,15 +1,15 @@
-import { PERMISSIONS } from '~/constants/common';
 import { type Document } from 'mongodb';
-import { mongodb } from '~/utils/db.server';
+import { PERMISSIONS } from '~/constants/common';
+import { res404 } from '~/hoc/remix';
 import {
   newRecordCommonField,
   statusOriginal,
 } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
-import { momentTz, convertRolesToPermissions } from '~/utils/common';
-import { type Permissions, type Roles, type Groups, type Users } from '~/types';
+import { type Groups, type Permissions, type Roles, type Users } from '~/types';
 import { type GetRolesOfGroupsProjection } from '~/types/bridge';
-import { res404 } from '~/hoc/remix';
+import { convertRolesToPermissions, momentTz } from '~/utils/common';
+import { mongodb } from '~/utils/db.server';
 
 /**
  * @description verify the user is super-user or not

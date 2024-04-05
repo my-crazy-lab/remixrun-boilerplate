@@ -1,16 +1,16 @@
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { Form } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import ROUTE_NAME from '~/constants/route';
 import {
   authenticator,
   isVerificationCodeExpired,
 } from '~/services/auth.server';
-import { json, redirect } from '@remix-run/node';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { commitSession, getSession } from '~/services/session.server';
-import ROUTE_NAME from '~/constants/route';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   return await authenticator.authenticate('user-pass', request, {

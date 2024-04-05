@@ -1,11 +1,10 @@
-'use client';
-
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Input, type InputProps } from '@/components/ui/input';
+import type { InputProps } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { toBase64 } from '@/lib/utils';
 import { UploadCloud, User2Icon } from 'lucide-react';
-import React from 'react';
+import { useRef } from 'react';
 
 type AvatarUploadProps = {
   value?: string;
@@ -13,10 +12,10 @@ type AvatarUploadProps = {
 };
 
 export function AvatarUpload({ value, onChange }: AvatarUploadProps) {
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleChange: InputProps['onChange'] = async e => {
-    if (e.target?.files?.length) {
+    if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       const base64 = await toBase64(file);
       onChange?.(base64);
