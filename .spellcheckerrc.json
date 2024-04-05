@@ -1,10 +1,7 @@
 {
   "version": "0.1",
   "language": "en, vi",
-  "words": [
-    "tasker",
-    "spellcheckerrc"
-  ],
+  "words": ["tasker", "spellcheckerrc"],
   "ignorePaths": [
     "node_modules",
     "dist",

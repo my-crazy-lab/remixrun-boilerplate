@@ -56,7 +56,7 @@ export default function Screen() {
                   options={[
                     {
                       value: 'HCM',
-                      label: 'Ho Chi Minh',
+                      label: 'HCM',
                     },
                     {
                       value: 'HN',
@@ -64,7 +64,7 @@ export default function Screen() {
                     },
                     {
                       value: 'DT',
-                      label: 'Dong Thap',
+                      label: 'DT',
                     },
                   ]}
                   className="w-[360px]"
@@ -78,7 +78,7 @@ export default function Screen() {
                   options={[
                     {
                       value: 'HCM',
-                      label: 'Ho Chi Minh',
+                      label: 'HCM',
                     },
                     {
                       value: 'HN',
@@ -86,7 +86,7 @@ export default function Screen() {
                     },
                     {
                       value: 'DT',
-                      label: 'Dong Thap',
+                      label: 'DT',
                     },
                   ]}
                   className="w-[360px]"
