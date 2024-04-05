@@ -1,14 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
-import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
-import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from '@/components/ui/use-toast';
 import type { ActionFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { verifyAndSendCode } from '~/services/auth.server';
+import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
+import { verifyAndSendCode } from '~/services/auth.server';
 
 interface ActionData {
   error?: string;
