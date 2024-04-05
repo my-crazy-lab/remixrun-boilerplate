@@ -84,14 +84,14 @@ export const loader = hocLoader(
   PERMISSIONS.WRITE_ROLE,
 );
 
+interface FormData {
+  permissions: { [key: string]: boolean };
+  name: string;
+  description: string;
+}
 export default function Screen() {
-  const loaderData = useLoaderData<any>();
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<any>({
+  const loaderData = useLoaderData<LoaderData>();
+  const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
       name: '',
       description: '',
