@@ -1,5 +1,6 @@
+import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
-import { CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, MultiSelectAsync } from '@/components/ui/multi-select';
@@ -7,14 +8,11 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import {
   useLoaderData,
-  useNavigate,
   useNavigation,
   useSearchParams,
-  useSubmit,
+  useSubmit
 } from '@remix-run/react';
-import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hoc404, hocAction, hocLoader, res403GroupParent } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
@@ -133,16 +131,16 @@ interface FormData {
   }>;
 }
 
-export default function Screen() {
-  const { t } = useTranslation();
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Edit group" />,
+}
 
+export default function Screen() {
   const { group, roles, users } = useLoaderData<LoaderData>();
   const navigation = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const submit = useSubmit();
 
-  const goBack = () => navigate(-1);
 
   const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
@@ -178,87 +176,78 @@ export default function Screen() {
 
   return (
     <>
-      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
-        <Button onClick={goBack}>
-          <MoveLeft className="h-5 w-5" />{' '}
-        </Button>
-        Update role
+      <div className="grid space-y-2 bg-secondary rounded-xl p-4">
+        <Typography variant='h3'>Edit group</Typography>
+        <Breadcrumbs />
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="gap-4 pb-4 grid p-0">
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="group" className="text-left">
-                Group name
-              </Label>
-              <Input
-                {...register('name' as const, {
-                  required: true,
-                })}
-                className="col-span-3"
-              />
-            </div>
+      <form className="gap-4 pb-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
 
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-left">
-                {t('DESCRIPTION')}
-              </Label>
-              <Input
-                {...register('description' as const, {
-                  required: true,
-                })}
-                className="col-span-3"
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-left">Users</Label>
-              <div className="col-span-3">
-                <Controller
-                  control={control}
-                  name="userIds"
-                  render={({ field: { onChange, value } }) => (
-                    <MultiSelectAsync
-                      isLoading={navigation.state === 'loading'}
-                      defaultSearchValue={searchParams.get('users') || ''}
-                      searchRemix={{ searchKey: 'users', setSearchParams }}
-                      isDisplayAllOptions
-                      options={users.map(user => ({
-                        value: user._id,
-                        label: user.username,
-                      }))}
-                      selected={value}
-                      setSelected={onChange}
-                      className="w-[360px]"
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-left">Roles</Label>
-              <div className="col-span-3">
-                <Controller
-                  control={control}
-                  name="roleIds"
-                  render={({ field: { onChange, value } }) => (
-                    <MultiSelect
-                      isDisplayAllOptions
-                      options={roles.map(role => ({
-                        value: role._id,
-                        label: role.name,
-                      }))}
-                      selected={value}
-                      setSelected={onChange}
-                      className="w-[360px]"
-                    />
-                  )}
-                />
-              </div>
-            </div>
+        <div className="grid gap-4 py-4 grid-cols-2">
+          <div className="grid items-center gap-4">
+            <Label htmlFor="group" className="text-left">
+              Group name
+            </Label>
+            <Input
+              {...register('name' as const, {
+                required: true,
+              })}
+            />
           </div>
-        </CardContent>
+
+          <div className="grid items-center gap-4">
+            <Label htmlFor="description">
+              Description
+            </Label>
+            <Input
+              {...register('description' as const, {
+                required: true,
+              })}
+            />
+          </div>
+
+          <div className="grid items-center gap-4">
+            <Label>Users</Label>
+            <Controller
+              control={control}
+              name="userIds"
+              render={({ field: { onChange, value } }) => (
+                <MultiSelectAsync
+                  isLoading={navigation.state === 'loading'}
+                  defaultSearchValue={searchParams.get('users') || ''}
+                  searchRemix={{ searchKey: 'users', setSearchParams }}
+                  isDisplayAllOptions
+                  options={users.map((user) => ({
+                    value: user._id,
+                    label: user.username,
+                  }))}
+                  selected={value}
+                  setSelected={onChange}
+                  className="w-[360px]"
+                />
+              )}
+            />
+          </div>
+          <div className="grid items-center gap-4">
+            <Label>Roles</Label>
+            <Controller
+              control={control}
+              name="roleIds"
+              render={({ field: { onChange, value } }) => (
+                <MultiSelect
+                  isDisplayAllOptions
+                  options={roles.map((role) => ({
+                    value: role._id,
+                    label: role.name,
+                  }))}
+                  selected={value}
+                  setSelected={onChange}
+                  className="w-[360px]"
+                />
+              )}
+            />
+          </div>
+        </div>
+
         <div className="flex justify-end">
           <Button type="submit">Save changes</Button>
         </div>

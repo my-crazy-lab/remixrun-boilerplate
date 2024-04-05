@@ -8,17 +8,16 @@ interface EmailArgs {
   from: string;
 }
 export async function sendEmail({ to, from, text, subject }: EmailArgs) {
-  // const transporter = nodemailer.createTransport(dotenv.MAIL_URL);
+  const transporter = nodemailer.createTransport(dotenv.MAIL_URL);
   try {
-    /*
     await transporter.sendMail({
       to,
       from,
       text,
       subject,
     });
-    */
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.log(error);
   }
 }

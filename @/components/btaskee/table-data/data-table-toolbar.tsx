@@ -1,8 +1,8 @@
-import type { Table } from '@tanstack/react-table';
-import type { SetURLSearchParams } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
+import type { Table } from '@tanstack/react-table';
 import debounce from 'lodash/debounce.js';
 import React from 'react';
+import type { SetURLSearchParams } from 'react-router-dom';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -34,7 +34,7 @@ export function DataTableToolbar<TData>({
         table.getColumn(column)?.setFilterValue(event.target.value);
         debouncedOnChange(event);
       }}
-      className="h-8 w-[150px] lg:w-[250px]"
+      className="h-8 w-[150px] lg:w-[250px] block justify-end"
     />
   );
 }

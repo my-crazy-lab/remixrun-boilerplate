@@ -84,3 +84,5 @@ export interface CollectionIdString extends Document {
 export type ReturnValueIgnorePromise<
   T extends (...args: MustBeAny) => MustBeAny,
 > = ReturnType<T> extends Promise<infer A> ? A : never;
+
+export type CommonFunction<T, R = MustBeAny> = (arg: T) => R;

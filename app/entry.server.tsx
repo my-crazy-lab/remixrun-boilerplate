@@ -126,6 +126,7 @@ async function handleBotRequest(
           // errors encountered during initial shell rendering since they'll
           // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
+            // eslint-disable-next-line no-console
             console.error(error);
           }
         },
@@ -178,6 +179,7 @@ async function handleBrowserRequest(
           // errors encountered during initial shell rendering since they'll
           // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
+            // eslint-disable-next-line no-console
             console.error(error);
           }
         },
