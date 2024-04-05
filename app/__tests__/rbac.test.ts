@@ -273,8 +273,8 @@ describe('Role base access control', () => {
 
   describe('getGroupsOfUser', () => {
     const userId = 'testUser';
-  const groupId = 'testGroup';
-  const roleId = 'testRole';
+    const groupId = 'testGroup';
+    const roleId = 'testRole';
 
     beforeEach(async () => {
       await mongodb.collection<Groups>('groups').insertOne({
@@ -288,11 +288,11 @@ describe('Role base access control', () => {
         createdAt: new Date(),
         status: 'ACTIVE',
       });
-    })
+    });
 
     afterEach(async () => {
-await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
-    })
+      await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
+    });
 
     it('should return groups of a user', async () => {
       const projection = { _id: 1, name: 1 };
@@ -301,10 +301,13 @@ await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
       expect(groups[0]._id).toEqual(groupId);
       expect(groups[0].name).toEqual('Test Group');
     });
-  
+
     it('should return empty array if user is not part of any group', async () => {
       const projection = { _id: 1, name: 1 };
-      const groups = await getGroupsOfUser({ projection, userId: 'nonexistentUser' });
+      const groups = await getGroupsOfUser({
+        projection,
+        userId: 'nonexistentUser',
+      });
       expect(groups).toHaveLength(0);
     });
   });
@@ -362,7 +365,7 @@ await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
       await mongodb
         .collection<Groups>('groups')
         .deleteOne({ _id: mockRecordCommonField._id });
-    })
+    });
 
     it('should createGroup successfully', async () => {
       const mockParams = {
@@ -384,16 +387,21 @@ await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
         .deleteOne({ name: mockParams.name });
     });
     it('should throw error if parent group not found', async () => {
-      const groupData: Pick<Groups, 'name' | 'description' | 'userIds' | 'roleIds'> & { parent: string } = {
+      const groupData: Pick<
+        Groups,
+        'name' | 'description' | 'userIds' | 'roleIds'
+      > & { parent: string } = {
         name: 'Test Group',
         description: 'This is a test group',
         parent: 'nonexistentParentId',
         userIds: ['userId1', 'userId2'],
         roleIds: ['roleId1', 'roleId2'],
       };
-  
-      await expect(createGroup(groupData)).rejects.toThrow('PARENT_GROUP_NOT_FOUND');
-    })
+
+      await expect(createGroup(groupData)).rejects.toThrow(
+        'PARENT_GROUP_NOT_FOUND',
+      );
+    });
   });
 
   describe('updateGroups', () => {
@@ -535,7 +543,7 @@ await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
 
       expect(groupDetail).toBeDefined();
       expect(groupDetail._id).toEqual(groupId1);
-    })
+    });
     it('should return group detail if user is parent of group', async () => {
       const groupDetail = await getGroupDetail({
         isParent: false,
@@ -546,7 +554,7 @@ await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
 
       expect(groupDetail).toBeDefined();
       expect(groupDetail._id).toEqual(groupId1);
-    })
+    });
     it('should throw an error if group does not exist and user is root', async () => {
       await expect(
         getGroupDetail({
