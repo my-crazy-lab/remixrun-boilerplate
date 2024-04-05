@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@/components/ui/card';
 import { Toaster } from '@/components/ui/toaster';
 import NotFound from '@/images/404.svg';
@@ -71,26 +71,30 @@ export function ErrorBoundary() {
       </head>
       <body>
         <div className="flex flex-col items-center justify-center h-screen bg-white">
-
           <CardHeader className="text-center">
             <CardTitle className="lg:text-7xl text-4xl">
-              <img className='w-2/3 2xl:w-full text-center m-auto' src={NotFound} alt='not-found-img' />
+              <img
+                className="w-2/3 2xl:w-full text-center m-auto"
+                src={NotFound}
+                alt="not-found-img"
+              />
             </CardTitle>
-            <Typography className='mt-3' variant='h3'>Sorry, page not found</Typography>
+            <Typography className="mt-3" variant="h3">
+              Sorry, page not found
+            </Typography>
             <CardDescription>
               The page you are looking for not available!
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-center">
             <Button
-              className='gap-2'
+              className="gap-2"
               onClick={() => {
                 navigate(-1);
               }}>
               <HomeIcon /> Go Back Home
             </Button>
           </CardFooter>
-
         </div>
         <Scripts />
       </body>

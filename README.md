@@ -6,7 +6,7 @@
 - :heart_decoration: **Back-office Systems Templates**: Typical for enterprise "backend" applications
 - :globe_with_meridians: **International**: Built-in i18n solution
 - :gear: **Best Practices**: Solid workflow to make your code healthy
-- :zap: **Router Redirect**: Avaiable Error boundary page
+- :zap: **Router Redirect**: Available Error boundary page
 - :four_leaf_clover: **Plugin Architecture**: Modify multi project for Enterprise by plugin architecture (DOING)
 - :pencil: **Code Conventions**:
   - [Linter](https://eslint.org/)
@@ -25,7 +25,7 @@
 - :ok_hand: **Unit Test**:
   - Fly safely with unit [Jest](https://jestjs.io/)
   - 100% coverage. (DOING)
-- :cyclone: **Avaiable CICD**: :construction: doing
+- :cyclone: **Available CI/CD**: :construction: doing
 
 ## Features
 
@@ -37,7 +37,7 @@
 
 ## Code Structure
 
-- **@**: Styles core by [Shadcn](https://ui.shadcn.com/), avaiable Complex Component like [cmdk](https://github.com/pacocoursey/cmdk), [Table](https://tanstack.com/table/latest)
+- **@**: Styles core by [Shadcn](https://ui.shadcn.com/), available Complex Component like [cmdk](https://github.com/pacocoursey/cmdk), [Table](https://tanstack.com/table/latest)
 - **app**: contains the main source code
   - **constants**: Reusable constants across the application (both client-server)
   - **hoc**: Store [Higher order function](https://en.wikipedia.org/wiki/Higher-order_function).
@@ -89,13 +89,13 @@ db.collection("groups").insert({
 })
 ```
 
-Because this is internal applicatons, the User cannot register freely. We will create Root account first, and create another user by core workflow. <br>
+Because this is internal applications, the User cannot register freely. We will create Root account first, and create another user by core workflow. <br>
 Example:
 
 ```
 db.collection("users").insert({
   "_id": "root",
-  "username" : "minhlee",
+  "username" : "MinLee",
   "email" : "test@gmail.com",
 })
 ```
@@ -103,7 +103,7 @@ db.collection("users").insert({
 After that, forgot and change password (to match by your .env, because this machine hash password from your key and salt-round).
 
 You must to verify at your Email to reset password.<br>
-If your STMP don't avaiable, you can go to direct link:
+If your STMP don't available, you can go to direct link:
 
 ```
 `${localhost}/reset-password/${resetPassword.token}`

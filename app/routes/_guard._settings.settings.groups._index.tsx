@@ -38,36 +38,54 @@ export default function Screen() {
   return (
     <div className="h-full flex-1 flex-col space-y-8 flex">
       <div className="grid space-y-2 bg-secondary p-4 rounded-xl">
-        <Typography variant='h2'>Groups</Typography>
+        <Typography variant="h2">Groups</Typography>
         <Breadcrumbs />
       </div>
       <div className="grid grid-cols-3 gap-8">
         {loaderData.groups?.map((group, index: number) => {
           return (
             <Link key={index} to={`/settings/groups/${group._id}`}>
-              <Card className='bg-gray-100'>
-                <CardHeader className='p-4'>
-                  <Typography variant='h4' affects='removePMargin'> {group.name}</Typography>
-                  <Typography className='text-gray-500' variant='p' affects='removePMargin'>{group.description}</Typography>
+              <Card className="bg-gray-100">
+                <CardHeader className="p-4">
+                  <Typography variant="h4" affects="removePMargin">
+                    {' '}
+                    {group.name}
+                  </Typography>
+                  <Typography
+                    className="text-gray-500"
+                    variant="p"
+                    affects="removePMargin">
+                    {group.description}
+                  </Typography>
                 </CardHeader>
-                <CardContent className='flex flex-row gap-4 p-4'>
-                  <div className='flex items-center gap-2'>
-                    <div className='bg-primary-50 p-3 rounded-md'>
-                      <img src={TabGroupIcon} alt='tab-group-icon' />
+                <CardContent className="flex flex-row gap-4 p-4">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary-50 p-3 rounded-md">
+                      <img src={TabGroupIcon} alt="tab-group-icon" />
                     </div>
                     <div>
-                      <Typography className='text-gray-400' variant='p'>Children Group</Typography>
-                      <Typography className='text-primary' variant='h4'>2</Typography>
+                      <Typography className="text-gray-400" variant="p">
+                        Children Group
+                      </Typography>
+                      <Typography className="text-primary" variant="h4">
+                        2
+                      </Typography>
                     </div>
                   </div>
 
-                  <div className='flex items-center gap-2'>
-                    <div className='bg-secondary p-3 rounded-md'>
-                      <img src={UsersIcon} alt='user-group-icon' />
+                  <div className="flex items-center gap-2">
+                    <div className="bg-secondary p-3 rounded-md">
+                      <img src={UsersIcon} alt="user-group-icon" />
                     </div>
                     <div>
-                      <Typography className='text-gray-400' variant='p'>Users</Typography>
-                      <Typography className='text-secondary-foreground' variant='h3'>2</Typography>
+                      <Typography className="text-gray-400" variant="p">
+                        Users
+                      </Typography>
+                      <Typography
+                        className="text-secondary-foreground"
+                        variant="h3">
+                        2
+                      </Typography>
                     </div>
                   </div>
                 </CardContent>

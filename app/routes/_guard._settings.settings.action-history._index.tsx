@@ -15,8 +15,10 @@ import {
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/action-history" label="Actions history" />,
-}
+  breadcrumb: () => (
+    <BreadcrumbsLink to="/settings/action-history" label="Actions history" />
+  ),
+};
 
 interface IActionsHistory {
   _id: string;
@@ -134,7 +136,7 @@ export default function Screen() {
   return (
     <>
       <div className="grid space-y-2 bg-secondary p-4 rounded-xl mb-4">
-        <Typography variant='h3'>Actions history</Typography>
+        <Typography variant="h3">Actions history</Typography>
         <Breadcrumbs />
       </div>
 

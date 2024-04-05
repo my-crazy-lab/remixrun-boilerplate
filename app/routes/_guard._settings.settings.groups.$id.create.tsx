@@ -10,7 +10,7 @@ import {
   useLoaderData,
   useNavigation,
   useSearchParams,
-  useSubmit
+  useSubmit,
 } from '@remix-run/react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -75,8 +75,10 @@ export const loader = hocLoader(
 );
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Create group" />,
-}
+  breadcrumb: () => (
+    <BreadcrumbsLink to="/settings/groups" label="Create group" />
+  ),
+};
 
 interface FormData {
   name: string;
@@ -121,34 +123,30 @@ export default function Screen() {
 
   return (
     <>
-      <div className='grid space-y-2 bg-secondary p-4 rounded-xl'>
-        <Typography variant='h2'>Create group</Typography>
+      <div className="grid space-y-2 bg-secondary p-4 rounded-xl">
+        <Typography variant="h2">Create group</Typography>
         <Breadcrumbs />
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="grid items-center gap-4">
-            <Label htmlFor="group_name">
-              Group name
-            </Label>
+            <Label htmlFor="group_name">Group name</Label>
             <Input
               {...register('name' as const, {
                 required: true,
               })}
               className="col-span-2"
-              placeholder='Enter group name'
+              placeholder="Enter group name"
             />
           </div>
           <div className="grid items-center gap-4">
-            <Label htmlFor="group_description">
-              Group description
-            </Label>
+            <Label htmlFor="group_description">Group description</Label>
             <Input
               {...register('description' as const, {
                 required: true,
               })}
               className="col-span-2"
-              placeholder='Enter description'
+              placeholder="Enter description"
             />
           </div>
           <div className="grid items-center gap-4">

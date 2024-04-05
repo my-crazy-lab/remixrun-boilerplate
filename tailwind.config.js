@@ -60,7 +60,7 @@ module.exports = {
         blue: {
           DEFAULT: 'hsl(var(--blue-500))',
           50: 'hsl(var(--blue-50))',
-        }
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',

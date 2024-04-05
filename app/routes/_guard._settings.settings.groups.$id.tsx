@@ -8,7 +8,7 @@ import {
   getGroupDetail,
   isParentOfGroup,
 } from '~/services/role-base-access-control.server';
-import { type Roles } from '~/types';
+import { type Groups, type Roles } from '~/types';
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const groupId = params.id || '';
@@ -43,7 +43,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 };
 
 export const handle = {
-  breadcrumb: (data: { group: any }) => {
+  breadcrumb: (data: { group: Groups }) => {
     const { group } = data;
 
     return (

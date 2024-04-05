@@ -10,7 +10,7 @@ import {
   useLoaderData,
   useNavigation,
   useSearchParams,
-  useSubmit
+  useSubmit,
 } from '@remix-run/react';
 import { Controller, useForm } from 'react-hook-form';
 import { ERROR, PERMISSIONS } from '~/constants/common';
@@ -132,15 +132,16 @@ interface FormData {
 }
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Edit group" />,
-}
+  breadcrumb: () => (
+    <BreadcrumbsLink to="/settings/groups" label="Edit group" />
+  ),
+};
 
 export default function Screen() {
   const { group, roles, users } = useLoaderData<LoaderData>();
   const navigation = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
-
 
   const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
@@ -177,11 +178,10 @@ export default function Screen() {
   return (
     <>
       <div className="grid space-y-2 bg-secondary rounded-xl p-4">
-        <Typography variant='h3'>Edit group</Typography>
+        <Typography variant="h3">Edit group</Typography>
         <Breadcrumbs />
       </div>
       <form className="gap-4 pb-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
-
         <div className="grid gap-4 py-4 grid-cols-2">
           <div className="grid items-center gap-4">
             <Label htmlFor="group" className="text-left">
@@ -195,9 +195,7 @@ export default function Screen() {
           </div>
 
           <div className="grid items-center gap-4">
-            <Label htmlFor="description">
-              Description
-            </Label>
+            <Label htmlFor="description">Description</Label>
             <Input
               {...register('description' as const, {
                 required: true,
@@ -216,7 +214,7 @@ export default function Screen() {
                   defaultSearchValue={searchParams.get('users') || ''}
                   searchRemix={{ searchKey: 'users', setSearchParams }}
                   isDisplayAllOptions
-                  options={users.map((user) => ({
+                  options={users.map(user => ({
                     value: user._id,
                     label: user.username,
                   }))}
@@ -235,7 +233,7 @@ export default function Screen() {
               render={({ field: { onChange, value } }) => (
                 <MultiSelect
                   isDisplayAllOptions
-                  options={roles.map((role) => ({
+                  options={roles.map(role => ({
                     value: role._id,
                     label: role.name,
                   }))}

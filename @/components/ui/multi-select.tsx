@@ -19,24 +19,25 @@ import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import type { SetURLSearchParams } from 'react-router-dom';
 import { Skeleton } from './skeleton';
+import { type CommonFunction } from '~/types';
 
 export type OptionType = {
   label: string;
   value: string;
 };
 
-interface MultiSelectAsyncProps {
+interface MultiSelectAsyncProps<T> {
   options: OptionType[];
   className?: string;
   isDisplayAllOptions?: boolean;
   selected?: OptionType[];
-  setSelected?: any;
+  setSelected?: T;
   isLoading?: boolean;
   defaultSearchValue?: string;
   searchRemix: { setSearchParams: SetURLSearchParams; searchKey: string };
 }
 
-export function MultiSelectAsync({
+export function MultiSelectAsync<T extends CommonFunction>({
   options,
   className,
   selected = [],
@@ -44,10 +45,10 @@ export function MultiSelectAsync({
   isLoading = false,
   defaultSearchValue = '',
   searchRemix,
-}: MultiSelectAsyncProps) {
+}: MultiSelectAsyncProps<T>) {
   const [open, setOpen] = React.useState(false);
   const handleUnselect = (item: string) => {
-    setSelected(selected.filter(i => i.value !== item));
+    setSelected?.(selected.filter(i => i.value !== item));
   };
   const [searchText, setSearchText] =
     React.useState<string>(defaultSearchValue);
@@ -70,8 +71,9 @@ export function MultiSelectAsync({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
-            }`}
+          className={`w-full justify-between ${
+            selected.length > 1 ? 'h-full' : 'h-10'
+          }`}
           onClick={() => setOpen(!open)}>
           <div className="flex gap-1 flex-wrap">
             {selected.map(item => (
@@ -126,8 +128,8 @@ export function MultiSelectAsync({
               <CommandItem
                 key={option.value}
                 onSelect={() => {
-                  setSelected(
-                    selected.some((item: any) => item.value === option.value)
+                  setSelected?.(
+                    selected.some(item => item.value === option.value)
                       ? selected.filter(item => item.value !== option.value)
                       : [...selected, option],
                   );
@@ -151,21 +153,21 @@ export function MultiSelectAsync({
   );
 }
 
-interface MultiSelectProps {
+interface MultiSelectProps<T> {
   options: OptionType[];
   className?: string;
   isDisplayAllOptions?: boolean;
   selected?: OptionType[];
-  setSelected?: any;
+  setSelected?: T;
 }
 
-export function MultiSelect({
+export function MultiSelect<T extends CommonFunction>({
   options,
   className,
   isDisplayAllOptions,
   selected = [],
   setSelected,
-}: MultiSelectProps) {
+}: MultiSelectProps<T>) {
   const [open, setOpen] = React.useState(false);
   const [allSelected, setAllSelected] = React.useState(false);
 
@@ -180,14 +182,14 @@ export function MultiSelect({
   }, [isDisplayAllOptions, selected, options]);
 
   const handleUnselect = (item: string) => {
-    setSelected(selected.filter(i => i.value !== item));
+    setSelected?.(selected.filter(i => i.value !== item));
   };
 
   const handleIsDisplayAllOptions = () => {
     if (allSelected && selected) {
-      setSelected([]);
+      setSelected?.([]);
     } else {
-      setSelected(options);
+      setSelected?.(options);
     }
     setAllSelected(!allSelected);
   };
@@ -199,8 +201,9 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
-            }`}
+          className={`w-full justify-between ${
+            selected.length > 1 ? 'h-full' : 'h-10'
+          }`}
           onClick={() => setOpen(!open)}>
           <div className="flex gap-1 flex-wrap">
             {selected.map(item => (
@@ -242,7 +245,7 @@ export function MultiSelect({
               <CommandItem
                 key={option.value}
                 onSelect={() => {
-                  setSelected(
+                  setSelected?.(
                     selected.some(item => item.value === option.value)
                       ? selected.filter(item => item.value !== option.value)
                       : [...selected, option],

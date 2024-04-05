@@ -16,7 +16,7 @@ import { Logo } from './BTaskeeLogo';
 import LanguageSelector from './LanguageSelector';
 import TimezoneSwitcher from './TimezoneSwitcher';
 
-const navigations = [
+const navigation = [
   {
     title: 'Settings',
     href: ROUTE_NAME.PROFILE_SETTING,
@@ -25,7 +25,7 @@ const navigations = [
     title: 'Marketing',
     href: 'marketing/promotion',
   },
-]
+];
 
 export default function Header() {
   const { pathname } = useLocation();
@@ -39,7 +39,7 @@ export default function Header() {
             className="text-sm font-medium text-muted-foreground transition-colors">
             <Logo />
           </Link>
-          {navigations.map(item => (
+          {navigation.map(item => (
             <Link
               key={item.href}
               to={item.href}
@@ -64,9 +64,7 @@ export default function Header() {
           <LanguageSelector />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="relative h-8 w-8 rounded-full">
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>SC</AvatarFallback>
                 </Avatar>

@@ -51,7 +51,9 @@ export const loader = hocLoader(
         actionPermissions: groupPermissionsByModule(role.actionPermissions),
       },
     });
-  }, PERMISSIONS.READ_ROLE);
+  },
+  PERMISSIONS.READ_ROLE,
+);
 
 export default function RolesDetail() {
   const loaderData = useLoaderData<LoaderData>();
@@ -59,15 +61,17 @@ export default function RolesDetail() {
   return (
     <>
       <div className="grid space-y-2 bg-secondary p-4 rounded-xl mb-4">
-        <Typography className='capitalize' variant='h3'>{loaderData.role.name}</Typography>
+        <Typography className="capitalize" variant="h3">
+          {loaderData.role.name}
+        </Typography>
         <Breadcrumbs />
       </div>
-      <Typography variant='p'>{loaderData.role.description}</Typography>
+      <Typography variant="p">{loaderData.role.description}</Typography>
 
       {_.map(loaderData.role.actionPermissions, actionPermission => (
         <Accordion type="single" collapsible>
           <AccordionItem value={actionPermission.module}>
-            <AccordionTrigger className='capitalize'>
+            <AccordionTrigger className="capitalize">
               {actionPermission?.module}
             </AccordionTrigger>
             <AccordionContent>

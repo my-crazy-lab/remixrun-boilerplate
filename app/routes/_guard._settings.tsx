@@ -1,15 +1,15 @@
-import { BreadcrumbsLink } from "@/components/btaskee/Breadcrumbs";
-import Typography from "@/components/btaskee/Typography";
+import { BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import Typography from '@/components/btaskee/Typography';
 import { buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Link, Outlet, useLocation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import ROUTE_NAME from "~/constants/route";
+import ROUTE_NAME from '~/constants/route';
 
 export const handle = {
   breadcrumb: () => <BreadcrumbsLink to="/settings" label="Setting" />,
-}
+};
 
 const navigations = [
   {
@@ -28,7 +28,7 @@ const navigations = [
     title: 'Action history',
     href: ROUTE_NAME.ACTION_HISTORY_SETTING,
   },
-]
+];
 
 export default function Screen() {
   const { t } = useTranslation(['common', 'settings']);
@@ -37,8 +37,11 @@ export default function Screen() {
   return (
     <div className="space-y-6 md:block">
       <div className="space-y-0.5">
-        <Typography variant='h2'>{t('SETTINGS')}</Typography>
-        <Typography className="text-gray-400" variant='p' affects='removePMargin'>
+        <Typography variant="h2">{t('SETTINGS')}</Typography>
+        <Typography
+          className="text-gray-400"
+          variant="p"
+          affects="removePMargin">
           Manage your account settings and set e-mail preferences.
         </Typography>
       </div>

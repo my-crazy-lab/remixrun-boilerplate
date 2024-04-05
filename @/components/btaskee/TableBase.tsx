@@ -97,15 +97,17 @@ const BTaskeeTable = <TData, TValue>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map(headerGroup => (
-              <TableRow className='bg-gray-100 rounded-s-sm' key={headerGroup.id}>
+              <TableRow
+                className="bg-gray-100 rounded-s-sm"
+                key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
                   <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>

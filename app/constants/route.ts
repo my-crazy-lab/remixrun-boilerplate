@@ -9,7 +9,7 @@ const ROUTE_NAME = {
   ACTION_HISTORY_SETTING: '/settings/action-history',
 
   MARKETING: 'marketing',
-  MARKETING_PROMOTION: '/marketing/promotion'
+  MARKETING_PROMOTION: '/marketing/promotion',
 };
 
 export default ROUTE_NAME;

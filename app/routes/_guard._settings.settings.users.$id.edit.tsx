@@ -52,8 +52,6 @@ export default function Screen() {
               <Label className="text-left">Cities</Label>
               <div className="col-span-2">
                 <MultiSelect
-                  // selected={value}
-                  // setSelected={onChange}
                   isDisplayAllOptions
                   options={[
                     {

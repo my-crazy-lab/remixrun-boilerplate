@@ -28,8 +28,10 @@ import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Create role" />,
-}
+  breadcrumb: () => (
+    <BreadcrumbsLink to="/settings/groups" label="Create role" />
+  ),
+};
 
 export const action = hocAction(
   async ({ params }: ActionFunctionArgs, { formData }) => {
@@ -117,16 +119,14 @@ export default function Screen() {
   return (
     <>
       <div className="grid p-4 space-y-2 bg-secondary rounded-xl">
-        <Typography variant='h4'>Create role</Typography>
+        <Typography variant="h4">Create role</Typography>
         <Breadcrumbs />
       </div>
 
-      <form className='mt-4' onSubmit={handleSubmit(onSubmit)}>
-        <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
+      <form className="mt-4" onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
           <div>
-            <Label htmlFor="name">
-              Role name
-            </Label>
+            <Label htmlFor="name">Role name</Label>
             <Input
               placeholder="Enter role name"
               className="mt-2"
@@ -134,9 +134,7 @@ export default function Screen() {
             />
           </div>
           <div>
-            <Label htmlFor="description">
-              Description
-            </Label>
+            <Label htmlFor="description">Description</Label>
             <Input
               placeholder="Enter description"
               className="mt-2"
@@ -148,7 +146,7 @@ export default function Screen() {
         {_.map(loaderData.permissionsGrouped, actionPermission => (
           <Accordion type="single" collapsible key={actionPermission.module}>
             <AccordionItem value={actionPermission.module}>
-              <AccordionTrigger className='capitalize'>
+              <AccordionTrigger className="capitalize">
                 {actionPermission?.module}
               </AccordionTrigger>
               <AccordionContent>

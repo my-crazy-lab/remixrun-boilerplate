@@ -37,7 +37,7 @@ import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
   breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Edit role" />,
-}
+};
 
 interface LoaderData {
   role: ReturnValueIgnorePromise<typeof getRoleDetail>;
@@ -154,17 +154,14 @@ export default function Screen() {
 
   return (
     <>
-
       <div className="grid p-4 space-y-2 bg-secondary rounded-xl">
-        <Typography variant='h4'>Edit role</Typography>
+        <Typography variant="h4">Edit role</Typography>
         <Breadcrumbs />
       </div>
-      <form className='mt-4 '>
-        <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
+      <form className="mt-4 ">
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
           <div>
-            <Label htmlFor="name">
-              Role name
-            </Label>
+            <Label htmlFor="name">Role name</Label>
             <Input
               {...register('name', { required: 'Please enter name role' })}
               className="mt-2"
@@ -173,9 +170,7 @@ export default function Screen() {
             <ErrorMessageBase name="name" errors={errors} />
           </div>
           <div>
-            <Label htmlFor="name">
-              Role description
-            </Label>
+            <Label htmlFor="name">Role description</Label>
             <Input
               {...register('description', {
                 required: 'Please enter name description',
@@ -192,10 +187,9 @@ export default function Screen() {
             defaultValue={role?.actionPermissions[0].module}
             type="single"
             collapsible
-            className='mt-4'
-          >
+            className="mt-4">
             <AccordionItem value={actionPermission.module}>
-              <AccordionTrigger className='capitalize'>
+              <AccordionTrigger className="capitalize">
                 {actionPermission?.module}
               </AccordionTrigger>
               <AccordionContent>
@@ -238,8 +232,7 @@ export default function Screen() {
             onClick={handleSubmit(onSubmit)}
             variant="default"
             type="submit"
-            color="primary"
-          >
+            color="primary">
             Save changes
           </Button>
         </div>

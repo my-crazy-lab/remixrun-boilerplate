@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useTranslation } from "react-i18next";
+import { useTranslation } from 'react-i18next';
 
 export const defaultLanguage = [
   {
@@ -28,8 +28,7 @@ const LanguageSelector = () => {
   return (
     <Select
       defaultValue={`${defaultLanguage[0].key}`}
-      onValueChange={value => changeLanguage(value)}
-    >
+      onValueChange={value => changeLanguage(value)}>
       <SelectTrigger className="h-10 w-[180px]">
         <SelectValue placeholder={`${defaultLanguage[0].name}`} />
       </SelectTrigger>

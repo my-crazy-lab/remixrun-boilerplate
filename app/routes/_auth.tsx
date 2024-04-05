@@ -19,9 +19,7 @@ export default function Screen() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;OK Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              Ut enim ad minim veniam, quis nostrud exercitation.&rdquo;
+              &ldquo;Update soon.&rdquo;
             </p>
           </blockquote>
         </div>
