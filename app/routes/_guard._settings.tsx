@@ -11,7 +11,7 @@ export const handle = {
   breadcrumb: () => <BreadcrumbsLink to="/settings" label="Setting" />,
 };
 
-const navigations = [
+const navigation = [
   {
     title: 'Profile',
     href: ROUTE_NAME.PROFILE_SETTING,
@@ -52,7 +52,7 @@ export default function Screen() {
             className={cn(
               'flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1',
             )}>
-            {navigations.map(item => (
+            {navigation.map(item => (
               <Link
                 key={item.href}
                 to={item.href}

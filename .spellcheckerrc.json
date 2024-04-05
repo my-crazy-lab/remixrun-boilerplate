@@ -13,7 +13,9 @@
     "package.json",
     "Dockerfile",
     "coverage",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "\\@",
+    "__tests__"
   ],
   "ignoreWords": [
     "languagedetector",

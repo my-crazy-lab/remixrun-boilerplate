@@ -288,7 +288,7 @@ export async function getGroupDetail<T = Document>({
     .collection('groups')
     .aggregate([
       {
-        $match: { _id: groupId, userds: userId },
+        $match: { _id: groupId, userIds: userId },
       },
       {
         $lookup: {
