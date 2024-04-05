@@ -11,29 +11,34 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
+import { getUserId } from '~/services/helpers.server';
+import { getUserProfile } from '~/services/settings.server';
 
 export const handle = {
   breadcrumb: () => <BreadcrumbsLink to="/settings/profile" label="Profile" />,
 };
 
-const dataUser = {
-  city: [
-    'Hồ Chí Minh',
-    'Hà Nội',
-    'Đà Nẵng',
-    'Bình Dương',
-    'Đồng Nai',
-    'Cần Thơ',
-    'Hải Phòng',
-    'Lâm Đồng',
-    'Khánh Hòa',
-    'Bangkok',
-  ],
-  username: 'myquyen.le',
-  emails: 'xnguyen9a101@gmail.com',
+interface LoaderData {
+  userProfile: {
+    _id: string;
+    username: string;
+    email: string;
+    cities: Array<string>
+  }
+}
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const userId = await getUserId({ request });
+  const userProfile = await getUserProfile(userId);
+
+  return json({ userProfile });
 };
 
 export default function Screen() {
+  const loaderData = useLoaderData<LoaderData>();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col p-4 rounded-lg bg-secondary">
@@ -55,11 +60,11 @@ export default function Screen() {
                 <Typography variant="h4" affects="small">
                   Email
                 </Typography>
-                <Input defaultValue={dataUser.emails}></Input>
+                <Input defaultValue={loaderData.userProfile.email}></Input>
                 <Typography variant="h4" affects="small">
                   User Name
                 </Typography>
-                <Input defaultValue={dataUser.username}></Input>
+                <Input defaultValue={loaderData.userProfile.username}></Input>
               </div>
             </CardContent>
           </Card>
@@ -71,30 +76,25 @@ export default function Screen() {
               </CardDescription>
             </CardHeader>
             <Separator />
-            <CardContent>
-              <div className="py-4 gap-4 grid">
-                <Typography variant="h4" affects="small">
-                  Department
-                </Typography>
-                <Typography variant="h4" affects="small">
-                  City
-                </Typography>
-                <div className="gap-2 grid grid-cols-4">
-                  {dataUser.city.map((ct, index) => {
-                    return (
-                      <Badge
-                        className="text-center block rounded-md py-2 font-normal text-blue bg-blue-50"
-                        key={index}>
-                        {ct}
-                      </Badge>
-                    );
-                  })}
-                </div>
+            <CardContent className='mt-4 gap-4 grid'>
+              <Typography variant="h4" affects="small">
+                City
+              </Typography>
+              <div className="gap-2 grid grid-cols-4">
+                {loaderData.userProfile.cities.map((city, index) => {
+                  return (
+                    <Badge
+                      className="text-center block rounded-md py-2 font-normal text-blue bg-blue-50"
+                      key={index}>
+                      {city}
+                    </Badge>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
         </div>
-        <Card className="h-1/2">
+        <Card className="h-[448px]">
           <CardHeader>
             <CardTitle className="text-lg">Change Profile</CardTitle>
             <CardDescription>
