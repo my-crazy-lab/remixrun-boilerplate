@@ -1,8 +1,8 @@
-import * as React from 'react';
-import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { LinkProps } from '@remix-run/react';
 import { Link } from '@remix-run/react';
+import { ChevronRight, MoreHorizontal } from 'lucide-react';
+import * as React from 'react';
 
 const Breadcrumb = React.forwardRef<
   HTMLElement,

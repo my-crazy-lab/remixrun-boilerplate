@@ -1,4 +1,4 @@
-import { MongoClient, BSON } from 'mongodb';
+import { BSON, MongoClient } from 'mongodb';
 import type { Db } from 'mongodb';
 import { dotenv } from '~/services/dotenv.server';
 

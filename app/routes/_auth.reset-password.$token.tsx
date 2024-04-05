@@ -1,15 +1,14 @@
 import { Button } from '@/components/ui/button';
-import { useActionData, Form, useNavigation } from '@remix-run/react';
-import { useTranslation } from 'react-i18next';
-import { toast } from '@/components/ui/use-toast';
-
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { changePassword, isResetPassExpired } from '~/services/auth.server';
-import { json, redirect } from '@remix-run/node';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from '@/components/ui/use-toast';
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
+import { Form, useActionData, useNavigation } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
+import { changePassword, isResetPassExpired } from '~/services/auth.server';
 
 interface ActionData {
   error?: string;

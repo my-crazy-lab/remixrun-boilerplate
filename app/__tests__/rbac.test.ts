@@ -20,7 +20,7 @@ import {
   verifyPermissions,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import { type Groups, type Permissions, type Users, type Roles } from '~/types';
+import { type Groups, type Permissions, type Roles, type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
 
 const mockRecordCommonField = {

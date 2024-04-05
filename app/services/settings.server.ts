@@ -1,9 +1,10 @@
 import { type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
+
 import { hashPassword } from './auth.server';
 import {
-  newRecordCommonField,
   type FindOptionsClient,
+  newRecordCommonField,
 } from './constants.server';
 
 interface ISearch {

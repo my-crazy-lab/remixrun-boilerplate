@@ -1,5 +1,4 @@
 // HIGHER ORDER COMPONENT
-
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { getUserId, saveActionHistory } from '~/services/helpers.server';
 import { getUserPermissions } from '~/services/role-base-access-control.server';

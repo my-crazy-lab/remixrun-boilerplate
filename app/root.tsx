@@ -24,6 +24,7 @@ import {
 import { HomeIcon } from 'lucide-react';
 import { useChangeLanguage } from 'remix-i18next/react';
 import i18next from '~/i18next.server';
+
 import styles from './tailwind.css';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {

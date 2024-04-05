@@ -1,6 +1,3 @@
-import { cn } from '@/lib/utils';
-import * as React from 'react';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,11 +12,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
+import * as React from 'react';
 import type { SetURLSearchParams } from 'react-router-dom';
-import { Skeleton } from './skeleton';
 import { type CommonFunction } from '~/types';
+
+import { Skeleton } from './skeleton';
 
 export type OptionType = {
   label: string;

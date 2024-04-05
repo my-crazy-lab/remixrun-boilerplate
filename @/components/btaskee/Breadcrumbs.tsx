@@ -4,6 +4,7 @@ import { useMatches } from '@remix-run/react';
 import { ChevronRight } from 'lucide-react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { Fragment } from 'react';
+
 import { NavigationLink } from './NavigationLink';
 
 type BreadcrumbsItemProps = HTMLAttributes<HTMLElement> &

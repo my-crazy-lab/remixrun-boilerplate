@@ -1,8 +1,7 @@
 import { createRequestHandler } from '@remix-run/express';
 import { broadcastDevReady } from '@remix-run/node';
-import express from 'express';
-
 import 'dotenv/config';
+import express from 'express';
 
 // notice that the result of `remix build` is "just a module"
 import * as build from './build/index.js';

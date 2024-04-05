@@ -1,8 +1,9 @@
-import { ObjectId, mongodb } from '~/utils/db.server';
 import type { Document } from 'mongodb';
-import { getSession } from './session.server';
-import { momentTz } from '~/utils/common';
 import type { CollectionIdString } from '~/types';
+import { momentTz } from '~/utils/common';
+import { ObjectId, mongodb } from '~/utils/db.server';
+
+import { getSession } from './session.server';
 
 export async function saveActionHistory(
   { request }: { request: Request },

@@ -1,20 +1,21 @@
-import { Authenticator } from 'remix-auth';
-import { sessionStorage } from '~/services/session.server';
-import { FormStrategy } from 'remix-auth-form';
-import bcrypt from 'bcrypt';
 import { redirect } from '@remix-run/node';
-import { mongodb } from '~/utils/db.server';
-import { dotenv } from './dotenv.server';
-import { getFutureTimeFromToday, momentTz } from '~/utils/common';
-import { sendEmail } from './mail.server';
+import bcrypt from 'bcrypt';
+import { Authenticator } from 'remix-auth';
+import { FormStrategy } from 'remix-auth-form';
 import { v4 as uuidv4 } from 'uuid';
+import { ERROR } from '~/constants/common';
+import ROUTE_NAME from '~/constants/route';
+import { sessionStorage } from '~/services/session.server';
+import { type Users } from '~/types';
+import { getFutureTimeFromToday, momentTz } from '~/utils/common';
+import { mongodb } from '~/utils/db.server';
+
 import {
   EXPIRED_RESET_PASSWORD,
   EXPIRED_VERIFICATION_CODE,
 } from './constants.server';
-import ROUTE_NAME from '~/constants/route';
-import { ERROR } from '~/constants/common';
-import { type Users } from '~/types';
+import { dotenv } from './dotenv.server';
+import { sendEmail } from './mail.server';
 
 interface AuthenticatorSessionData {
   userId: string;

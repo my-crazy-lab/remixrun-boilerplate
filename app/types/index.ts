@@ -1,5 +1,5 @@
-import type { TActionPermissionModule } from '~/constants/common';
 import type { Document } from 'mongodb';
+import type { TActionPermissionModule } from '~/constants/common';
 
 export interface Users {
   _id: string;
