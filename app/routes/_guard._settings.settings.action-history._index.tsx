@@ -5,7 +5,7 @@ import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-tabl
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData, useSearchParams } from '@remix-run/react';
-import type { ColumnDef, Row } from '@tanstack/react-table';
+import { type ColumnDef } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import moment from 'moment';
 import {
@@ -120,12 +120,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ actionsHistory, total });
 };
 
-const renderSubComponent = ({ row }: { row: Row }) => (
-  <pre style={{ fontSize: '10px' }}>
-    <code>{JSON.stringify(row.getValue('data'), null, 2)}</code>
-  </pre>
-);
-
 export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { total, actionsHistory } = useLoaderData<{
@@ -142,6 +136,9 @@ export default function Screen() {
 
       <BTaskeeTable
         total={total || 0}
+        // TODO fix typing for Table
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         data={actionsHistory || []}
         columns={columns}
         pagination={getPageSizeAndPageIndex({
@@ -151,7 +148,11 @@ export default function Screen() {
         })}
         searchField="username"
         setSearchParams={setSearchParams}
-        renderSubComponent={renderSubComponent}
+        renderSubComponent={({ row }) => (
+          <pre style={{ fontSize: '10px' }}>
+            <code>{JSON.stringify(row.getValue('data'), null, 2)}</code>
+          </pre>
+        )}
         getRowCanExpand={() => true}
       />
     </>

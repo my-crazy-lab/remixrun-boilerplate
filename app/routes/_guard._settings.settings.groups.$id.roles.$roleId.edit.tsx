@@ -99,7 +99,6 @@ export const action = hocAction(
 );
 
 export default function Screen() {
-  const { role } = useLoaderData<LoaderData>();
   const loaderData = useLoaderData<LoaderData>();
 
   const {
@@ -181,16 +180,15 @@ export default function Screen() {
             <ErrorMessageBase name="description" errors={errors} />
           </div>
         </div>
-        {_.map(role?.actionPermissions, actionPermission => (
+        {_.map(loaderData.allPermissionsAvailable, actionPermission => (
           <Accordion
             key={actionPermission.module}
-            defaultValue={role?.actionPermissions[0].module}
             type="single"
             collapsible
             className="mt-4">
             <AccordionItem value={actionPermission.module}>
               <AccordionTrigger className="capitalize">
-                {actionPermission?.module}
+                {actionPermission.module}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

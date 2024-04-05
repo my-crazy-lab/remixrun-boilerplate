@@ -102,7 +102,10 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
-            {row.getValue('cities')?.map((e, index) => (
+            {// TODO fix typing for react hook form
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            row.getValue('cities')?.map((e, index) => (
               <Badge variant="secondary" key={index}>
                 {e}
               </Badge>
@@ -309,6 +312,9 @@ export default function Screen() {
 
       <BTaskeeTable
         total={loaderData?.total || 0}
+        // TODO fix typing for Table
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         data={loaderData?.users || []}
         columns={columns}
         pagination={getPageSizeAndPageIndex({
