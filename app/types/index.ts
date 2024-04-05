@@ -24,6 +24,8 @@ export interface Users {
   };
 }
 
+export type IUserType = 'ACTIVE' | 'INACTIVE';
+
 export interface Permissions {
   _id: string;
   name: string;
