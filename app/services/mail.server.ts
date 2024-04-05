@@ -17,6 +17,6 @@ export async function sendEmail({ to, from, text, subject }: EmailArgs) {
       subject,
     });
   } catch (error) {
-    throw new Error("EMAIL_SERVICE_ERROR")
+    throw new Error('EMAIL_SERVICE_ERROR');
   }
 }
