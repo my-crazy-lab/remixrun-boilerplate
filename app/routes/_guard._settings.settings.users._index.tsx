@@ -11,29 +11,38 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MultiSelect } from '@/components/ui/multi-select';
+import { MultiSelect, type OptionType } from '@/components/ui/multi-select';
 
-import { DataTableColumnHeader } from '@/components/ui/table-data/data-table-column-header';
-import { DataTableRowActions } from '@/components/ui/table-data/data-table-row-actions';
+import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-table-column-header';
+import { DataTableRowActions } from '@/components/btaskee/table-data/data-table-row-actions';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData, useSearchParams, useSubmit } from '@remix-run/react';
 
-import * as React from 'react';
+import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import BTaskeeTable from '@/components/btaskee/TableBase';
+import Typography from '@/components/btaskee/Typography';
+import type { ColumnDef } from '@tanstack/react-table';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { PERMISSIONS } from '~/constants/common';
+import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
-import { getSession } from '~/services/session.server';
 import {
   createNewUser,
   getTotalUsers,
   getUsers,
 } from '~/services/settings.server';
+import { type ReturnValueIgnorePromise } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
-import BTaskeeTable from '@/components/ui/btaskee-table';
-import type { ColumnDef } from '@tanstack/react-table';
 
-const columns: ColumnDef<any>[] = [
+export const handle = {
+  breadcrumb: () => (
+    <BreadcrumbsLink to="/settings/users" label="Users management" />
+  ),
+};
+
+const columns: ColumnDef<LoaderData['users'][0]>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -89,26 +98,27 @@ const columns: ColumnDef<any>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="City" />
     ),
-    cell: ({ row }: any) => {
+    cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
-            {row
-              ?.getValue('cities')
-              .map((e: any, index: number) => <Badge key={index}>{e}</Badge>)}
+            {row.getValue('cities')?.map((e, index) => (
+              <Badge variant="secondary" key={index}>
+                {e}
+              </Badge>
+            ))}
           </span>
         </div>
       );
     },
   },
-
   {
     id: 'actions',
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ];
 
-export const action = hocAction(async ({}, { formData }: any) => {
+export const action = hocAction(async ({}, { formData }) => {
   try {
     const { username, email, password, cities } = formData;
 
@@ -120,11 +130,18 @@ export const action = hocAction(async ({}, { formData }: any) => {
     });
 
     return null;
-  } catch (error: any) {
-    console.log(error);
-    return error;
+  } catch (error) {
+    if (error instanceof Error) {
+      return json({ error: error.message });
+    }
+    return json({ error: ERROR.UNKNOWN_ERROR });
   }
 }, PERMISSIONS.WRITE_USER);
+
+interface LoaderData {
+  users: ReturnValueIgnorePromise<typeof getUsers>;
+  total: number;
+}
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -143,21 +160,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     limit,
     projection: { cities: 1, username: 1, email: 1 },
   });
-  const session = await getSession(request.headers.get('cookie'));
   return json({ users, total });
 };
 
+interface FormData {
+  email: string;
+  password: string;
+  cities: Array<OptionType>;
+  username: string;
+}
+
 export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const loaderData = useLoaderData();
+  const loaderData = useLoaderData<LoaderData>();
 
-  const {
-    register,
-    control,
-    reset,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<any>({
+  const { register, control, reset, handleSubmit } = useForm<FormData>({
     defaultValues: {
       email: '',
       password: '',
@@ -165,15 +182,16 @@ export default function Screen() {
       username: '',
     },
   });
+
   const submit = useSubmit();
-  const [open, setOpen] = React.useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
 
   const onCloseAndReset = () => {
     setOpen(false);
     reset();
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const formData = new FormData();
     formData.append('email', data.email);
     formData.append('password', data.password);
@@ -185,15 +203,11 @@ export default function Screen() {
   };
 
   return (
-    <div className="hidden h-full flex-1 flex-col space-y-8 md:flex">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Users management
-          </h2>
-          <p className="text-muted-foreground">
-            Here&apos;s a list of your users!
-          </p>
+    <div className="h-full flex-1 flex-col space-y-8 flex">
+      <div className="flex items-center justify-between space-y-2 bg-secondary p-4 rounded-xl">
+        <div className="grid space-y-2">
+          <Typography variant="h2"> Users management</Typography>
+          <Breadcrumbs />
         </div>
         <Dialog
           open={open}
@@ -204,7 +218,9 @@ export default function Screen() {
             setOpen(open);
           }}>
           <DialogTrigger asChild>
-            <Button variant="outline">Add new user</Button>
+            <Button className="gap-2" variant="default">
+              <Plus /> Add new user
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[560px]">
             <form onSubmit={handleSubmit(onSubmit)}>

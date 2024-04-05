@@ -20,19 +20,8 @@ import {
   verifyPermissions,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import type { Groups, Permissions, Roles, Users } from '~/types';
-import {
-  describe,
-  expect,
-  beforeEach,
-  afterEach,
-  afterAll,
-  it,
-  beforeAll,
-  jest,
-} from '@jest/globals';
+import { type Groups, type Permissions, type Users, type Roles } from '~/types';
 import { mongodb } from '~/utils/db.server';
-import { WithId } from 'mongodb';
 
 const mockRecordCommonField = {
   createdAt: new Date('2024-03-24T00:00:00.000Z'),
@@ -394,7 +383,7 @@ describe('Role base access control', () => {
       };
       await updateGroups(mockParams);
 
-      const group: WithId<Groups> | null = await mongodb
+      const group = await mongodb
         .collection<Groups>('groups')
         .findOne({ _id: mockGroupId });
       expect(group?.name).toEqual('updated');

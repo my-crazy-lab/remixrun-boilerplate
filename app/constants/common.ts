@@ -19,4 +19,7 @@ export type TActionPermissionModule = keyof typeof IActionPermissionModule;
 export const ERROR = {
   EMAIL_INCORRECT: 'EMAIL_INCORRECT',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
+  LINK_EXPIRED: 'LINK_EXPIRED',
+  PASSWORD_NOT_MATCH: 'PASSWORD_NOT_MATCH',
+  PARENT_GROUP_NOT_FOUND: 'PARENT_GROUP_NOT_FOUND',
 };

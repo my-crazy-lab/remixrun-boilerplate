@@ -19,3 +19,4 @@ export type FindOptionsClient = Pick<
 >;
 
 export const EXPIRED_RESET_PASSWORD = 15; // by minutes
+export const EXPIRED_VERIFICATION_CODE = 10; // by minutes

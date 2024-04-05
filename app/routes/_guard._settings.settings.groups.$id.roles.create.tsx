@@ -1,3 +1,5 @@
+import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import Typography from '@/components/btaskee/Typography';
 import {
   Accordion,
   AccordionContent,
@@ -7,16 +9,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { useLoaderData, useNavigate, useSubmit } from '@remix-run/react';
+import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
-import { MoveLeft } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
-import { PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader, res403, res403GroupParent } from '~/hoc/remix';
+import { ERROR, PERMISSIONS } from '~/constants/common';
+import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
   createRole,
@@ -24,27 +24,39 @@ import {
   isParentOfGroup,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import { groupPermissionsByModule } from '~/utils/helpers';
+import { type ReturnValueIgnorePromise } from '~/types';
+import { groupPermissionsByModule } from '~/utils/common';
+
+export const handle = {
+  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Create role" />,
+}
 
 export const action = hocAction(
-  async ({ params }: ActionFunctionArgs, { formData }: any) => {
+  async ({ params }: ActionFunctionArgs, { formData }) => {
     try {
       const { name, description, permissions } = formData;
       await createRole({
         name,
-        groupId: params.id,
+        groupId: params.id || '',
         description,
         permissions: JSON.parse(permissions),
       });
 
       return redirect(`/settings/groups/${params.id}`);
-    } catch (err: any) {
-      console.log(err);
-      return json({ err });
+    } catch (error) {
+      if (error instanceof Error) {
+        return json({ error: error.message });
+      }
+      return json({ error: ERROR.UNKNOWN_ERROR });
     }
   },
   PERMISSIONS.WRITE_ROLE,
 );
+
+interface LoaderData {
+  permissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
+  permissionsGrouped: ReturnType<typeof groupPermissionsByModule>;
+}
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
@@ -72,8 +84,6 @@ export const loader = hocLoader(
 
 export default function Screen() {
   const loaderData = useLoaderData<any>();
-  const navigate = useNavigate();
-  const goBack = () => navigate(-1);
   const {
     register,
     control,
@@ -87,7 +97,7 @@ export default function Screen() {
   });
   const submit = useSubmit();
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
     const formData = new FormData();
     const permissions: string[] = [];
 
@@ -106,33 +116,40 @@ export default function Screen() {
 
   return (
     <>
-      <div className="flex flex-row items-center text-xl px-0 pb-6 gap-4">
-        <Button onClick={goBack}>
-          <MoveLeft className="h-5 w-5" />{' '}
-        </Button>
-        Create role
+      <div className="grid p-4 space-y-2 bg-secondary rounded-xl">
+        <Typography variant='h4'>Create role</Typography>
+        <Breadcrumbs />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Label className="text-left" htmlFor="name">
-          Role name
-        </Label>
-        <Input
-          placeholder="Role"
-          {...register('name' as const, { required: true })}></Input>
-        <Label className="text-left mt-4" htmlFor="description">
-          Description
-        </Label>
-        <Input
-          placeholder="Description"
-          {...register('description' as const, { required: true })}></Input>
-        <Separator className="my-4" />
+      <form className='mt-4' onSubmit={handleSubmit(onSubmit)}>
+        <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
+          <div>
+            <Label htmlFor="name">
+              Role name
+            </Label>
+            <Input
+              placeholder="Enter role name"
+              className="mt-2"
+              {...register('name' as const, { required: true })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="description">
+              Description
+            </Label>
+            <Input
+              placeholder="Enter description"
+              className="mt-2"
+              {...register('description' as const, { required: true })}
+            />
+          </div>
+        </div>
 
-        {_.map(loaderData.permissionsGrouped, (actionPermission: any) => (
-          <Accordion type="single" collapsible key={actionPermission._id}>
+        {_.map(loaderData.permissionsGrouped, actionPermission => (
+          <Accordion type="single" collapsible key={actionPermission.module}>
             <AccordionItem value={actionPermission.module}>
-              <AccordionTrigger>
-                {actionPermission?.module?.toUpperCase()}
+              <AccordionTrigger className='capitalize'>
+                {actionPermission?.module}
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

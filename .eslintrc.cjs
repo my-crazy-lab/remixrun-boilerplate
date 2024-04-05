@@ -83,6 +83,8 @@ module.exports = {
             "allow": ["_id", "__db"]
           }
         ],
+        "no-console": 2,
+        '@typescript-eslint/consistent-type-imports': 2
       }
     },
 

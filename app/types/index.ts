@@ -82,3 +82,9 @@ export interface IActionPermission {
 export interface CollectionIdString extends Document {
   _id: string;
 }
+
+export type ReturnValueIgnorePromise<
+  T extends (...args: MustBeAny) => MustBeAny,
+> = ReturnType<T> extends Promise<infer A> ? A : never;
+
+export type CommonFunction<T, R = MustBeAny> = (arg: T) => R;

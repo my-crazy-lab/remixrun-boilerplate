@@ -3,9 +3,13 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { getUserId, saveActionHistory } from '~/services/helpers.server';
 import { getUserPermissions } from '~/services/role-base-access-control.server';
+import { type CommonFunction, type MustBeAny } from '~/types';
 
 export function hocAction(
-  callback: (args: ActionFunctionArgs, { formData }: any) => any,
+  callback: (
+    args: ActionFunctionArgs,
+    { formData }: { formData: MustBeAny },
+  ) => MustBeAny,
   permission: string,
 ) {
   async function action(args: ActionFunctionArgs) {
@@ -26,7 +30,10 @@ export function hocAction(
   return action;
 }
 
-export function hocLoader(callback: any, permission: string) {
+export function hocLoader(
+  callback: CommonFunction<LoaderFunctionArgs>,
+  permission: string,
+) {
   async function loader(args: LoaderFunctionArgs) {
     const userId = await getUserId({ request: args.request });
     const userPermissions = await getUserPermissions(userId);
