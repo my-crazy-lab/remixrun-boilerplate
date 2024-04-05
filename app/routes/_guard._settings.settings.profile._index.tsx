@@ -22,7 +22,7 @@ export const handle = {
 };
 
 interface LoaderData {
-  userProfile:  ReturnValueIgnorePromise<typeof getUserProfile>;
+  userProfile: ReturnValueIgnorePromise<typeof getUserProfile>;
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -72,7 +72,7 @@ export default function Screen() {
               </CardDescription>
             </CardHeader>
             <Separator />
-            <CardContent className='mt-4 gap-4 grid'>
+            <CardContent className="mt-4 gap-4 grid">
               <Typography variant="h4" affects="small">
                 City
               </Typography>
@@ -98,7 +98,7 @@ export default function Screen() {
             </CardDescription>
           </CardHeader>
           <Separator />
-          <div className="justify-ceter flex flex-col items-center">
+          <div className="justify-center flex flex-col items-center">
             <AvatarUpload />
             <Typography variant="p" affects="muted" className="pt-4">
               Allowed JPG or PNG. Max size of 100Kb.
