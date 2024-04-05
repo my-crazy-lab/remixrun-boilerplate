@@ -278,13 +278,13 @@ describe('Role base access control', () => {
 
   describe('isRoot', () => {
     it('should return true when use is superuser', async () => {
-      const rootuser = await isRoot(rootId);
-      expect(rootuser).toBeTruthy();
+      const rootUser = await isRoot(rootId);
+      expect(rootUser).toBe(true);
     });
 
     it('should return false when use is not superuser', async () => {
-      const rootuser = await isRoot('');
-      expect(rootuser).toBeFalsy();
+      const rootUser = await isRoot('not-root-user');
+      expect(rootUser).toBe(false);
     });
   });
 
@@ -292,11 +292,11 @@ describe('Role base access control', () => {
     it('should return true when use is superuser', async () => {
       const permissions = [rootId];
 
-      const rootuser = await verifyPermissions(
+      const rootUser = await verifyPermissions(
         { request: {} as Request },
         permissions,
       );
-      expect(rootuser).toBeTruthy();
+      expect(rootUser).toBe(true);
     });
     it('Should return false when permission not found', async () => {
       const mockPermission = 'IncorrectPermissionId';
@@ -305,7 +305,7 @@ describe('Role base access control', () => {
         mockPermission,
       ]);
 
-      expect(isVerified).toBeFalsy();
+      expect(isVerified).toBe(false);
     });
   });
 
@@ -498,7 +498,7 @@ describe('Role base access control', () => {
 
       expect(result).toHaveLength(mockPermission.length);
       mockPermission.forEach(permission => {
-        expect(result).toContainEqual(permission);
+        expect(result).toContainEqual({ _id: permission._id });
       });
     });
     it('Should get entire permission within a group correctly', async () => {
@@ -516,7 +516,7 @@ describe('Role base access control', () => {
         groupId: managerId,
       });
 
-      expect(isVerified).toBeTruthy();
+      expect(isVerified).toBe(true);
     });
   });
 
@@ -727,6 +727,12 @@ describe('Role base access control', () => {
       expect(result).toHaveLength(2);
       expect(result).toContainEqual(roles[0].permissions[0]);
       expect(result).toContainEqual(roles[1].permissions[0]);
+    });
+
+    it('Should return an empty array if the group does not exist', async () => {
+      const result = await getPermissionsOfGroup('non-existing-group');
+
+      expect(result).toEqual([]);
     });
   });
 
