@@ -1,7 +1,10 @@
 import { type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
 import { hashPassword } from './auth.server';
-import { newRecordCommonField, type FindOptionsClient } from './constants.server';
+import {
+  newRecordCommonField,
+  type FindOptionsClient,
+} from './constants.server';
 
 interface ISearch {
   $match: {
@@ -121,8 +124,8 @@ export async function getUsers({ skip, limit, projection }: FindOptionsClient) {
   return users;
 }
 
-export async function getUserProfile(_id: string) {
-  return await mongodb.collection<Users>('users').findOne({ _id })
+export function getUserProfile(_id: string) {
+  return mongodb.collection<Users>('users').findOne({ _id });
 }
 
 export async function createNewUser({

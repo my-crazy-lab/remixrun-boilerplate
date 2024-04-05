@@ -15,18 +15,14 @@ import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { getUserId } from '~/services/helpers.server';
 import { getUserProfile } from '~/services/settings.server';
+import { type ReturnValueIgnorePromise } from '~/types';
 
 export const handle = {
   breadcrumb: () => <BreadcrumbsLink to="/settings/profile" label="Profile" />,
 };
 
 interface LoaderData {
-  userProfile: {
-    _id: string;
-    username: string;
-    email: string;
-    cities: Array<string>
-  }
+  userProfile:  ReturnValueIgnorePromise<typeof getUserProfile>;
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -60,11 +56,11 @@ export default function Screen() {
                 <Typography variant="h4" affects="small">
                   Email
                 </Typography>
-                <Input defaultValue={loaderData.userProfile.email}></Input>
+                <Input defaultValue={loaderData.userProfile?.email}></Input>
                 <Typography variant="h4" affects="small">
                   User Name
                 </Typography>
-                <Input defaultValue={loaderData.userProfile.username}></Input>
+                <Input defaultValue={loaderData.userProfile?.username}></Input>
               </div>
             </CardContent>
           </Card>
@@ -81,7 +77,7 @@ export default function Screen() {
                 City
               </Typography>
               <div className="gap-2 grid grid-cols-4">
-                {loaderData.userProfile.cities.map((city, index) => {
+                {loaderData.userProfile?.cities.map((city, index) => {
                   return (
                     <Badge
                       className="text-center block rounded-md py-2 font-normal text-blue bg-blue-50"
