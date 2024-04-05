@@ -311,14 +311,9 @@ describe('Role base access control', () => {
 
   describe('requirePermissions', () => {
     it('should throw Error when user not have permissions', async () => {
-      const permissions = ['not-exist'];
-      try {
-        await requirePermissions({ request: {} as Request }, permissions);
-      } catch (error) {
-        expect((error as { message: string }).message).toEqual(
-          "User don't have permission",
-        );
-      }
+      await expect(
+        requirePermissions({ request: {} as Request }, ['not-exist']),
+      ).rejects.toThrow("User don't have permission");
     });
   });
 
