@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Role base access control getGroupDetail should throw an error if group does not exist 1`] = `undefined`;
-
 exports[`Role base access control getGroupDetail should throw an error if group does not exist and user is parent of group 1`] = `undefined`;
 
 exports[`Role base access control getGroupDetail should throw an error if group does not exist and user is root 1`] = `undefined`;
