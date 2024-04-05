@@ -45,7 +45,7 @@
   - **routes**: Core [Remix's routing system](https://remix.run/docs/en/main/discussion/routes)
   - **services**: [Backend endpoints and logic](https://remix.run/docs/en/main/file-conventions/-server)
   - **types**: Reuseable for [Typescript](https://www.typescriptlang.org/)
-  - **utiles**: Useful function.
+  - **utilities**: Useful function.
 - **public**: Static assets such as images, fonts.
 - **test**: Unit tests
 - **build**: Output directory for compiled code and assets generated during the build process.
