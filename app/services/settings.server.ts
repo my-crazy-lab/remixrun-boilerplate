@@ -4,7 +4,7 @@ import { newRecordCommonField } from './constants.server';
 import { hashPassword } from './auth.server';
 import { type Users } from '~/types';
 
-export interface ISearch {
+interface ISearch {
   $match: {
     'user.username'?: {
       $regex: string;

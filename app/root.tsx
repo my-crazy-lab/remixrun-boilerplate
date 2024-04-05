@@ -20,7 +20,6 @@ import {
   ScrollRestoration,
   useLoaderData,
   useNavigate,
-  useRouteError,
 } from '@remix-run/react';
 import { HomeIcon } from 'lucide-react';
 import { useChangeLanguage } from 'remix-i18next/react';
@@ -62,9 +61,6 @@ export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
   const navigate = useNavigate();
-  const routerError = useRouteError();
-
-  console.log(routerError);
 
   return (
     <html lang="en">

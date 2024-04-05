@@ -98,10 +98,12 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {row.getValue('cities')?.map((e, index) => (
-              <Badge variant="secondary" key={index}>{e}</Badge>
+              <Badge variant="secondary" key={index}>
+                {e}
+              </Badge>
             ))}
-          </span >
-        </div >
+          </span>
+        </div>
       );
     },
   },
@@ -111,7 +113,7 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
   },
 ];
 
-export const action = hocAction(async ({ }, { formData }: any) => {
+export const action = hocAction(async ({}, { formData }) => {
   try {
     const { username, email, password, cities } = formData;
 
@@ -162,8 +164,10 @@ interface FormData {
   username: string;
 }
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/users" label="Users management" />,
-}
+  breadcrumb: () => (
+    <BreadcrumbsLink to="/settings/users" label="Users management" />
+  ),
+};
 
 export default function Screen() {
   const { t } = useTranslation();
@@ -201,8 +205,8 @@ export default function Screen() {
   return (
     <div className="h-full flex-1 flex-col space-y-8 flex">
       <div className="flex items-center justify-between space-y-2 bg-secondary p-4 rounded-xl">
-        <div className='grid space-y-2'>
-          <Typography variant='h2'> Users management</Typography>
+        <div className="grid space-y-2">
+          <Typography variant="h2"> Users management</Typography>
           <Breadcrumbs />
         </div>
         <Dialog
@@ -214,7 +218,9 @@ export default function Screen() {
             setOpen(open);
           }}>
           <DialogTrigger asChild>
-            <Button className='gap-2' variant="default"><Plus /> Add new user</Button>
+            <Button className="gap-2" variant="default">
+              <Plus /> Add new user
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[560px]">
             <form onSubmit={handleSubmit(onSubmit)}>

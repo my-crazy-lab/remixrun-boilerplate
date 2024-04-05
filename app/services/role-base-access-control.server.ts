@@ -6,11 +6,7 @@ import {
   statusOriginal,
 } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
-import {
-  momentTz,
-  convertRolesToPermissions,
-  groupPermissionsByModule,
-} from '~/utils/common';
+import { momentTz, convertRolesToPermissions } from '~/utils/common';
 import { type Permissions, type Roles, type Groups, type Users } from '~/types';
 import { type GetRolesOfGroupsProjection } from '~/types/bridge';
 import { res404 } from '~/hoc/remix';
@@ -357,18 +353,20 @@ export async function getGroupPermissions(groupId: string) {
 
   const aggregate = [matchGroups, lookupRole, unwindRole];
 
+  type GroupUnwindRole = Groups & { roles: Roles };
   const data = await mongodb
     .collection('groups')
-    .aggregate<Groups>(aggregate)
+    .aggregate<GroupUnwindRole>(aggregate)
     .toArray();
 
-  const setOfPermissions = data.reduce(
-    (accumulator, obj) =>
-      new Set([...accumulator, ...(obj?.roles?.permissions || [])]),
-    [],
-  );
-
-  const permissions = [...setOfPermissions];
+  const initial: Roles['permissions'] = [];
+  const permissions = data.reduce((accumulator, obj) => {
+    const setOfPermissions = new Set([
+      ...accumulator,
+      ...(obj?.roles?.permissions || []),
+    ]);
+    return [...setOfPermissions];
+  }, initial);
 
   // root account can access all permissions
   if (permissions.includes(PERMISSIONS.ROOT)) {
@@ -480,7 +478,7 @@ export async function updateRole({
   );
 }
 
-export async function getAllPermissions({ projection }: any) {
+export async function getAllPermissions(projection: Document) {
   const data = await mongodb
     .collection<Permissions>('permissions')
     .find({}, { projection })
@@ -545,18 +543,20 @@ export async function getPermissionsOfGroup(groupId: string) {
 
   const aggregate = [{ $match: { _id: groupId } }, lookupRole, unwindRole];
 
+  type GroupUnwindRole = Groups & { roles: Roles };
   const data = await mongodb
     .collection('groups')
-    .aggregate<Groups>(aggregate)
+    .aggregate<GroupUnwindRole>(aggregate)
     .toArray();
 
-  const setOfPermissions = data.reduce(
-    (accumulator, obj) =>
-      new Set([...accumulator, ...(obj?.role?.permissions || [])]),
-    [],
-  );
-
-  return [...setOfPermissions];
+  const initial: Roles['permissions'] = [];
+  return data.reduce((accumulator, obj) => {
+    const setOfPermissions = new Set([
+      ...accumulator,
+      ...(obj?.roles?.permissions || []),
+    ]);
+    return [...setOfPermissions];
+  }, initial);
 }
 
 /**

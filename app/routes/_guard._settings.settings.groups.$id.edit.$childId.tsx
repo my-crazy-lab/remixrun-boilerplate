@@ -216,7 +216,7 @@ export default function Screen() {
                   defaultSearchValue={searchParams.get('users') || ''}
                   searchRemix={{ searchKey: 'users', setSearchParams }}
                   isDisplayAllOptions
-                  options={users.map((user: any) => ({
+                  options={users.map((user) => ({
                     value: user._id,
                     label: user.username,
                   }))}
@@ -235,7 +235,7 @@ export default function Screen() {
               render={({ field: { onChange, value } }) => (
                 <MultiSelect
                   isDisplayAllOptions
-                  options={roles.map((role: any) => ({
+                  options={roles.map((role) => ({
                     value: role._id,
                     label: role.name,
                   }))}

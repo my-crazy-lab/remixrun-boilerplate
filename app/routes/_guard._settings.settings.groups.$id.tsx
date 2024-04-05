@@ -1,10 +1,14 @@
-import { BreadcrumbsLink } from "@/components/btaskee/Breadcrumbs";
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { Outlet, useLoaderData } from "@remix-run/react";
-import { hoc404 } from "~/hoc/remix";
-import { getUserId } from "~/services/helpers.server";
-import { getGroupDetail, isParentOfGroup } from "~/services/role-base-access-control.server";
+import { BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import { Outlet, useLoaderData } from '@remix-run/react';
+import { hoc404 } from '~/hoc/remix';
+import { getUserId } from '~/services/helpers.server';
+import {
+  getGroupDetail,
+  isParentOfGroup,
+} from '~/services/role-base-access-control.server';
+import { type Roles } from '~/types';
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const groupId = params.id || '';
@@ -17,7 +21,9 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
   // accept parent and user(in group) with permission Read
   const group = await hoc404(async () =>
-    getGroupDetail<any>({
+    getGroupDetail<{
+      roles: Roles[];
+    }>({
       userId,
       groupId,
       isParent,
@@ -38,15 +44,18 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
 export const handle = {
   breadcrumb: (data: { group: any }) => {
-    const { group } = data
+    const { group } = data;
 
-    return <BreadcrumbsLink to={`/settings/groups/${group._id}`} label={group.name} />
+    return (
+      <BreadcrumbsLink
+        to={`/settings/groups/${group._id}`}
+        label={group.name}
+      />
+    );
   },
-}
+};
 
 export default function Screen() {
   const loaderData = useLoaderData();
-  return (
-    <Outlet context={loaderData} />
-  )
+  return <Outlet context={loaderData} />;
 }

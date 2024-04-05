@@ -6,16 +6,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function toBase64(file: File) {
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     const fileReader = new FileReader();
 
     fileReader.readAsDataURL(file);
 
     fileReader.onload = () => {
-      resolve(fileReader.result);
+      const result = fileReader.result;
+      if (!(result instanceof ArrayBuffer)) {
+        resolve(result || '');
+      }
     };
 
-    fileReader.onerror = (error) => {
+    fileReader.onerror = error => {
       reject(error);
     };
   });
