@@ -1,6 +1,13 @@
-import { createNewUser, getActionsHistory, getTotalActionsHistory, getTotalUsers, getUserProfile, getUsers } from "~/services/settings.server";
-import type { ActionsHistory, Users } from "~/types";
-import { mongodb } from "~/utils/db.server";
+import {
+  createNewUser,
+  getActionsHistory,
+  getTotalActionsHistory,
+  getTotalUsers,
+  getUserProfile,
+  getUsers,
+} from '~/services/settings.server';
+import type { ActionsHistory, Users } from '~/types';
+import { mongodb } from '~/utils/db.server';
 
 describe('Setting page', () => {
   const mockUserId = 'user-1';
@@ -26,43 +33,41 @@ describe('Setting page', () => {
       status: 'ACTIVE',
       cities: ['Hồ Chí Minh', 'HN'],
     },
-  ]
+  ];
 
   const mockActionsHistory: Array<ActionsHistory> = [
     {
       _id: mockActionId,
       data: {
-        "name": "mkt",
-        "description": "child rooot",
-        "userIds": "[\"65eac266901400e13f73cebf\",\"R5pRgZqKyhTKRX2N22\"]",
-        "roleIds": "[\"root\"]"
+        name: 'mkt',
+        description: 'child rooot',
+        userIds: '["65eac266901400e13f73cebf","R5pRgZqKyhTKRX2N22"]',
+        roleIds: '["root"]',
       },
       userId: mockUserId,
-      action: "create",
-      createdAt: new Date()
+      action: 'create',
+      createdAt: new Date(),
     },
     {
       _id: mockActionId_2,
       data: {
-        "name": "mkt",
-        "description": "child rooot",
-        "userIds": "[\"65eac266901400e13f73cebf\",\"R5pRgZqKyhTKRX2N22\"]",
-        "roleIds": "[\"root\"]"
+        name: 'mkt',
+        description: 'child rooot',
+        userIds: '["65eac266901400e13f73cebf","R5pRgZqKyhTKRX2N22"]',
+        roleIds: '["root"]',
       },
       userId: mockUserId,
-      action: "create",
-      createdAt: new Date()
-    }
-  ]
+      action: 'create',
+      createdAt: new Date(),
+    },
+  ];
 
   beforeAll(async () => {
-    await mongodb
-      .collection<Users>('users')
-      .insertMany(mockUsers);
+    await mongodb.collection<Users>('users').insertMany(mockUsers);
     await mongodb
       .collection<ActionsHistory>('actionsHistory')
       .insertMany(mockActionsHistory);
-  })
+  });
 
   afterAll(async () => {
     await mongodb.collection<Users>('users').deleteMany({
@@ -80,14 +85,14 @@ describe('Setting page', () => {
   describe('getTotalActionHistory', () => {
     it('should return total action history correctly', async () => {
       const total = await getTotalActionsHistory({ searchText: '' });
-      expect(total).toEqual(mockActionsHistory.length)
-    })
+      expect(total).toEqual(mockActionsHistory.length);
+    });
 
     it('should return total action history correctly with search text', async () => {
       const total = await getTotalActionsHistory({ searchText: 'searchText' });
-      expect(total).toEqual(0)
-    })
-  })
+      expect(total).toEqual(0);
+    });
+  });
 
   describe('getActionsHistory', () => {
     it('should return data action history correctly', async () => {
@@ -106,8 +111,8 @@ describe('Setting page', () => {
       expect(actionsHistory).toHaveLength(mockActionsHistory.length);
       mockActionsHistory.forEach((action, index) => {
         expect(actionsHistory[index]._id).toEqual(action._id);
-      })
-    })
+      });
+    });
 
     it('should return data action history correctly with search text', async () => {
       const actionsHistory = await getActionsHistory({
@@ -123,16 +128,16 @@ describe('Setting page', () => {
       });
 
       expect(actionsHistory).toHaveLength(0);
-    })
-  })
+    });
+  });
 
   describe('getTotalUsers', () => {
     it('should return total data user correctly', async () => {
       const total = await getTotalUsers();
 
-      expect(total).toEqual(mockUsers.length)
-    })
-  })
+      expect(total).toEqual(mockUsers.length);
+    });
+  });
 
   describe('getUsers', () => {
     it('should return data users correctly', async () => {
@@ -140,17 +145,17 @@ describe('Setting page', () => {
 
       expect(users).toHaveLength(mockUsers.length);
       expect(users).toEqual(mockUsers);
-    })
-  })
+    });
+  });
 
   describe('getUserProfile', () => {
     it('should return data user correctly', async () => {
       mockUsers.forEach(async user => {
         const userProfile = await getUserProfile(user._id);
         expect(userProfile).toEqual(user);
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe('createNewUser', () => {
     it('should create new user successfully', async () => {
@@ -173,4 +178,4 @@ describe('Setting page', () => {
         .deleteOne({ username: mockParams.username });
     });
   });
-})
+});

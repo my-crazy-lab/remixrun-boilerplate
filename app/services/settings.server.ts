@@ -2,12 +2,8 @@ import { type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
 
 import { hashPassword } from './auth.server';
-import type {
-  FindOptionsClient
-} from './constants.server';
-import {
-  newRecordCommonField
-} from './constants.server';
+import type { FindOptionsClient } from './constants.server';
+import { newRecordCommonField } from './constants.server';
 
 interface ISearch {
   $match: {
