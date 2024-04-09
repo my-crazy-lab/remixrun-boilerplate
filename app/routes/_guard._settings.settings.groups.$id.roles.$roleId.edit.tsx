@@ -12,15 +12,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
-  type ActionFunctionArgs,
-  type LoaderFunctionArgs,
   json,
   redirect,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
 } from '@remix-run/node';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hocAction, hocLoader, res403 } from '~/hoc/remix';
@@ -99,6 +100,8 @@ export const action = hocAction(
 );
 
 export default function Screen() {
+  const { t } = useTranslation(['user-settings']);
+
   const loaderData = useLoaderData<LoaderData>();
 
   const {
@@ -154,28 +157,28 @@ export default function Screen() {
   return (
     <>
       <div className="grid p-4 space-y-2 bg-secondary rounded-xl">
-        <Typography variant="h4">Edit role</Typography>
+        <Typography variant="h3">{t('EDIT_ROLE')}</Typography>
         <Breadcrumbs />
       </div>
       <form className="mt-4 ">
         <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
           <div>
-            <Label htmlFor="name">Role name</Label>
+            <Label htmlFor="name">{t('ROLE_NAME')}</Label>
             <Input
-              {...register('name', { required: 'Please enter name role' })}
+              {...register('name', { required: t('THIS_FIELD_IS_REQUIRED') })}
               className="mt-2"
-              placeholder="Enter name..."
+              placeholder={t('ENTER_ROLE_NAME')}
             />
             <ErrorMessageBase name="name" errors={errors} />
           </div>
           <div>
-            <Label htmlFor="name">Role description</Label>
+            <Label htmlFor="description">{t('ROLE_DESCRIPTION')}</Label>
             <Input
               {...register('description', {
-                required: 'Please enter name description',
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               className="mt-2"
-              placeholder="Enter description"
+              placeholder={t('ENTER_DESCRIPTION')}
             />
             <ErrorMessageBase name="description" errors={errors} />
           </div>
@@ -231,7 +234,7 @@ export default function Screen() {
             variant="default"
             type="submit"
             color="primary">
-            Save changes
+            {t('SAVE_CHANGES')}
           </Button>
         </div>
       </form>

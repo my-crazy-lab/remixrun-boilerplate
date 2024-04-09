@@ -6,6 +6,7 @@ import UsersIcon from '@/images/user-group.svg';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 
@@ -33,12 +34,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
+  const { t } = useTranslation(['user-settings'])
   const loaderData = useLoaderData<LoaderData>();
 
   return (
     <div className="h-full flex-1 flex-col space-y-8 flex">
       <div className="grid space-y-2 bg-secondary p-4 rounded-xl">
-        <Typography variant="h2">Groups</Typography>
+        <Typography variant="h3">{t('GROUPS')}</Typography>
         <Breadcrumbs />
       </div>
       <div className="grid grid-cols-3 gap-8">
@@ -48,7 +50,6 @@ export default function Screen() {
               <Card className="bg-gray-100">
                 <CardHeader className="p-4">
                   <Typography variant="h4" affects="removePMargin">
-                    {' '}
                     {group.name}
                   </Typography>
                   <Typography
@@ -65,7 +66,7 @@ export default function Screen() {
                     </div>
                     <div>
                       <Typography className="text-gray-400" variant="p">
-                        Children Group
+                        {t('CHILDREN_GROUP')}
                       </Typography>
                       <Typography className="text-primary" variant="h4">
                         2
@@ -79,7 +80,7 @@ export default function Screen() {
                     </div>
                     <div>
                       <Typography className="text-gray-400" variant="p">
-                        Users
+                        {t('USERS')}
                       </Typography>
                       <Typography
                         className="text-secondary-foreground"

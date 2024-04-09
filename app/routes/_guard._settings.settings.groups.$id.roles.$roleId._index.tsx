@@ -80,8 +80,8 @@ export default function RolesDetail() {
                   <div key={action._id} className="my-2">
                     <div className="mt-1 flex items-center gap-2">
                       <Badge
-                        variant="outline"
-                        className="text-sm text-gray-500">
+                        className="text-sm text-blue bg-blue-50 rounded-lg"
+                      >
                         {action.name}
                       </Badge>
                     </div>

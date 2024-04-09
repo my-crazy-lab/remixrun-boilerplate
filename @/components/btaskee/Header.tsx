@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,28 +9,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { Form, Link, useLocation } from '@remix-run/react';
+import { Form, Link } from '@remix-run/react';
 import ROUTE_NAME from '~/constants/route';
 
 import { Logo } from './BTaskeeLogo';
 import LanguageSelector from './LanguageSelector';
 import TimezoneSwitcher from './TimezoneSwitcher';
 
-const navigation = [
-  {
-    title: 'Settings',
-    href: ROUTE_NAME.PROFILE_SETTING,
-  },
-  {
-    title: 'Marketing',
-    href: 'marketing/promotion',
-  },
-];
-
 export default function Header() {
-  const { pathname } = useLocation();
-
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4">
@@ -40,20 +26,6 @@ export default function Header() {
             className="text-sm font-medium text-muted-foreground transition-colors">
             <Logo />
           </Link>
-          {navigation.map(item => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                buttonVariants({ variant: 'ghost' }),
-                pathname.includes(item.href)
-                  ? 'text-primary font-medium'
-                  : 'text-gray font-normal',
-                'text-sm transition-colors hover:text-primary',
-              )}>
-              {item.title}
-            </Link>
-          ))}
         </nav>
         <div className="ml-auto flex items-center space-x-4">
           <Input
@@ -82,8 +54,13 @@ export default function Header() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
+                <Link className='w-full' to={ROUTE_NAME.PROFILE_SETTING}>
+                  Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
                 <Form className="w-full" method="post" action="/logout">
-                  <button className="w-full  text-start" type="submit">
+                  <button className="w-full text-start" type="submit">
                     Logout
                   </button>
                 </Form>

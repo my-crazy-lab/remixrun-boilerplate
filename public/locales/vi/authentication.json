@@ -1,0 +1,21 @@
+{
+  "SIGN_IN": "Sign in",
+  "FORGOT_PASSWORD": "Forgot password",
+  "FORGOT_PASSWORD_TEXT_HELPER": "Please enter the email address and we will email you a link to reset your password",
+  "CHECK_YOUR_EMAIL": "Check your email",
+  "EMAIL": "Email",
+  "LOADING": "Loading",
+  "SEND": "Send",
+  "BACK_TO_SIGN_IN": "Back to sign in",
+  "RESET_PASSWORD": "Reset password",
+  "NEW_PASSWORD": "New password",
+  "CONFIRM_PASSWORD": "Confirm password",
+  "USERNAME": "Username",
+  "ENTER_USERNAME": "Enter username",
+  "PASSWORD": "Password",
+  "ENTER_PASSWORD": "Enter password",
+  "VERIFICATION_CODE": "Verification code",
+  "VERIFY": "Verify",
+  "CREATE_NEW_PASSWORD": "Create new password",
+  "ENTER_VERIFICATION_CODE": "Enter code"
+}

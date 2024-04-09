@@ -11,8 +11,9 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { type LoaderFunctionArgs, json } from '@remix-run/node';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 import { getUserId } from '~/services/helpers.server';
 import { getUserProfile } from '~/services/settings.server';
 import { type ReturnValueIgnorePromise } from '~/types';
@@ -33,32 +34,33 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
+  const { t } = useTranslation(['user-settings']);
   const loaderData = useLoaderData<LoaderData>();
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col p-4 rounded-lg bg-secondary">
-        <Typography variant="h3">Profile</Typography>
+        <Typography variant="h3">{t('PROFILE')}</Typography>
         <Breadcrumbs />
       </div>
       <div className="gap-10 grid grid-cols-2">
         <div className="flex flex-col gap-5">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Personal Details</CardTitle>
+              <CardTitle className="text-lg">{t('PERSONAL_DETAILS')}</CardTitle>
               <CardDescription>
-                To change your personal detail, edit and save from here
+                {t('PERSONAL_DETAILS_TEXT_HELPER')}
               </CardDescription>
             </CardHeader>
             <Separator />
             <CardContent className="py-4">
               <div className="flex flex-col gap-5">
                 <Typography variant="h4" affects="small">
-                  Email
+                  {t('EMAIL')}
                 </Typography>
                 <Input defaultValue={loaderData.userProfile?.email}></Input>
                 <Typography variant="h4" affects="small">
-                  User Name
+                  {t('USERNAME')}
                 </Typography>
                 <Input defaultValue={loaderData.userProfile?.username}></Input>
               </div>
@@ -66,15 +68,17 @@ export default function Screen() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Authorization</CardTitle>
+              <CardTitle>
+                {t('AUTHORIZATION')}
+              </CardTitle>
               <CardDescription>
-                To change your personal detail, edit and save from here
+                {t('PERSONAL_DETAILS_TEXT_HELPER')}
               </CardDescription>
             </CardHeader>
             <Separator />
             <CardContent className="mt-4 gap-4 grid">
               <Typography variant="h4" affects="small">
-                City
+                {t('CITIES')}
               </Typography>
               <div className="gap-2 grid grid-cols-4">
                 {loaderData.userProfile?.cities.map((city, index) => {
@@ -92,16 +96,18 @@ export default function Screen() {
         </div>
         <Card className="h-[448px]">
           <CardHeader>
-            <CardTitle className="text-lg">Change Profile</CardTitle>
+            <CardTitle className="text-lg">
+              {t('CHANGE_PROFILE')}
+            </CardTitle>
             <CardDescription>
-              Change your profile picture from here
+              {t('CHANGE_PICTURE_FROM_HERE')}
             </CardDescription>
           </CardHeader>
           <Separator />
           <div className="justify-center flex flex-col items-center">
             <AvatarUpload />
             <Typography variant="p" affects="muted" className="pt-4">
-              Allowed JPG or PNG. Max size of 100Kb.
+              {t('IMAGE_HELPER_TEXT')}
             </Typography>
           </div>
         </Card>
