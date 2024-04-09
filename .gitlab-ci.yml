@@ -1,7 +1,7 @@
 image: node:18 
 
 services:
-  - mongo:latest
+  - mongo:5.0.23
 
 variables:
   METEOR_ALLOW_SUPERUSER: 1
@@ -9,9 +9,6 @@ variables:
 
 before_script:
   - npm install
-  - apt-get update && apt-get install -y mongodb
-  - mkdir dbpath
-  - mongod --dbpath dbpath
 
 stages:
   - code standard
