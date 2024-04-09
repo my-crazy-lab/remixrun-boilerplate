@@ -1,4 +1,4 @@
-image: .remixproject/remix-ide
+image: node:18 
 
 services:
   - mongo:5.0.23
