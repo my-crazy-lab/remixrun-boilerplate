@@ -1,6 +1,14 @@
 import type { Document } from 'mongodb';
 import type { TActionPermissionModule } from '~/constants/common';
 
+export interface ActionsHistory {
+  _id: string;
+  userId: string;
+  action: string;
+  data: Document;
+  createdAt: Date;
+}
+
 export interface Users {
   _id: string;
   username: string;
