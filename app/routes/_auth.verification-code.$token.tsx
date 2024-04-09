@@ -1,31 +1,30 @@
 import { Button } from '@/components/ui/button';
-import { useActionData, useLoaderData } from '@remix-run/react';
-import { useTranslation } from 'react-i18next';
-import { toast } from '@/components/ui/use-toast';
-
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { Form } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
+import ROUTE_NAME from '~/constants/route';
 import {
   authenticator,
   isVerificationCodeExpired,
 } from '~/services/auth.server';
-import { json, redirect } from '@remix-run/node';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { useEffect } from 'react';
 import { commitSession, getSession } from '~/services/session.server';
 
 export async function action({ request, params }: ActionFunctionArgs) {
   return await authenticator.authenticate('user-pass', request, {
     successRedirect: '/',
-    failureRedirect: `/verification-code/${params.token}`,
+    failureRedirect: `${ROUTE_NAME.VERIFICATION_CODE}/${params.token}`,
     throwOnError: true,
   });
 }
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
-  const isExpired = await isVerificationCodeExpired({ token: params.token });
-  if (isExpired) return redirect('/sign-in');
+  const isExpired = await isVerificationCodeExpired({
+    token: params.token || '',
+  });
+  if (isExpired) return redirect(ROUTE_NAME.SIGN_IN);
 
   await authenticator.isAuthenticated(request, {
     successRedirect: '/',
@@ -45,19 +44,11 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 export default function Screen() {
   const { t } = useTranslation();
-  const error = useActionData<any>();
-  const data = useLoaderData<any>();
-
-  useEffect(() => {
-    if (error?.error) {
-      toast({ description: error.error });
-    }
-  }, [error?.error]);
 
   return (
     <>
       <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Login</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('LOGIN')}</h1>
         <p className="text-sm text-muted-foreground">
           Open your gmail and verify your code.
         </p>
@@ -71,7 +62,7 @@ export default function Screen() {
               </Label>
               <Input name="code" required placeholder="Verification code" />
             </div>
-            <Button>Verify</Button>
+            <Button>{t('VERIFY')}</Button>
           </div>
         </Form>
       </div>

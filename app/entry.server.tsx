@@ -1,16 +1,16 @@
-import { PassThrough } from 'node:stream';
-
 import type { AppLoadContext, EntryContext } from '@remix-run/node';
 import { createReadableStreamFromReadable } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
-import * as isbotModule from 'isbot';
-import { renderToPipeableStream } from 'react-dom/server';
-
-import { I18nextProvider, initReactI18next } from 'react-i18next';
-import Backend from 'i18next-fs-backend';
-import i18n from './i18n'; // your i18n configuration file
-import { resolve } from 'node:path';
 import { createInstance } from 'i18next';
+import Backend from 'i18next-fs-backend';
+import * as isbotModule from 'isbot';
+// your i18n configuration file
+import { resolve } from 'node:path';
+import { PassThrough } from 'node:stream';
+import { renderToPipeableStream } from 'react-dom/server';
+import { I18nextProvider, initReactI18next } from 'react-i18next';
+
+import i18n from './i18n';
 import i18next from './i18next.server';
 
 const ABORT_DELAY = 5_000;
@@ -126,6 +126,7 @@ async function handleBotRequest(
           // errors encountered during initial shell rendering since they'll
           // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
+            // eslint-disable-next-line no-console
             console.error(error);
           }
         },
@@ -178,6 +179,7 @@ async function handleBrowserRequest(
           // errors encountered during initial shell rendering since they'll
           // reject and get logged in handleDocumentRequest.
           if (shellRendered) {
+            // eslint-disable-next-line no-console
             console.error(error);
           }
         },

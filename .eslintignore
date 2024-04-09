@@ -1,0 +1,10 @@
+\@/
+
+globals.d.ts
+.gitignore
+
+node_modules/*
+build/*
+public/*
+coverage/*
+.husky/*

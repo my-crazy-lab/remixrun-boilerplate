@@ -1,6 +1,3 @@
-import { cn } from '@/lib/utils';
-import * as React from 'react';
-
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,28 +12,32 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
-import { Skeleton } from './skeleton';
+import * as React from 'react';
 import type { SetURLSearchParams } from 'react-router-dom';
+import { type CommonFunction } from '~/types';
+
+import { Skeleton } from './skeleton';
 
 export type OptionType = {
   label: string;
   value: string;
 };
 
-interface MultiSelectAsyncProps {
+interface MultiSelectAsyncProps<T> {
   options: OptionType[];
   className?: string;
   isDisplayAllOptions?: boolean;
   selected?: OptionType[];
-  setSelected?: any;
+  setSelected?: T;
   isLoading?: boolean;
   defaultSearchValue?: string;
   searchRemix: { setSearchParams: SetURLSearchParams; searchKey: string };
 }
 
-export function MultiSelectAsync({
+export function MultiSelectAsync<T extends CommonFunction>({
   options,
   className,
   selected = [],
@@ -44,10 +45,10 @@ export function MultiSelectAsync({
   isLoading = false,
   defaultSearchValue = '',
   searchRemix,
-}: MultiSelectAsyncProps) {
+}: MultiSelectAsyncProps<T>) {
   const [open, setOpen] = React.useState(false);
   const handleUnselect = (item: string) => {
-    setSelected(selected.filter(i => i.value !== item));
+    setSelected?.(selected.filter(i => i.value !== item));
   };
   const [searchText, setSearchText] =
     React.useState<string>(defaultSearchValue);
@@ -79,11 +80,11 @@ export function MultiSelectAsync({
               <Badge
                 variant="secondary"
                 key={item.value}
-                className="mr-1 mb-1"
+                className="mr-1 rounded-md"
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button
-                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="ml-1 ring-offset-background rounded-md outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       handleUnselect(item.value);
@@ -127,8 +128,8 @@ export function MultiSelectAsync({
               <CommandItem
                 key={option.value}
                 onSelect={() => {
-                  setSelected(
-                    selected.some((item: any) => item.value === option.value)
+                  setSelected?.(
+                    selected.some(item => item.value === option.value)
                       ? selected.filter(item => item.value !== option.value)
                       : [...selected, option],
                   );
@@ -152,21 +153,21 @@ export function MultiSelectAsync({
   );
 }
 
-interface MultiSelectProps {
+interface MultiSelectProps<T> {
   options: OptionType[];
   className?: string;
   isDisplayAllOptions?: boolean;
   selected?: OptionType[];
-  setSelected?: any;
+  setSelected?: T;
 }
 
-export function MultiSelect({
+export function MultiSelect<T extends CommonFunction>({
   options,
   className,
   isDisplayAllOptions,
   selected = [],
   setSelected,
-}: MultiSelectProps) {
+}: MultiSelectProps<T>) {
   const [open, setOpen] = React.useState(false);
   const [allSelected, setAllSelected] = React.useState(false);
 
@@ -181,14 +182,14 @@ export function MultiSelect({
   }, [isDisplayAllOptions, selected, options]);
 
   const handleUnselect = (item: string) => {
-    setSelected(selected.filter(i => i.value !== item));
+    setSelected?.(selected.filter(i => i.value !== item));
   };
 
   const handleIsDisplayAllOptions = () => {
     if (allSelected && selected) {
-      setSelected([]);
+      setSelected?.([]);
     } else {
-      setSelected(options);
+      setSelected?.(options);
     }
     setAllSelected(!allSelected);
   };
@@ -209,11 +210,11 @@ export function MultiSelect({
               <Badge
                 variant="secondary"
                 key={item.value}
-                className="mr-1 mb-1"
+                className="mr-1 rounded-md"
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button
-                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="ml-1 ring-offset-background rounded-md outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       handleUnselect(item.value);
@@ -244,7 +245,7 @@ export function MultiSelect({
               <CommandItem
                 key={option.value}
                 onSelect={() => {
-                  setSelected(
+                  setSelected?.(
                     selected.some(item => item.value === option.value)
                       ? selected.filter(item => item.value !== option.value)
                       : [...selected, option],

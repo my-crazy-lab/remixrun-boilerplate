@@ -2,7 +2,6 @@
  * For a detailed explanation regarding each configuration property, visit:
  * https://jestjs.io/docs/configuration
  */
-
 import type { Config } from 'jest';
 
 const config: Config = {
@@ -13,7 +12,7 @@ const config: Config = {
   // bail: 0,
 
   // The directory where Jest should store its cached dependency information
-  // cacheDirectory: "/private/var/folders/bw/hbm8wr5s3ps40hsxmzkm0f_00000gq/T/jest_dz",
+  // cacheDirectory: "/private/var/folders/bw/hbm8wr5s3ps400f_00000gq/T/jest_dz",
 
   // Automatically clear mock calls, instances, contexts and results before every test
   clearMocks: true,

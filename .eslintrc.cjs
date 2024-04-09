@@ -74,6 +74,18 @@ module.exports = {
         'plugin:import/recommended',
         'plugin:import/typescript',
       ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 2,
+        '@typescript-eslint/no-unused-vars': 2,
+        'no-underscore-dangle': [
+          2,
+          {
+            allow: ['_id', '__db'],
+          },
+        ],
+        'no-console': 2,
+        '@typescript-eslint/consistent-type-imports': 2,
+      },
     },
 
     // Node

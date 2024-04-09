@@ -1,9 +1,13 @@
+import { type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
-import type { FindOptionsClient } from './constants.server';
-import { newRecordCommonField } from './constants.server';
-import { hashPassword } from './auth.server';
 
-export interface ISearch {
+import { hashPassword } from './auth.server';
+import {
+  type FindOptionsClient,
+  newRecordCommonField,
+} from './constants.server';
+
+interface ISearch {
   $match: {
     'user.username'?: {
       $regex: string;
@@ -60,7 +64,7 @@ export async function getActionsHistory({
   const $search: ISearch = { $match: {} };
 
   if (searchText) {
-    $search.$match.username = {
+    $search.$match['user.username'] = {
       $regex: searchText,
       $options: 'i',
     };
@@ -101,8 +105,8 @@ export async function getTotalUsers() {
 }
 
 export async function getUsers({ skip, limit, projection }: FindOptionsClient) {
-  const usersCol = mongodb.collection('users');
-  const users = await usersCol
+  const users = await mongodb
+    .collection<Users>('users')
     .find(
       {},
       {
@@ -121,14 +125,18 @@ export async function getUsers({ skip, limit, projection }: FindOptionsClient) {
   return users;
 }
 
+export function getUserProfile(_id: string) {
+  return mongodb.collection<Users>('users').findOne({ _id });
+}
+
 export async function createNewUser({
   username,
   password,
   email,
   cities,
-}: any) {
-  const usersCol = mongodb.collection('users');
-  const passwordHashed = await hashPassword(password);
+}: Pick<Users, 'username' | 'email' | 'cities'> & { password: string }) {
+  const usersCol = mongodb.collection<Users>('users');
+  const passwordHashed = hashPassword(password);
 
   await usersCol.insertOne({
     ...newRecordCommonField(),

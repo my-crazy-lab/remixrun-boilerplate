@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+
 import { dotenv } from './dotenv.server';
 
 interface EmailArgs {
@@ -8,17 +9,15 @@ interface EmailArgs {
   from: string;
 }
 export async function sendEmail({ to, from, text, subject }: EmailArgs) {
-  // const transporter = nodemailer.createTransport(dotenv.MAIL_URL);
   try {
-    /*
+    const transporter = nodemailer.createTransport(dotenv.MAIL_URL);
     await transporter.sendMail({
       to,
       from,
       text,
       subject,
     });
-    */
   } catch (error) {
-    console.log(error);
+    throw new Error('EMAIL_SERVICE_ERROR');
   }
 }

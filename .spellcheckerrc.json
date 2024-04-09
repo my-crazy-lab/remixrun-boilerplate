@@ -2,6 +2,31 @@
   "version": "0.1",
   "language": "en, vi",
   "words": ["tasker", "spellcheckerrc"],
-  "ignorePaths": ["node_modules", "dist", "public", "build", "package.json"],
-  "ignoreWords": ["languagedetector", "uuidv4", "bTaskee", "BSON"]
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "public",
+    "build",
+    "package.json",
+    "Dockerfile",
+    "coverage",
+    "CHANGELOG.md",
+    "\\@",
+    "__tests__"
+  ],
+  "ignoreWords": [
+    "languagedetector",
+    "uuidv4",
+    "bTaskee",
+    "BSON",
+    "Shadcn",
+    "cmdk",
+    "STMP",
+    "Momentjs",
+    "Zustand",
+    "Minh",
+    "supportedLngs",
+    "isbot",
+    "renderToPipeableStream"
+  ]
 }

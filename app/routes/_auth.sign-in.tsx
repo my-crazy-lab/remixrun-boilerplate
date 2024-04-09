@@ -1,43 +1,51 @@
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
-import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
-import { useTranslation } from 'react-i18next';
-
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from '@/components/ui/use-toast';
 import type { ActionFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
-import { useEffect } from 'react';
+import { json, redirect } from '@remix-run/node';
+import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
+import { ERROR } from '~/constants/common';
+import ROUTE_NAME from '~/constants/route';
 import { verifyAndSendCode } from '~/services/auth.server';
+
+interface ActionData {
+  error?: string;
+}
 
 export async function action({ request }: ActionFunctionArgs) {
   try {
     const formData = await request.formData();
-    const { username, password, myKey } = Object.fromEntries(formData);
+    const { username, password } = Object.fromEntries(formData);
 
-    const verificationToken = await verifyAndSendCode({ username, password });
-    return redirect(`/verification-code/${verificationToken}`);
-  } catch (error: any) {
-    return error;
+    const verificationToken = await verifyAndSendCode({
+      username: username.toString(),
+      password: password.toString(),
+    });
+    return redirect(`${ROUTE_NAME.VERIFICATION_CODE}/${verificationToken}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      return json({ error: error.message });
+    }
+    return json({ error: ERROR.UNKNOWN_ERROR });
   }
 }
 
 export default function Screen() {
   const { t } = useTranslation();
-  const error = useActionData<any>();
+  const actionData = useActionData<ActionData>();
 
-  useEffect(() => {
-    if (error?.message) {
-      toast({ description: error.message });
-    }
-  }, [error?.message]);
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
 
   const navigation = useNavigation();
 
   return (
     <>
       <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Login</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('LOGIN')}</h1>
         <p className="text-sm text-muted-foreground">
           Enter your email below to create your account
         </p>
@@ -47,13 +55,13 @@ export default function Screen() {
           <div className="grid gap-2">
             <div className="grid gap-1">
               <Label className="sr-only" htmlFor="email">
-                Email
+                {t('EMAIL')}
               </Label>
               <Input name="username" required placeholder="User name" />
             </div>
             <div className="grid gap-1">
               <Label className="sr-only" htmlFor="password">
-                Password
+                {t('PASSWORD')}
               </Label>
               <Input
                 required
@@ -67,13 +75,7 @@ export default function Screen() {
               to={'/reset-password'}>
               Forgot password?
             </Link>
-            <Button
-              disabled={
-                navigation.formAction === '/sign-in' &&
-                navigation.state !== 'idle'
-              }>
-              Login
-            </Button>
+            <Button disabled={navigation.state !== 'idle'}>Login</Button>
           </div>
         </Form>
       </div>
