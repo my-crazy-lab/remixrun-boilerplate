@@ -22,17 +22,17 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-.Typescript checker:
+Typescript checker:
   stage: code standard
   script:
     - npm run typecheck
 
-.Lint:
+Lint:
   stage: code standard
   script:
     - npm run lint
 
-.Spell checker:
+Spell checker:
   stage: code standard
   script:
     - npm run cspell
