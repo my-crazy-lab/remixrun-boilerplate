@@ -9,6 +9,8 @@ variables:
 
 before_script:
   - npm install
+  - mkdir dbpath
+  - mongod --dbpath dbpath
 
 stages:
   - code standard
