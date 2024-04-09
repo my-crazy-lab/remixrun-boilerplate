@@ -16,6 +16,28 @@ export enum IActionPermissionModule {
 
 export type TActionPermissionModule = keyof typeof IActionPermissionModule;
 
+export const PIE_CHART_COLOR = [
+  '#0088FE',
+  '#00C49F',
+  '#FFBB28',
+  '#FF8042',
+  '#AF19FF',
+  '#FF6666',
+  '#66CCCC',
+  '#FF9999',
+  '#99CC66',
+  '#FF6600',
+  '#996699',
+  '#9999FF',
+  '#66FF99',
+  '#66FFCC',
+  '#FFCC66',
+  '#666699',
+  '#6666CC',
+  '#996666',
+  '#996633',
+];
+
 export const ERROR = {
   EMAIL_INCORRECT: 'EMAIL_INCORRECT',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
