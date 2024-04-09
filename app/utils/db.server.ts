@@ -20,19 +20,19 @@ else
 
 let mongodb: Db;
 
-  if (process.env.NODE_ENV === 'production') {
-    const client = new MongoClient(connectionString);
-    client.connect();
+if (process.env.NODE_ENV === 'production') {
+  const client = new MongoClient(connectionString);
+  client.connect();
 
-    mongodb = client.db(process.env.DB_APP);
-  } else {
-    if (!global?.__db) {
-      global.__db = new MongoClient(connectionString);
-    }
-     global.__db.connect();
-
-    mongodb = global.__db.db(process.env.DB_APP);
+  mongodb = client.db(process.env.DB_APP);
+} else {
+  if (!global?.__db) {
+    global.__db = new MongoClient(connectionString);
   }
+  global.__db.connect();
+
+  mongodb = global.__db.db(process.env.DB_APP);
+}
 
 const ObjectId = BSON.ObjectId;
 
