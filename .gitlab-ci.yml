@@ -1,14 +1,18 @@
-image: .remixproject/remix-ide
+image: node:latest 
 
 services:
-  - mongo:5.0.23
+  - mongo:latest
+
+cache:
+  paths:
+    - node_modules/
 
 variables:
-  METEOR_ALLOW_SUPERUSER: 1
   GIT_SSL_NO_VERIFY: 'true'
+  MONGODB_VERSION: 5.0.0
 
 before_script:
-  - meteor npm install
+  - npm install
 
 stages:
   - code standard
@@ -21,24 +25,24 @@ workflow:
 Typescript checker:
   stage: code standard
   script:
-    - meteor npm run typecheck
+    - npm run typecheck
 
 Lint:
   stage: code standard
   script:
-    - meteor npm run lint
+    - npm run lint
 
 Spell checker:
   stage: code standard
   script:
-    - meteor npm run cspell
+    - npm run cspell
 
 Unit testing:
   stage: test
   script:
-    - meteor npm run test
+    - npm run test
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: .coverage/coverage.txt
+        path: coverage/coverage.txt
