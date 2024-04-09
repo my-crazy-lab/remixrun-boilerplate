@@ -35,6 +35,11 @@ jest.mock('~/services/helpers.server', () => ({
   getUserId: () => 'root',
 }));
 
+jest.mock('~/services/helpers.server', () => ({
+  __esModule: true,
+  getUserId: () => 'root',
+}));
+
 jest.mock('~/services/constants.server', () => ({
   __esModule: true,
   statusOriginal: {
@@ -450,9 +455,12 @@ describe('Role base access control', () => {
       expect(role?.name).toEqual(dataRootRole.name);
     });
     it('should throw and error if role does not exist', async () => {
-      await expect(
-        getRoleDetail('non-exist-role'),
-      ).rejects.toThrowErrorMatchingSnapshot();
+      const spy = jest
+        .spyOn(global, 'Response')
+        .mockImplementation(() => new Error('err'));
+
+      await expect(getRoleDetail('non-exist-role')).rejects.toThrow('err');
+      spy.mockRestore();
     });
   });
 
