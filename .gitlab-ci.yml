@@ -1,4 +1,6 @@
-image: geoffreybooth/meteor-base:2.14 services:
+image: .remixproject/remix-ide
+
+services:
   - mongo:5.0.23
 
 variables:
@@ -16,31 +18,27 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-.Typescript checker:
+Typescript checker:
   stage: code standard
   script:
-    - meteor npm run docs
+    - meteor npm run typecheck
 
-.Lint:
+Lint:
   stage: code standard
   script:
-    - meteor npm run lint-ts
+    - meteor npm run lint
 
-.Spell checker:
+Spell checker:
   stage: code standard
   script:
     - meteor npm run cspell
 
-.Unit testing:
+Unit testing:
   stage: test
   script:
-    - meteor npm run coverage:ci
-    - cat .coverage/summary.txt
-  coverage: /^Statements\s*:\s*([^%]+)/
-
-.E2E testing:
-  stage: test
-  script:
-    - meteor npm run cypress:headless
-  coverage: /^Statements\s*:\s*([^%]+)/
-  timeout: 1h 30m
+    - meteor npm run test
+   artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: .coverage/coverage.txt
