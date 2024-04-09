@@ -1,7 +1,7 @@
 image: node:latest 
 
-services:
-  - mongo:latest
+# services:
+#   - mongo:latest
 
 cache:
   paths:
@@ -9,9 +9,16 @@ cache:
 
 variables:
   GIT_SSL_NO_VERIFY: 'true'
+  MONGODB_VERSION: 5.0.0
 
 before_script:
   - npm install
+  - apt-get update && apt-get install -y wget gnupg
+  - wget -qO - https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | apt-key add -
+  - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/${MONGODB_VERSION} multiverse" | tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
+  - apt-get update && apt-get install -y mongodb-org
+  - mongod --fork --logpath /var/log/mongodb.log
+  - sleep 5
 
 stages:
   - code standard
