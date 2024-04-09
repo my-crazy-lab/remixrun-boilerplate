@@ -45,4 +45,4 @@ Unit testing:
     reports:
       coverage_report:
         coverage_format: cobertura
-        path: .coverage/coverage.txt
+        path: coverage/coverage.txt
