@@ -21,8 +21,10 @@ else
 let mongodb: Db;
 
 if (process.env.NODE_ENV === 'production') {
+  console.log("in production")
   mongodb = new MongoClient(connectionString).db(process.env.DB_APP);
 } else {
+  console.log('out')
   if (!global?.__db) {
     global.__db = new MongoClient(connectionString);
   }
