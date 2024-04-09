@@ -2,7 +2,7 @@ import { BSON, MongoClient } from 'mongodb';
 import type { Db } from 'mongodb';
 import { dotenv } from '~/services/dotenv.server';
 
-let connectionString = dotenv.URI_APP;
+const connectionString = dotenv.URI_APP;
 
 if (!connectionString) {
   throw new Error(

@@ -1,7 +1,8 @@
 image: node:18 
 
 services:
-  - mongo:5.0.23
+  - name: mongo:latest
+    alias: mongodb
 
 variables:
   METEOR_ALLOW_SUPERUSER: 1
