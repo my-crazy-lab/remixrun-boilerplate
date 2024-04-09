@@ -1,7 +1,7 @@
 image: node:latest 
 
-# services:
-#   - mongo:latest
+services:
+  - mongo:latest
 
 cache:
   paths:
@@ -13,14 +13,6 @@ variables:
 
 before_script:
   - npm install
-  - apt-get update
-  - apt-get install -y gnupg curl
-  - which gpg
-  - curl -fsSL https://www.mongodb.org/static/pgp/server-5.0.asc | /usr/bin/gpg -o /usr/share/keyrings/mongodb-server-5.0.gpg --dearmor
-  - echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-5.0.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-5.0.list
-  - apt-get update && apt-get install -yf mongodb-org
-  - mongod --fork --logpath /var/log/mongodb.log
-  - sleep 5
 
 stages:
   - code standard
