@@ -543,7 +543,7 @@ export async function getPermissionsOfGroup(groupId: string) {
 
   const aggregate = [{ $match: { _id: groupId } }, lookupRole, unwindRole];
 
-  type GroupUnwindRole = Groups & { roles: Roles };
+  type GroupUnwindRole = Groups & { role: Roles };
   const data = await mongodb
     .collection('groups')
     .aggregate<GroupUnwindRole>(aggregate)
@@ -553,7 +553,7 @@ export async function getPermissionsOfGroup(groupId: string) {
   return data.reduce((accumulator, obj) => {
     const setOfPermissions = new Set([
       ...accumulator,
-      ...(obj?.roles?.permissions || []),
+      ...(obj?.role?.permissions || []),
     ]);
     return [...setOfPermissions];
   }, initial);

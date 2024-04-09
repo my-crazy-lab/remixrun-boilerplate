@@ -7,6 +7,7 @@ import {
   getAllPermissions,
   getGroupDetail,
   getGroupPermissions,
+  getGroupsOfUser,
   getPermissionsOfGroup,
   getRoleDetail,
   getRolesOfGroups,
@@ -271,32 +272,67 @@ describe('Role base access control', () => {
   });
 
   describe('getGroupsOfUser', () => {
-    it('return a response', async () => {
-      expect(true).toBe(true);
+    const userId = 'testUser';
+    const groupId = 'testGroup';
+    const roleId = 'testRole';
+
+    beforeEach(async () => {
+      await mongodb.collection<Groups>('groups').insertOne({
+        _id: groupId,
+        userIds: [userId],
+        roleIds: [roleId],
+        name: 'Test Group',
+        description: 'Test Group Description',
+        genealogy: ['genealogy1'],
+        hierarchy: 2,
+        createdAt: new Date(),
+        status: 'ACTIVE',
+      });
+    });
+
+    afterEach(async () => {
+      await mongodb.collection<Groups>('groups').deleteOne({ _id: groupId });
+    });
+
+    it('should return groups of a user', async () => {
+      const projection = { _id: 1, name: 1 };
+      const groups = await getGroupsOfUser({ projection, userId });
+      expect(groups).toHaveLength(1);
+      expect(groups[0]._id).toEqual(groupId);
+      expect(groups[0].name).toEqual('Test Group');
+    });
+
+    it('should return empty array if user is not part of any group', async () => {
+      const projection = { _id: 1, name: 1 };
+      const groups = await getGroupsOfUser({
+        projection,
+        userId: 'nonexistentUser',
+      });
+      expect(groups).toHaveLength(0);
     });
   });
 
   describe('isRoot', () => {
     it('should return true when use is superuser', async () => {
-      const rootuser = await isRoot(rootId);
-      expect(rootuser).toBeTruthy();
+      const rootUser = await isRoot(rootId);
+      expect(rootUser).toBe(true);
     });
 
     it('should return false when use is not superuser', async () => {
-      const rootuser = await isRoot('');
-      expect(rootuser).toBeFalsy();
+      const rootUser = await isRoot('not-root-user');
+      expect(rootUser).toBe(false);
     });
   });
 
-  describe('VerifyPermission', () => {
+  describe('verifyPermissions', () => {
     it('should return true when use is superuser', async () => {
       const permissions = [rootId];
 
-      const rootuser = await verifyPermissions(
+      const rootUser = await verifyPermissions(
         { request: {} as Request },
         permissions,
       );
-      expect(rootuser).toBeTruthy();
+      expect(rootUser).toBe(true);
     });
     it('Should return false when permission not found', async () => {
       const mockPermission = 'IncorrectPermissionId';
@@ -305,20 +341,15 @@ describe('Role base access control', () => {
         mockPermission,
       ]);
 
-      expect(isVerified).toBeFalsy();
+      expect(isVerified).toBe(false);
     });
   });
 
   describe('requirePermissions', () => {
     it('should throw Error when user not have permissions', async () => {
-      const permissions = ['not-exist'];
-      try {
-        await requirePermissions({ request: {} as Request }, permissions);
-      } catch (error) {
-        expect((error as { message: string }).message).toEqual(
-          "User don't have permission",
-        );
-      }
+      await expect(
+        requirePermissions({ request: {} as Request }, ['not-exist']),
+      ).rejects.toThrow("User don't have permission");
     });
   });
 
@@ -330,6 +361,12 @@ describe('Role base access control', () => {
   });
 
   describe('createGroup', () => {
+    afterEach(async () => {
+      await mongodb
+        .collection<Groups>('groups')
+        .deleteOne({ _id: mockRecordCommonField._id });
+    });
+
     it('should createGroup successfully', async () => {
       const mockParams = {
         name: 'test',
@@ -338,6 +375,7 @@ describe('Role base access control', () => {
         roleIds: [rootId],
         parent: rootId,
       };
+
       await createGroup(mockParams);
       const newGroupInserted = await mongodb
         .collection('groups')
@@ -347,6 +385,22 @@ describe('Role base access control', () => {
       await mongodb
         .collection<Groups>('groups')
         .deleteOne({ name: mockParams.name });
+    });
+    it('should throw error if parent group not found', async () => {
+      const groupData: Pick<
+        Groups,
+        'name' | 'description' | 'userIds' | 'roleIds'
+      > & { parent: string } = {
+        name: 'Test Group',
+        description: 'This is a test group',
+        parent: 'nonexistentParentId',
+        userIds: ['userId1', 'userId2'],
+        roleIds: ['roleId1', 'roleId2'],
+      };
+
+      await expect(createGroup(groupData)).rejects.toThrow(
+        'PARENT_GROUP_NOT_FOUND',
+      );
     });
   });
 
@@ -395,12 +449,21 @@ describe('Role base access control', () => {
       const role: Partial<Roles> = await getRoleDetail(rootId);
       expect(role?.name).toEqual(dataRootRole.name);
     });
+    it('should throw and error if role does not exist', async () => {
+      await expect(
+        getRoleDetail('non-exist-role'),
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
   });
 
   describe('getRolesOfGroups', () => {
     it('should return detail list roles of group correctly', async () => {
       const roles = await getRolesOfGroups(rootId);
       expect(roles.length).toEqual(1);
+    });
+    it('should return empty array if group does not exist', async () => {
+      const roles = await getRolesOfGroups('non-exist-group');
+      expect(roles.length).toEqual(0);
     });
   });
 
@@ -470,25 +533,47 @@ describe('Role base access control', () => {
       await mongodb.collection<Roles>('roles').deleteOne(role);
       await mongodb.collection<Users>('users').deleteOne(user);
     });
-    it('should search user correctly by text', async () => {
-      const groupDetailFound = await getGroupDetail({
+    it('should return group detail if user is root', async () => {
+      const groupDetail = await getGroupDetail({
         isParent: true,
         userId: userId1,
         groupId: groupId1,
         projection: { _id: 1 },
       });
 
-      expect(groupDetailFound?._id).toEqual(groupId1);
+      expect(groupDetail).toBeDefined();
+      expect(groupDetail._id).toEqual(groupId1);
     });
-    it('Should search group with root user successfully', async () => {
-      const groupDetailFound = await getGroupDetail({
-        isParent: true,
-        userId: rootId,
+    it('should return group detail if user is parent of group', async () => {
+      const groupDetail = await getGroupDetail({
+        isParent: false,
+        userId: userId1,
         groupId: groupId1,
         projection: { _id: 1 },
       });
 
-      expect(groupDetailFound?._id).toEqual(groupId1);
+      expect(groupDetail).toBeDefined();
+      expect(groupDetail._id).toEqual(groupId1);
+    });
+    it('should throw an error if group does not exist and user is root', async () => {
+      await expect(
+        getGroupDetail({
+          isParent: false,
+          userId,
+          groupId: 'nonexistentGroupId',
+          projection: { _id: 1 },
+        }),
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+    it('should throw an error if group does not exist and user is parent of group', async () => {
+      await expect(
+        getGroupDetail({
+          isParent: true,
+          userId,
+          groupId: 'nonexistentGroupId',
+          projection: { _id: 1 },
+        }),
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
@@ -498,7 +583,7 @@ describe('Role base access control', () => {
 
       expect(result).toHaveLength(mockPermission.length);
       mockPermission.forEach(permission => {
-        expect(result).toContainEqual(permission);
+        expect(result).toContainEqual({ _id: permission._id });
       });
     });
     it('Should get entire permission within a group correctly', async () => {
@@ -516,7 +601,7 @@ describe('Role base access control', () => {
         groupId: managerId,
       });
 
-      expect(isVerified).toBeTruthy();
+      expect(isVerified).toBe(true);
     });
   });
 
@@ -727,6 +812,12 @@ describe('Role base access control', () => {
       expect(result).toHaveLength(2);
       expect(result).toContainEqual(roles[0].permissions[0]);
       expect(result).toContainEqual(roles[1].permissions[0]);
+    });
+
+    it('Should return an empty array if the group does not exist', async () => {
+      const result = await getPermissionsOfGroup('non-existing-group');
+
+      expect(result).toEqual([]);
     });
   });
 
