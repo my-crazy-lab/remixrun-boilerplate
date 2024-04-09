@@ -37,7 +37,7 @@ Unit testing:
   stage: test
   script:
     - meteor npm run test
-   artifacts:
+  artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
