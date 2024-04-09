@@ -1,11 +1,13 @@
-image: node:18 
+image: node:latest 
 
 services:
-  - name: mongo:latest
-    alias: mongodb
+  - mongo:latest
+
+cache:
+  paths:
+    - node_modules/
 
 variables:
-  METEOR_ALLOW_SUPERUSER: 1
   GIT_SSL_NO_VERIFY: 'true'
 
 before_script:
