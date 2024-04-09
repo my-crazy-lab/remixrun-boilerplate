@@ -49,17 +49,21 @@ export default function Screen() {
   return (
     <>
       <div className="flex flex-col space-y-1 text-start">
-        <Typography variant='h3'>{t('VERIFICATION_CODE')}</Typography>
-        <Typography variant='p' affects='removePMargin'>Open your gmail and verify your code.</Typography>
+        <Typography variant="h3">{t('VERIFICATION_CODE')}</Typography>
+        <Typography variant="p" affects="removePMargin">
+          Open your gmail and verify your code.
+        </Typography>
       </div>
       <div className="grid gap-6">
         <Form method="post">
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="verificationCode">
-                {t('VERIFICATION_CODE')}
-              </Label>
-              <Input name="code" required placeholder={t('ENTER_VERIFICATION_CODE')} />
+              <Label htmlFor="verificationCode">{t('VERIFICATION_CODE')}</Label>
+              <Input
+                name="code"
+                required
+                placeholder={t('ENTER_VERIFICATION_CODE')}
+              />
             </div>
             <Button>{t('VERIFY')}</Button>
           </div>

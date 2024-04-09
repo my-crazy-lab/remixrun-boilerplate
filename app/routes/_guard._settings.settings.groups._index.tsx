@@ -34,7 +34,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings'])
+  const { t } = useTranslation(['user-settings']);
   const loaderData = useLoaderData<LoaderData>();
 
   return (

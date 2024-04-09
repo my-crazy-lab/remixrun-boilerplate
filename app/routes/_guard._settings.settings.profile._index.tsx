@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { getUserId } from '~/services/helpers.server';
@@ -68,9 +68,7 @@ export default function Screen() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>
-                {t('AUTHORIZATION')}
-              </CardTitle>
+              <CardTitle>{t('AUTHORIZATION')}</CardTitle>
               <CardDescription>
                 {t('PERSONAL_DETAILS_TEXT_HELPER')}
               </CardDescription>
@@ -96,12 +94,8 @@ export default function Screen() {
         </div>
         <Card className="h-[448px]">
           <CardHeader>
-            <CardTitle className="text-lg">
-              {t('CHANGE_PROFILE')}
-            </CardTitle>
-            <CardDescription>
-              {t('CHANGE_PICTURE_FROM_HERE')}
-            </CardDescription>
+            <CardTitle className="text-lg">{t('CHANGE_PROFILE')}</CardTitle>
+            <CardDescription>{t('CHANGE_PICTURE_FROM_HERE')}</CardDescription>
           </CardHeader>
           <Separator />
           <div className="justify-center flex flex-col items-center">

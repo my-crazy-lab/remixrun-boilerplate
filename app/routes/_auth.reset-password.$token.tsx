@@ -61,7 +61,7 @@ export default function Screen() {
     <>
       <div className="flex flex-col space-y-1 text-start">
         <Typography variant={'h3'}>{t('CREATE_NEW_PASSWORD')}</Typography>
-        <Typography variant='p' affects='removePMargin'>
+        <Typography variant="p" affects="removePMargin">
           Your new password must be different from previous used password.
         </Typography>
       </div>
@@ -84,7 +84,9 @@ export default function Screen() {
                 placeholder={t('CONFIRM_PASSWORD')}
               />
             </div>
-            <Button>{state !== 'idle' ? t('LOADING') : t('RESET_PASSWORD')}</Button>
+            <Button>
+              {state !== 'idle' ? t('LOADING') : t('RESET_PASSWORD')}
+            </Button>
           </div>
         </Form>
       </div>

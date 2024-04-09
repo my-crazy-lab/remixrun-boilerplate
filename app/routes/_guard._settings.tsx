@@ -41,8 +41,7 @@ export default function Screen() {
         <Typography
           className="text-gray-400"
           variant="p"
-          affects="removePMargin"
-        >
+          affects="removePMargin">
           {t('SETTINGS_HELPER_TEXT')}
         </Typography>
       </div>

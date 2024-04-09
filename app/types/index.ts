@@ -1,4 +1,4 @@
-import { type LucideIcon } from "lucide-react";
+import { type LucideIcon } from 'lucide-react';
 import type { Document } from 'mongodb';
 import type { TActionPermissionModule } from '~/constants/common';
 

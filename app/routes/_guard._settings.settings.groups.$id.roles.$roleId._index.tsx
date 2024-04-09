@@ -79,9 +79,7 @@ export default function RolesDetail() {
                 {_.map(actionPermission.actions, action => (
                   <div key={action._id} className="my-2">
                     <div className="mt-1 flex items-center gap-2">
-                      <Badge
-                        className="text-sm text-blue bg-blue-50 rounded-lg"
-                      >
+                      <Badge className="text-sm text-blue bg-blue-50 rounded-lg">
                         {action.name}
                       </Badge>
                     </div>

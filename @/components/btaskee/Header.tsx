@@ -54,7 +54,7 @@ export default function Header() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link className='w-full' to={ROUTE_NAME.PROFILE_SETTING}>
+                <Link className="w-full" to={ROUTE_NAME.PROFILE_SETTING}>
                   Settings
                 </Link>
               </DropdownMenuItem>

@@ -88,7 +88,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings'])
+  const { t } = useTranslation(['user-settings']);
 
   const params = useParams();
   const loaderData = useLoaderData<LoaderData>();
@@ -118,85 +118,85 @@ export default function Screen() {
         <div className="grid grid-cols-3 gap-8">
           {loaderData.group?.children?.length
             ? loaderData.group.children.map((child, index: number) => {
-              return (
-                <Link key={index} to={`/settings/groups/${child?._id}`}>
-                  <Card className="bg-gray-100">
-                    <CardHeader className="p-4">
-                      <div className="flex justify-between items-center">
-                        <Typography variant="h4" affects="removePMargin">
-                          {child.name}
-                        </Typography>
-                        {globalData.permissions?.includes(
-                          PERMISSIONS.WRITE_GROUP,
-                        ) ? (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-                                <DotsHorizontalIcon className="h-4 w-4" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="start"
-                              className="w-[160px]">
-                              <Link
-                                to={`/settings/groups/${params.id}/edit/${child._id}`}>
+                return (
+                  <Link key={index} to={`/settings/groups/${child?._id}`}>
+                    <Card className="bg-gray-100">
+                      <CardHeader className="p-4">
+                        <div className="flex justify-between items-center">
+                          <Typography variant="h4" affects="removePMargin">
+                            {child.name}
+                          </Typography>
+                          {globalData.permissions?.includes(
+                            PERMISSIONS.WRITE_GROUP,
+                          ) ? (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+                                  <DotsHorizontalIcon className="h-4 w-4" />
+                                  <span className="sr-only">Open menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="start"
+                                className="w-[160px]">
+                                <Link
+                                  to={`/settings/groups/${params.id}/edit/${child._id}`}>
+                                  <DropdownMenuItem>
+                                    {t('EDIT')}
+                                  </DropdownMenuItem>
+                                </Link>
+                                <DropdownMenuSeparator />
                                 <DropdownMenuItem>
-                                  {t('EDIT')}
+                                  {t('DELETE')}
                                 </DropdownMenuItem>
-                              </Link>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>
-                                {t('DELETE')}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        ) : null}
-                      </div>
-                      <Typography
-                        className="text-gray-500"
-                        variant="p"
-                        affects="removePMargin">
-                        {child?.description}
-                      </Typography>
-                    </CardHeader>
-                    <CardContent className="flex flex-row gap-4 p-4">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-primary-50 p-3 rounded-md">
-                          <img src={TabGroupIcon} alt="tab-group-icon" />
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          ) : null}
                         </div>
-                        <div>
-                          <Typography className="text-gray-400" variant="p">
-                            {t('CHILDREN_GROUP')}
-                          </Typography>
-                          <Typography className="text-primary" variant="h4">
-                            2
-                          </Typography>
+                        <Typography
+                          className="text-gray-500"
+                          variant="p"
+                          affects="removePMargin">
+                          {child?.description}
+                        </Typography>
+                      </CardHeader>
+                      <CardContent className="flex flex-row gap-4 p-4">
+                        <div className="flex items-center gap-2">
+                          <div className="bg-primary-50 p-3 rounded-md">
+                            <img src={TabGroupIcon} alt="tab-group-icon" />
+                          </div>
+                          <div>
+                            <Typography className="text-gray-400" variant="p">
+                              {t('CHILDREN_GROUP')}
+                            </Typography>
+                            <Typography className="text-primary" variant="h4">
+                              2
+                            </Typography>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="bg-secondary p-3 rounded-md">
-                          <img src={UsersIcon} alt="user-group-icon" />
+                        <div className="flex items-center gap-2">
+                          <div className="bg-secondary p-3 rounded-md">
+                            <img src={UsersIcon} alt="user-group-icon" />
+                          </div>
+                          <div>
+                            <Typography className="text-gray-400" variant="p">
+                              {t('USERS')}
+                            </Typography>
+                            <Typography
+                              className="text-secondary-foreground"
+                              variant="h3">
+                              2
+                            </Typography>
+                          </div>
                         </div>
-                        <div>
-                          <Typography className="text-gray-400" variant="p">
-                            {t('USERS')}
-                          </Typography>
-                          <Typography
-                            className="text-secondary-foreground"
-                            variant="h3">
-                            2
-                          </Typography>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })
             : t('NO_USER_GROUP_HERE')}
         </div>
       </div>
@@ -210,8 +210,7 @@ export default function Screen() {
               <Typography
                 className="text-gray pb-4"
                 variant={'p'}
-                affects={'removePMargin'}
-              >
+                affects={'removePMargin'}>
                 {t('SET_ROLES_AND_PERMISSIONS_HELPER_TEXT')}
               </Typography>
               <Separator />
@@ -267,8 +266,7 @@ export default function Screen() {
             <Typography
               className="text-gray"
               variant={'p'}
-              affects={'removePMargin'}
-            >
+              affects={'removePMargin'}>
               {t('USERS_HELPER_TEXT')}
             </Typography>
           </div>

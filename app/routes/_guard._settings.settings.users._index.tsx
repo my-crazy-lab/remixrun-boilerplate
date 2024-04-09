@@ -103,13 +103,13 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {// TODO fix typing for react hook form
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              row.getValue('cities')?.map((e, index) => (
-                <Badge variant="secondary" key={index}>
-                  {e}
-                </Badge>
-              ))}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            row.getValue('cities')?.map((e, index) => (
+              <Badge variant="secondary" key={index}>
+                {e}
+              </Badge>
+            ))}
           </span>
         </div>
       );
@@ -121,7 +121,7 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
   },
 ];
 
-export const action = hocAction(async ({ }, { formData }) => {
+export const action = hocAction(async ({}, { formData }) => {
   try {
     const { username, email, password, cities } = formData;
 
@@ -174,7 +174,7 @@ interface FormData {
 }
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings'])
+  const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData<LoaderData>();
 

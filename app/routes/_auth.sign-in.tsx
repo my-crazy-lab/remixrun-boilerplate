@@ -54,19 +54,28 @@ export default function Screen() {
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">{t('USERNAME')}</Label>
-              <Input name="username" required placeholder={t('ENTER_USERNAME')} />
+              <Input
+                name="username"
+                required
+                placeholder={t('ENTER_USERNAME')}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">{t('PASSWORD')}</Label>
-              <PasswordInput name="password" required placeholder={t('ENTER_PASSWORD')} />
+              <PasswordInput
+                name="password"
+                required
+                placeholder={t('ENTER_PASSWORD')}
+              />
             </div>
             <Link
               className="text-end mb-6 text-primary text-sm font-normal"
-              to={'/reset-password'}
-            >
+              to={'/reset-password'}>
               {t('FORGOT_PASSWORD')}?
             </Link>
-            <Button disabled={navigation.state !== 'idle'}>{t('SIGN_IN')}</Button>
+            <Button disabled={navigation.state !== 'idle'}>
+              {t('SIGN_IN')}
+            </Button>
           </div>
         </Form>
       </div>
