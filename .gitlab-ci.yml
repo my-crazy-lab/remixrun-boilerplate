@@ -13,9 +13,10 @@ variables:
 
 before_script:
   - npm install
-  - apt-get update && apt-get install -y wget gnupg
-  - wget -qO - https://www.mongodb.org/static/pgp/server-${MONGODB_VERSION}.asc | apt-key add -
-  - echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/${MONGODB_VERSION} multiverse" | tee /etc/apt/sources.list.d/mongodb-org-${MONGODB_VERSION}.list
+  - apt-get update && sudo apt-get install gnupg curl
+  - curl -fsSL https://www.mongodb.org/static/pgp/server-5.0.asc | \ sudo gpg -o /usr/share/keyrings/mongodb-server-5.0.gpg \ --dearmor
+  - echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-5.0.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-5.0.list
+  - sudo apt-get update
   - apt-get update && apt-get install -y mongodb-org
   - mongod --fork --logpath /var/log/mongodb.log
   - sleep 5
@@ -52,3 +53,6 @@ Unit testing:
       coverage_report:
         coverage_format: cobertura
         path: .coverage/coverage.txt
+
+after_script:
+  - mongo admin --eval "db.shutdownServer()"
