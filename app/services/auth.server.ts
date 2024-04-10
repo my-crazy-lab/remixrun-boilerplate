@@ -5,6 +5,7 @@ import { FormStrategy } from 'remix-auth-form';
 import { v4 as uuidv4 } from 'uuid';
 import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
+import { sendEmail } from '~/services/mail.server';
 import { sessionStorage } from '~/services/session.server';
 import { type Users } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
@@ -15,7 +16,6 @@ import {
   EXPIRED_VERIFICATION_CODE,
 } from './constants.server';
 import { dotenv } from './dotenv.server';
-import { sendEmail } from './mail.server';
 
 interface AuthenticatorSessionData {
   userId: string;

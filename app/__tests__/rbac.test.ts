@@ -24,6 +24,8 @@ import {
 import { type Groups, type Permissions, type Roles, type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
 
+import { mockResponseThrowError } from './helpers.test';
+
 const mockRecordCommonField = {
   createdAt: new Date('2024-03-24T00:00:00.000Z'),
   _id: 'mockNewRoleId',
@@ -455,12 +457,9 @@ describe('Role base access control', () => {
       expect(role?.name).toEqual(dataRootRole.name);
     });
     it('should throw and error if role does not exist', async () => {
-      const spy = jest
-        .spyOn(global, 'Response')
-        .mockImplementation(() => new Error('err'));
-
-      await expect(getRoleDetail('non-exist-role')).rejects.toThrow('err');
-      spy.mockRestore();
+      const { errorText, restore } = mockResponseThrowError();
+      await expect(getRoleDetail('non-exist-role')).rejects.toThrow(errorText);
+      restore();
     });
   });
 
@@ -564,6 +563,7 @@ describe('Role base access control', () => {
       expect(groupDetail._id).toEqual(groupId1);
     });
     it('should throw an error if group does not exist and user is root', async () => {
+      const { errorText, restore } = mockResponseThrowError();
       await expect(
         getGroupDetail({
           isParent: false,
@@ -571,9 +571,11 @@ describe('Role base access control', () => {
           groupId: 'nonexistentGroupId',
           projection: { _id: 1 },
         }),
-      ).rejects.toThrowErrorMatchingSnapshot();
+      ).rejects.toThrow(errorText);
+      restore();
     });
     it('should throw an error if group does not exist and user is parent of group', async () => {
+      const { errorText, restore } = mockResponseThrowError();
       await expect(
         getGroupDetail({
           isParent: true,
@@ -581,7 +583,8 @@ describe('Role base access control', () => {
           groupId: 'nonexistentGroupId',
           projection: { _id: 1 },
         }),
-      ).rejects.toThrowErrorMatchingSnapshot();
+      ).rejects.toThrow(errorText);
+      restore();
     });
   });
 
@@ -719,12 +722,15 @@ describe('Role base access control', () => {
       slug: 'r-o-l-e-n-a-m-e-1',
       createdAt: new Date('2024-02-01'),
     };
+
     beforeEach(async () => {
       await mongodb.collection<Roles>('roles').insertOne(role);
     });
+
     afterEach(async () => {
       await mongodb.collection<Roles>('roles').deleteOne({ _id: role._id });
     });
+
     it('Should delete role successfully', async () => {
       await deleteRole(role._id);
 
@@ -747,9 +753,11 @@ describe('Role base access control', () => {
       hierarchy: 12,
       createdAt: new Date('2024-02-01'),
     };
+
     beforeEach(async () => {
       await mongodb.collection<Groups>('groups').insertOne(group);
     });
+
     afterEach(async () => {
       await mongodb.collection<Groups>('groups').deleteOne({ _id: group._id });
     });

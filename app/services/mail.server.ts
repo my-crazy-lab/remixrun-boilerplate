@@ -1,8 +1,7 @@
 import nodemailer from 'nodemailer';
-
 import { dotenv } from './dotenv.server';
 
-interface EmailArgs {
+export interface EmailArgs {
   text: string;
   subject: string;
   to: string;
