@@ -1,4 +1,5 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import { PasswordInput } from '@/components/btaskee/PasswordInput';
 import BTaskeeTable from '@/components/btaskee/TableBase';
 import Typography from '@/components/btaskee/Typography';
 import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-table-column-header';
@@ -24,6 +25,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
 import {
@@ -172,6 +174,7 @@ interface FormData {
 }
 
 export default function Screen() {
+  const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData<LoaderData>();
 
@@ -207,7 +210,7 @@ export default function Screen() {
     <div className="h-full flex-1 flex-col space-y-8 flex">
       <div className="flex items-center justify-between space-y-2 bg-secondary p-4 rounded-xl">
         <div className="grid space-y-2">
-          <Typography variant="h2"> Users management</Typography>
+          <Typography variant="h3">{t('USER_MANAGEMENT')}</Typography>
           <Breadcrumbs />
         </div>
         <Dialog
@@ -220,30 +223,31 @@ export default function Screen() {
           }}>
           <DialogTrigger asChild>
             <Button className="gap-2" variant="default">
-              <Plus /> Add new user
+              <Plus />
+              {t('ADD_NEW_USER')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[560px]">
             <form onSubmit={handleSubmit(onSubmit)}>
               <DialogHeader>
-                <DialogTitle>New user</DialogTitle>
+                <DialogTitle>{t('NEW_USER')}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="username" className="text-right">
-                    Username
+                    {t('USERNAME')}
                   </Label>
                   <Input
                     {...register('username' as const, {
                       required: true,
                     })}
                     className="col-span-3"
-                    placeholder="Username"
+                    placeholder={t('USERNAME')}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="email" className="text-right">
-                    Email
+                    {t('EMAIL')}
                   </Label>
                   <Input
                     {...register('email' as const, {
@@ -251,25 +255,24 @@ export default function Screen() {
                     })}
                     type="email"
                     className="col-span-3"
-                    placeholder="Email"
+                    placeholder={t('EMAIL')}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="password" className="text-right">
-                    Password
+                    {t('PASSWORD')}
                   </Label>
-                  <Input
+                  <PasswordInput
                     {...register('password' as const, {
                       required: true,
                     })}
                     autoComplete="off"
-                    type="password"
                     className="col-span-3"
-                    placeholder="Password"
+                    placeholder={t('PASSWORD')}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Cities</Label>
+                  <Label className="text-right">{t('CITIES')}</Label>
                   <div className="col-span-3">
                     <Controller
                       control={control}
@@ -301,7 +304,7 @@ export default function Screen() {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit">Save changes</Button>
+                <Button type="submit">{t('SAVE_CHANGES')}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

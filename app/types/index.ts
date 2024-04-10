@@ -1,5 +1,14 @@
+import { type LucideIcon } from 'lucide-react';
 import type { Document } from 'mongodb';
 import type { TActionPermissionModule } from '~/constants/common';
+
+export interface NavItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  isChildren?: boolean;
+  children?: NavItem[];
+}
 
 export interface ActionsHistory {
   _id: string;

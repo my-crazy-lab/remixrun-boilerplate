@@ -18,6 +18,7 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData, useParams } from '@remix-run/react';
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '~/constants/common';
 import { hoc404, res403 } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
@@ -87,6 +88,8 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
+  const { t } = useTranslation(['user-settings']);
+
   const params = useParams();
   const loaderData = useLoaderData<LoaderData>();
   const globalData = useGlobalStore(state => state);
@@ -95,7 +98,7 @@ export default function Screen() {
     <>
       <div className="flex justify-between items-center bg-secondary p-4 rounded-md">
         <div className="grid space-y-2">
-          <Typography variant="h4">{loaderData.group?.name}</Typography>
+          <Typography variant="h3">{loaderData.group?.name}</Typography>
           <Breadcrumbs />
         </div>
 
@@ -103,14 +106,14 @@ export default function Screen() {
           <Link to={`/settings/groups/${params.id}/create`}>
             <Button className="gap-2">
               <Plus />
-              Create new group
+              {t('CREATE_NEW_GROUP')}
             </Button>
           </Link>
         ) : null}
       </div>
       <div>
         <Typography className="py-4 font-medium text-base" variant="p">
-          Children groups
+          {t('CHILDREN_GROUP')}
         </Typography>
         <div className="grid grid-cols-3 gap-8">
           {loaderData.group?.children?.length
@@ -121,7 +124,6 @@ export default function Screen() {
                       <CardHeader className="p-4">
                         <div className="flex justify-between items-center">
                           <Typography variant="h4" affects="removePMargin">
-                            {' '}
                             {child.name}
                           </Typography>
                           {globalData.permissions?.includes(
@@ -141,10 +143,14 @@ export default function Screen() {
                                 className="w-[160px]">
                                 <Link
                                   to={`/settings/groups/${params.id}/edit/${child._id}`}>
-                                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    {t('EDIT')}
+                                  </DropdownMenuItem>
                                 </Link>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  {t('DELETE')}
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           ) : null}
@@ -163,7 +169,7 @@ export default function Screen() {
                           </div>
                           <div>
                             <Typography className="text-gray-400" variant="p">
-                              Children Group
+                              {t('CHILDREN_GROUP')}
                             </Typography>
                             <Typography className="text-primary" variant="h4">
                               2
@@ -177,7 +183,7 @@ export default function Screen() {
                           </div>
                           <div>
                             <Typography className="text-gray-400" variant="p">
-                              Users
+                              {t('USERS')}
                             </Typography>
                             <Typography
                               className="text-secondary-foreground"
@@ -191,19 +197,21 @@ export default function Screen() {
                   </Link>
                 );
               })
-            : 'No user group here!'}
+            : t('NO_USER_GROUP_HERE')}
         </div>
       </div>
       <div className="grid md:grid-cols-3 grid-cols-1 gap-6 mt-6">
         <Card className="p-4 col-span-2">
           <div className="flex justify-between items-center pb-4">
             <div className="flex flex-col">
-              <Typography variant={'h4'}>Set roles and permissions</Typography>
+              <Typography variant={'h4'}>
+                {t('SET_ROLES_AND_PERMISSIONS')}
+              </Typography>
               <Typography
                 className="text-gray pb-4"
                 variant={'p'}
                 affects={'removePMargin'}>
-                To change your personal detail, edit and save from here
+                {t('SET_ROLES_AND_PERMISSIONS_HELPER_TEXT')}
               </Typography>
               <Separator />
             </div>
@@ -211,7 +219,7 @@ export default function Screen() {
               <Link to={`/settings/groups/${params.id}/roles/create`}>
                 <Button className="gap-2">
                   <Plus />
-                  Create roles
+                  {t('CREATE_ROLES')}
                 </Button>
               </Link>
             ) : null}
@@ -239,10 +247,10 @@ export default function Screen() {
                       <DropdownMenuContent align="end" className="w-[160px]">
                         <Link
                           to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem>{t('DELETE')}</DropdownMenuItem>
                       </DropdownMenuContent>
                     ) : null}
                   </DropdownMenu>
@@ -254,12 +262,12 @@ export default function Screen() {
 
         <Card className="p-4 col-span-1">
           <div className="flex flex-col pb-4">
-            <Typography variant={'h4'}>Users</Typography>
+            <Typography variant={'h4'}>{t('USERS')}</Typography>
             <Typography
               className="text-gray"
               variant={'p'}
               affects={'removePMargin'}>
-              To change your personal
+              {t('USERS_HELPER_TEXT')}
             </Typography>
           </div>
           <Separator />
@@ -272,7 +280,7 @@ export default function Screen() {
                       variant="ghost"
                       className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-10 w-10">
-                        <AvatarFallback>bTaskee</AvatarFallback>
+                        <AvatarFallback>B</AvatarFallback>
                       </Avatar>
                     </Button>
                     <div>

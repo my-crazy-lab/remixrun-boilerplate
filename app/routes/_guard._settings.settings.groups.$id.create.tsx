@@ -88,7 +88,7 @@ interface FormData {
 }
 
 export default function Screen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['user-settings']);
   const navigation = useNavigation();
 
   const loaderData = useLoaderData<LoaderData>();
@@ -124,33 +124,33 @@ export default function Screen() {
   return (
     <>
       <div className="grid space-y-2 bg-secondary p-4 rounded-xl">
-        <Typography variant="h2">Create group</Typography>
+        <Typography variant="h3">{t('CREATE_GROUP')}</Typography>
         <Breadcrumbs />
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-2 gap-4 py-4">
           <div className="grid items-center gap-4">
-            <Label htmlFor="group_name">Group name</Label>
+            <Label htmlFor="group_name">{t('GROUP_NAME')}</Label>
             <Input
               {...register('name' as const, {
                 required: true,
               })}
               className="col-span-2"
-              placeholder="Enter group name"
+              placeholder={t('ENTER_GROUP_NAME')}
             />
           </div>
           <div className="grid items-center gap-4">
-            <Label htmlFor="group_description">Group description</Label>
+            <Label htmlFor="group_description">{t('GROUP_DESCRIPTION')}</Label>
             <Input
               {...register('description' as const, {
                 required: true,
               })}
               className="col-span-2"
-              placeholder="Enter description"
+              placeholder={t('ENTER_DESCRIPTION')}
             />
           </div>
           <div className="grid items-center gap-4">
-            <Label htmlFor="users">Users</Label>
+            <Label htmlFor="users">{t('USERS')}</Label>
             <div className="col-span-2">
               <Controller
                 control={control}
@@ -174,7 +174,7 @@ export default function Screen() {
             </div>
           </div>
           <div className="grid items-center gap-4">
-            <Label className="text-left">Roles</Label>
+            <Label className="text-left">{t('ROLES')}</Label>
             <div className="col-span-2">
               <Controller
                 control={control}
@@ -196,7 +196,7 @@ export default function Screen() {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button type="submit">{t('SAVE')}</Button>
+          <Button type="submit">{t('SAVE_CHANGES')}</Button>
         </div>
       </form>
     </>
