@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
 import { verifyAndSendCode } from '~/services/auth.server';
 import { dotenv } from '~/services/dotenv.server';
+import * as EmailService from '~/services/mail.server';
 import { type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
-import * as EmailService from '~/services/mail.server';
 
 jest.mock('~/services/mail.server', () => ({
   __esModule: true,
