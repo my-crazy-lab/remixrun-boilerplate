@@ -15,6 +15,7 @@ import { json, redirect } from '@remix-run/node';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
@@ -90,6 +91,8 @@ interface FormData {
   description: string;
 }
 export default function Screen() {
+  const { t } = useTranslation(['user-settings']);
+
   const loaderData = useLoaderData<LoaderData>();
   const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
@@ -119,24 +122,24 @@ export default function Screen() {
   return (
     <>
       <div className="grid p-4 space-y-2 bg-secondary rounded-xl">
-        <Typography variant="h4">Create role</Typography>
+        <Typography variant="h3">{t('CREATE_ROLE')}</Typography>
         <Breadcrumbs />
       </div>
 
       <form className="mt-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
           <div>
-            <Label htmlFor="name">Role name</Label>
+            <Label htmlFor="name">{t('ROLE_NAME')}</Label>
             <Input
-              placeholder="Enter role name"
+              placeholder={t('ENTER_ROLE_NAME')}
               className="mt-2"
               {...register('name' as const, { required: true })}
             />
           </div>
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('DESCRIPTION')}</Label>
             <Input
-              placeholder="Enter description"
+              placeholder={t('ENTER_DESCRIPTION')}
               className="mt-2"
               {...register('description' as const, { required: true })}
             />
@@ -185,7 +188,7 @@ export default function Screen() {
 
         <div className="flex justify-end mt-4">
           <Button variant="default" type="submit" color="primary">
-            Save changes
+            {t('SAVE_CHANGES')}
           </Button>
         </div>
       </form>

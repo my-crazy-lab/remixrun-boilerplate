@@ -2,7 +2,7 @@ import Header from '@/components/btaskee/Header';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
-import React from 'react';
+import { useRef } from 'react';
 import ROUTE_NAME from '~/constants/route';
 import type { GlobalProps, GlobalStore } from '~/hooks/useGlobalStore';
 import { GlobalContext, createGlobalStore } from '~/hooks/useGlobalStore';
@@ -31,13 +31,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function Screen() {
   const { user } = useLoaderData<{ user: GlobalProps }>();
 
-  const storeRef = React.useRef<GlobalStore>();
+  const storeRef = useRef<GlobalStore>();
   if (!storeRef.current) {
     storeRef.current = createGlobalStore(user);
   }
 
   return (
-    <div className="hidden flex-col md:flex">
+    <div className="hidden flex-col md:flex max-w-[1392px] m-auto">
       <Header />
       <div className="flex-1 space-y-4 p-8 pt-6">
         <GlobalContext.Provider value={storeRef.current}>

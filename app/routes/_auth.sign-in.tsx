@@ -1,3 +1,5 @@
+import { PasswordInput } from '@/components/btaskee/PasswordInput';
+import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,7 +35,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Screen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['authentication']);
   const actionData = useActionData<ActionData>();
 
   if (actionData?.error) {
@@ -45,37 +47,35 @@ export default function Screen() {
   return (
     <>
       <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">{t('LOGIN')}</h1>
-        <p className="text-sm text-muted-foreground">
-          Enter your email below to create your account
-        </p>
+        <Typography variant={'h3'}>{t('SIGN_IN')}</Typography>
       </div>
       <div className="grid gap-6">
         <Form method="post">
-          <div className="grid gap-2">
-            <div className="grid gap-1">
-              <Label className="sr-only" htmlFor="email">
-                {t('EMAIL')}
-              </Label>
-              <Input name="username" required placeholder="User name" />
-            </div>
-            <div className="grid gap-1">
-              <Label className="sr-only" htmlFor="password">
-                {t('PASSWORD')}
-              </Label>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">{t('USERNAME')}</Label>
               <Input
+                name="username"
                 required
+                placeholder={t('ENTER_USERNAME')}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">{t('PASSWORD')}</Label>
+              <PasswordInput
                 name="password"
-                type="password"
-                placeholder="Password"
+                required
+                placeholder={t('ENTER_PASSWORD')}
               />
             </div>
             <Link
-              className="text-end underline italic mb-8"
+              className="text-end mb-6 text-primary text-sm font-normal"
               to={'/reset-password'}>
-              Forgot password?
+              {t('FORGOT_PASSWORD')}?
             </Link>
-            <Button disabled={navigation.state !== 'idle'}>Login</Button>
+            <Button disabled={navigation.state !== 'idle'}>
+              {t('SIGN_IN')}
+            </Button>
           </div>
         </Form>
       </div>

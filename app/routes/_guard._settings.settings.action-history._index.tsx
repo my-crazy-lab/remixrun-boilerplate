@@ -8,6 +8,7 @@ import { useLoaderData, useSearchParams } from '@remix-run/react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import moment from 'moment';
+import { useTranslation } from 'react-i18next';
 import {
   getActionsHistory,
   getTotalActionsHistory,
@@ -121,6 +122,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
+  const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
   const { total, actionsHistory } = useLoaderData<{
     total: number;
@@ -130,10 +132,9 @@ export default function Screen() {
   return (
     <>
       <div className="grid space-y-2 bg-secondary p-4 rounded-xl mb-4">
-        <Typography variant="h3">Actions history</Typography>
+        <Typography variant="h3">{t('ACTIONS_HISTORY')}</Typography>
         <Breadcrumbs />
       </div>
-
       <BTaskeeTable
         total={total || 0}
         // TODO fix typing for Table

@@ -13,6 +13,7 @@ import {
   useSubmit,
 } from '@remix-run/react';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hoc404, hocAction, hocLoader, res403GroupParent } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
@@ -138,6 +139,8 @@ export const handle = {
 };
 
 export default function Screen() {
+  const { t } = useTranslation(['user-settings']);
+
   const { group, roles, users } = useLoaderData<LoaderData>();
   const navigation = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -178,33 +181,35 @@ export default function Screen() {
   return (
     <>
       <div className="grid space-y-2 bg-secondary rounded-xl p-4">
-        <Typography variant="h3">Edit group</Typography>
+        <Typography variant="h3">{t('EDIT_GROUP')}</Typography>
         <Breadcrumbs />
       </div>
       <form className="gap-4 pb-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4 py-4 grid-cols-2">
           <div className="grid items-center gap-4">
             <Label htmlFor="group" className="text-left">
-              Group name
+              {t('GROUP_NAME')}
             </Label>
             <Input
               {...register('name' as const, {
                 required: true,
               })}
+              placeholder={t('ENTER_GROUP_NAME')}
             />
           </div>
 
           <div className="grid items-center gap-4">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('DESCRIPTION')}</Label>
             <Input
               {...register('description' as const, {
                 required: true,
               })}
+              placeholder={t('ENTER_DESCRIPTION')}
             />
           </div>
 
           <div className="grid items-center gap-4">
-            <Label>Users</Label>
+            <Label>{t('USERS')}</Label>
             <Controller
               control={control}
               name="userIds"
@@ -226,7 +231,7 @@ export default function Screen() {
             />
           </div>
           <div className="grid items-center gap-4">
-            <Label>Roles</Label>
+            <Label>{t('ROLES')}</Label>
             <Controller
               control={control}
               name="roleIds"
@@ -245,9 +250,8 @@ export default function Screen() {
             />
           </div>
         </div>
-
         <div className="flex justify-end">
-          <Button type="submit">Save changes</Button>
+          <Button type="submit">{t('SAVE_CHANGES')}</Button>
         </div>
       </form>
     </>

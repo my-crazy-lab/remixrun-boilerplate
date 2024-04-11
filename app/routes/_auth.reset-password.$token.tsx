@@ -1,5 +1,6 @@
+import { PasswordInput } from '@/components/btaskee/PasswordInput';
+import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
@@ -48,7 +49,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export default function Screen() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['authentication']);
   const { state } = useNavigation();
 
   const actionData = useActionData<ActionData>();
@@ -58,36 +59,34 @@ export default function Screen() {
 
   return (
     <>
-      <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t('RESET_PASSWORD')}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          You are a step away from accessing your account!
-        </p>
+      <div className="flex flex-col space-y-1 text-start">
+        <Typography variant={'h3'}>{t('CREATE_NEW_PASSWORD')}</Typography>
+        <Typography variant="p" affects="removePMargin">
+          Your new password must be different from previous used password.
+        </Typography>
       </div>
       <div className="grid gap-6">
         <Form method="post">
-          <div className="grid gap-2">
-            <div className="grid gap-1">
-              <Label className="sr-only">New Password</Label>
-              <Input
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label>{t('NEW_PASSWORD')}</Label>
+              <PasswordInput
                 required
-                type="password"
                 name="newPassword"
-                placeholder="New Password"
+                placeholder={t('NEW_PASSWORD')}
               />
             </div>
             <div className="grid gap-1">
-              <Label className="sr-only">Re-enter New Password</Label>
-              <Input
+              <Label>{t('CONFIRM_PASSWORD')}</Label>
+              <PasswordInput
                 required
-                type="password"
                 name="reEnterPassword"
-                placeholder="Re-enter New Password"
+                placeholder={t('CONFIRM_PASSWORD')}
               />
             </div>
-            <Button>{state !== 'idle' ? t('LOADING') : t('RESET')}</Button>
+            <Button>
+              {state !== 'idle' ? t('LOADING') : t('RESET_PASSWORD')}
+            </Button>
           </div>
         </Form>
       </div>

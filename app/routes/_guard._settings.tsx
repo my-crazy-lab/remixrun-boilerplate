@@ -13,25 +13,25 @@ export const handle = {
 
 const navigation = [
   {
-    title: 'Profile',
+    title: 'PROFILE',
     href: ROUTE_NAME.PROFILE_SETTING,
   },
   {
-    title: 'Users management',
+    title: 'USER_MANAGEMENT',
     href: ROUTE_NAME.USER_SETTING,
   },
   {
-    title: 'Groups',
+    title: 'GROUPS',
     href: ROUTE_NAME.GROUP_SETTING,
   },
   {
-    title: 'Action history',
+    title: 'ACTIONS_HISTORY',
     href: ROUTE_NAME.ACTION_HISTORY_SETTING,
   },
 ];
 
 export default function Screen() {
-  const { t } = useTranslation(['common', 'settings']);
+  const { t } = useTranslation(['user-settings']);
   const { pathname } = useLocation();
 
   return (
@@ -42,7 +42,7 @@ export default function Screen() {
           className="text-gray-400"
           variant="p"
           affects="removePMargin">
-          Manage your account settings and set e-mail preferences.
+          {t('SETTINGS_HELPER_TEXT')}
         </Typography>
       </div>
       <Separator className="my-6" />
@@ -59,11 +59,11 @@ export default function Screen() {
                 className={cn(
                   buttonVariants({ variant: 'ghost' }),
                   pathname.includes(item.href)
-                    ? 'bg-muted hover:bg-muted font-medium'
-                    : 'hover:bg-muted text-gray font-normal',
+                    ? 'bg-primary-50 hover:bg-primary-50 hover:text-primary font-medium text-primary'
+                    : 'hover:bg-primary-50 text-gray font-normal',
                   'justify-start text-base',
                 )}>
-                {item.title}
+                {t(item.title)}
               </Link>
             ))}
           </nav>
