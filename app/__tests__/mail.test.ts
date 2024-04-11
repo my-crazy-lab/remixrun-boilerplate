@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import type Mail from 'nodemailer/lib/mailer';
 import { dotenv } from '~/services/dotenv.server';
 import { sendEmail } from '~/services/mail.server';
+import { type MustBeAny } from '~/types';
 
 describe('sendEmail', () => {
   it('Should send email by SMTP successfully with nodemailer library', async () => {
@@ -11,7 +12,7 @@ describe('sendEmail', () => {
     ) => void = jest.fn();
     const createTransportSpy = jest
       .spyOn(nodemailer, 'createTransport')
-      .mockReturnValue({ sendMail: sendEmailSpy });
+      .mockReturnValue({ sendMail: sendEmailSpy } as MustBeAny);
 
     const mockParams = {
       text: 'text',
