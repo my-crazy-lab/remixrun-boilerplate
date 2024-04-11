@@ -1,11 +1,11 @@
 import { Card, CardHeader } from '@/components/ui/card';
-import CellBase from '~/Base/CellBase';
-import PieBase, { type PieBaseProps } from '~/Base/PieBase';
-import PieChartBase, { type PieChartBaseProps } from '~/Base/PieChartBase';
+import CellBase from '@/components/base/CellBase';
+import PieBase, { type PieBaseProps } from '@/components/base/PieBase';
+import PieChartBase, { type PieChartBaseProps } from '@/components/base/PieChartBase';
 import ResponsiveContainerBase, {
   type ResponsiveContainerBaseProps,
-} from '~/Base/ResponsiveContainerBase';
-import TooltipBase, { type IPayLoadTooltip } from '~/Base/TooltipBase';
+} from '@/components/base/ResponsiveContainerBase';
+import TooltipBase, { type IPayLoadTooltip } from '@/components/base/TooltipBase';
 import { PIE_CHART_COLOR } from '~/constants/common';
 
 export interface SimplePieChartProps extends ResponsiveContainerBaseProps {

@@ -1,15 +1,15 @@
-import BarBase, { type BarBaseProps } from '~/Base/BarBase';
-import BarChartBase, { type BarChartProps } from '~/Base/BarChartBase';
+import BarBase, { type BarBaseProps } from '@/components/base/BarBase';
+import BarChartBase, { type BarChartProps } from '@/components/base/BarChartBase';
 import CartesianGridBase, {
   type CartesianGridBaseProps,
-} from '~/Base/CartesianGridBase';
-import LegendBase from '~/Base/LegendBase';
+} from '@/components/base/CartesianGridBase';
+import LegendBase from '@/components/base/LegendBase';
 import ResponsiveContainerBase, {
   type ResponsiveContainerBaseProps,
-} from '~/Base/ResponsiveContainerBase';
-import TooltipBase from '~/Base/TooltipBase';
-import XAxisBase from '~/Base/XAxisBase';
-import YAxisBase from '~/Base/YAxisBase';
+} from '@/components/base/ResponsiveContainerBase';
+import TooltipBase from '@/components/base/TooltipBase';
+import XAxisBase from '@/components/base/XAxisBase';
+import YAxisBase from '@/components/base/YAxisBase';
 
 export interface SimpleBarChartProps extends ResponsiveContainerBaseProps {
   chartProps: BarChartProps;

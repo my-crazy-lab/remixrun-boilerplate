@@ -1,15 +1,15 @@
 import CartesianGridBase, {
   type CartesianGridBaseProps,
-} from '~/Base/CartesianGridBase';
-import LegendBase from '~/Base/LegendBase';
-import LineBase, { type LineBaseProps } from '~/Base/LineBase';
-import LineChartBase, { type LineChartBaseProps } from '~/Base/LineChartBase';
+} from '@/components/base/CartesianGridBase';
+import LegendBase from '@/components/base/LegendBase';
+import LineBase, { type LineBaseProps } from '@/components/base/LineBase';
+import LineChartBase, { type LineChartBaseProps } from '@/components/base/LineChartBase';
 import ResponsiveContainerBase, {
   type ResponsiveContainerBaseProps,
-} from '~/Base/ResponsiveContainerBase';
-import TooltipBase from '~/Base/TooltipBase';
-import XAxisBase from '~/Base/XAxisBase';
-import YAxisBase from '~/Base/YAxisBase';
+} from '@/components/base/ResponsiveContainerBase';
+import TooltipBase from '@/components/base/TooltipBase';
+import XAxisBase from '@/components/base/XAxisBase';
+import YAxisBase from '@/components/base/YAxisBase';
 
 export interface SimpleLineChartProps extends ResponsiveContainerBaseProps {
   chartProps: Omit<LineChartBaseProps, 'children'>;
