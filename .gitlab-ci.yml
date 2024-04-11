@@ -40,7 +40,7 @@ Spell checker:
 Unit testing:
   stage: test
   script:
-    - npm run test
+    - npm run test:ci
   artifacts:
     reports:
       coverage_report:

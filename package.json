@@ -13,7 +13,8 @@
     "cspell": "cspell --config .spellcheckerrc.json \"**\"",
     "deploy": "cross-env NODE_ENV=production node server.mjs",
     "prepare": "husky",
-    "test": "jest --detectOpenHandles"
+    "test:local": "jest --detectOpenHandles",
+    "test:ci": "JEST_CONFIG=jest.config.ci.ts jest --detectOpenHandles"
   },
   "dependencies": {
     "@hookform/error-message": "^2.0.1",
