@@ -21,14 +21,31 @@ import {
   verifyPermissions,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import { type Groups, type Permissions, type Roles, type Users } from '~/types';
+import {
+  type Groups,
+  type MustBeAny,
+  type Permissions,
+  type Roles,
+  type Users,
+} from '~/types';
 import { mongodb } from '~/utils/db.server';
 
-import { mockResponseThrowError } from './helpers.test';
+function mockResponseThrowError() {
+  const errorText = 'response return error message';
+
+  const spy = jest
+    .spyOn(global, 'Response')
+    .mockImplementation(() => new Error(errorText) as MustBeAny);
+
+  function restore() {
+    spy.mockRestore();
+  }
+  return { restore, errorText };
+}
 
 const mockRecordCommonField = {
   createdAt: new Date('2024-03-24T00:00:00.000Z'),
-  _id: 'mockNewRoleId',
+  _id: 'new-role-id',
   status: 'ACTIVE',
 };
 
