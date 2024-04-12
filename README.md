@@ -63,6 +63,37 @@
 ```
 db.collection("permissions").insert({
   {
+    "_id" : "manager",
+    "description" : "This is manager, with can access data all cities of each country",
+    "module" : "special",
+    "name" : "MANAGER"
+  }
+})
+
+db.collection("roles").insert({
+    "_id" : "manager",
+    "permissions" : [
+        "manager"
+    ],
+    "name":"MANAGER",
+})
+
+db.collection("groups").insert({
+    "name" : "Group manager",
+    "roleIds" : [
+        "manager"
+    ],
+    "userIds" : [
+        "manager",
+    ],
+    "genealogy": [],
+    "hierarchy" : NumberInt(1)
+})
+```
+
+```
+db.collection("permissions").insert({
+  {
     "_id" : "root",
     "description" : "This is root user, with all power",
     "module" : "special",
