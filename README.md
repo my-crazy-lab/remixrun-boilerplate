@@ -62,13 +62,6 @@
 
 ```
 db.collection("permissions").insert({
-    "_id" : "root",
-    "permissions" : [
-        "root"
-    ],
-    "name":"ROOT",
-})
-db.collection("roles").insert({
   {
     "_id" : "root",
     "description" : "This is root user, with all power",
@@ -76,6 +69,15 @@ db.collection("roles").insert({
     "name" : "ROOT"
   }
 })
+
+db.collection("roles").insert({
+    "_id" : "root",
+    "permissions" : [
+        "root"
+    ],
+    "name":"ROOT",
+})
+
 db.collection("groups").insert({
     "name" : "Group root",
     "roleIds" : [
