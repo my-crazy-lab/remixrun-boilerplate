@@ -77,18 +77,6 @@ db.collection("roles").insert({
     ],
     "name":"MANAGER",
 })
-
-db.collection("groups").insert({
-    "name" : "Group manager",
-    "roleIds" : [
-        "manager"
-    ],
-    "userIds" : [
-        "manager",
-    ],
-    "genealogy": [],
-    "hierarchy" : NumberInt(1)
-})
 ```
 
 ```
