@@ -1,10 +1,31 @@
 {
-  "CREATE_ACCOUNT": "Hello",
-  "SEND_EMAIL": "Gửi đến email",
-  "settings": {
-    "SETTINGS": "Cài đặt",
-    "groups": {
-      "GROUPS_MANAGEMENT": "Groups management"
-    }
-  }
+  "GO_BACK": "Quay lại",
+  "SUCCESS": "Thành công",
+  "INFORMATION": "Thông tin",
+  "ERROR": "Lỗi",
+  "WARNING": "Cảnh báo",
+  "PARENT_GROUP_NOT_FOUND": "Nhóm cha không được tìm thấy",
+  "USER_DONT_HAVE_PERMISSION": "Người dùng không có quyền",
+  "EMAIL_SERVICE_ERROR": "Lỗi dịch vụ email",
+  "ENV_ERROR": "Có lỗi với biến môi trường của máy chủ",
+  "LOGIN_FAILURE": "Đăng nhập thất bại",
+  "INCORRECT_ACCOUNT": "Tài khoản không chính xác",
+  "EMAIL_INCORRECT": "Email không chính xác",
+  "SETTINGS": "Cài đặt",
+  "ACTIONS_HISTORY": "Lịch sử hành động",
+  "USERS_MANAGEMENT": "Quản lý người dùng",
+  "PROFILE": "Hồ sơ",
+  "GROUPS": "Nhóm",
+  "EDIT_ROLE": "Chỉnh sửa vai trò",
+  "UPDATE_ROLE": "Cập nhật vai trò",
+  "UPDATE_GROUP": "Cập nhật nhóm",
+  "EDIT_GROUP": "Chỉnh sửa vai trò",
+  "ACCESS_DENINED": "Truy cập bị từ chối",
+  "NOT_PERMISSION": "Bạn không có quyền truy cập trang này.",
+  "PAGE_NOT_FOUND": "Xin lỗi, không tìm thấy trang",
+  "PAGE_NOT_FOUND_DESCRIPTION": "Trang bạn đang tìm kiếm không tồn tại!",
+  "SEARCH": "Tìm kiếm",
+  "LOGOUT": "Đăng xuất",
+  "CREATE_ROLE": "Tạo vai trò",
+  "CREATE_GROUP": "Tạo nhóm"
 }

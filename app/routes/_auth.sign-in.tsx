@@ -3,7 +3,6 @@ import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/use-toast';
 import type { ActionFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
@@ -39,7 +38,7 @@ export default function Screen() {
   const actionData = useActionData<ActionData>();
 
   if (actionData?.error) {
-    toast({ description: actionData.error });
+    throw new Error(actionData.error)
   }
 
   const navigation = useNavigation();

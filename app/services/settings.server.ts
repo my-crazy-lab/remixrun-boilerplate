@@ -1,6 +1,7 @@
 import { type Users } from '~/types';
 import { mongodb } from '~/utils/db.server';
 
+import { momentTz } from '~/utils/common';
 import { hashPassword } from './auth.server';
 import type { FindOptionsClient } from './constants.server';
 import { newRecordCommonField } from './constants.server';
@@ -143,4 +144,16 @@ export async function createNewUser({
     cities,
     services: { password: { bcrypt: passwordHashed } },
   });
+}
+
+export async function setUserLanguage({ language, _id }: Pick<Users, 'language' | '_id'>) {
+  await mongodb.collection<Users>('users').updateOne(
+    { _id },
+    {
+      $set: {
+        updatedAt: momentTz().toDate(),
+        language,
+      },
+    },
+  );
 }

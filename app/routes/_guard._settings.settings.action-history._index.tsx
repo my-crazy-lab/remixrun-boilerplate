@@ -9,27 +9,21 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
+import ROUTE_NAME from '~/constants/route';
 import {
   getActionsHistory,
   getTotalActionsHistory,
 } from '~/services/settings.server';
+import type { ActionsHistory } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/action-history" label="Actions history" />
+    <BreadcrumbsLink to={ROUTE_NAME.ACTION_HISTORY_SETTING} label="ACTIONS_HISTORY" />
   ),
 };
 
-interface IActionsHistory {
-  _id: string;
-  userId: string;
-  action: string;
-  data: unknown;
-  createdAt: Date;
-}
-
-const columns: ColumnDef<IActionsHistory>[] = [
+const columns: ColumnDef<ActionsHistory>[] = [
   {
     accessorKey: 'username',
     header: ({ column }) => (
@@ -126,7 +120,7 @@ export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { total, actionsHistory } = useLoaderData<{
     total: number;
-    actionsHistory: [IActionsHistory];
+    actionsHistory: [ActionsHistory];
   }>();
 
   return (
@@ -134,6 +128,7 @@ export default function Screen() {
       <div className="grid space-y-2 bg-secondary p-4 rounded-xl mb-4">
         <Typography variant="h3">{t('ACTIONS_HISTORY')}</Typography>
         <Breadcrumbs />
+
       </div>
       <BTaskeeTable
         total={total || 0}

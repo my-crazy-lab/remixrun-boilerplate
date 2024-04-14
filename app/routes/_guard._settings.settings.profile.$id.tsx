@@ -15,20 +15,26 @@ import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
-import { getUserId } from '~/services/helpers.server';
 import { getUserProfile } from '~/services/settings.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { ReturnValueIgnorePromise, Users } from '~/types';
+
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to={`${ROUTE_NAME.PROFILE_SETTING}`} label="PROFILE" />,
+  breadcrumb: (data: { userProfile: Users }) => {
+    const { userProfile } = data
+
+    return (
+      <BreadcrumbsLink to={`${ROUTE_NAME.PROFILE_SETTING}/${userProfile._id}`} label="PROFILE" />
+    );
+  },
 };
 
 interface LoaderData {
   userProfile: ReturnValueIgnorePromise<typeof getUserProfile>;
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await getUserId({ request });
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+  const userId = params.id || '';
   const userProfile = await getUserProfile(userId);
 
   return json({ userProfile });

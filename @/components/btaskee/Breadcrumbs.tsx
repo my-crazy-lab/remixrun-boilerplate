@@ -5,18 +5,22 @@ import { ChevronRight } from 'lucide-react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { Fragment } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import { NavigationLink } from './NavigationLink';
 
 type BreadcrumbsItemProps = HTMLAttributes<HTMLElement> &
   NavLinkProps & {
     label: ReactNode;
+    disabled?: boolean
   };
 
 export const BreadcrumbsLink = ({
   children,
   label,
+  disabled,
   ...props
 }: BreadcrumbsItemProps) => {
+  const { t } = useTranslation(['common'])
   return (
     <NavigationLink
       itemProp="item"
@@ -25,11 +29,12 @@ export const BreadcrumbsLink = ({
         'group-only:font-medium group-only:text-secondary',
         'max-md:font-medium max-md:text-gray-400',
         'text-gray-400',
+        disabled && 'opacity-50 cursor-not-allowed',
       ])}
       end
       {...props}>
       {children}
-      <span itemProp="name">{label}</span>
+      <span itemProp="name">{t(`${label}`)}</span>
     </NavigationLink>
   );
 };

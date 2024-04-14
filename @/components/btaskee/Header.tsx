@@ -10,13 +10,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Form, Link } from '@remix-run/react';
+import { UserCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
-
+import { MustBeAny } from '~/types';
 import { Logo } from './BTaskeeLogo';
 import LanguageSelector from './LanguageSelector';
-import TimezoneSwitcher from './TimezoneSwitcher';
 
-export default function Header() {
+export default function Header(userProfile: MustBeAny) {
+  const { t } = useTranslation(['common'])
+
   return (
     <div className="border-b">
       <div className="flex h-16 items-center px-4">
@@ -30,38 +33,39 @@ export default function Header() {
         <div className="ml-auto flex items-center space-x-4">
           <Input
             type="search"
-            placeholder="Search..."
+            placeholder={`${t('SEARCH')}...`}
             className="md:w-[100px] lg:w-[270px]"
           />
-          <TimezoneSwitcher />
           <LanguageSelector />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-10 w-10">
-                  <AvatarFallback>SC</AvatarFallback>
+                  <AvatarFallback>
+                    <UserCircle />
+                  </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="mt-2 w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">shadcn</p>
+                  <p className="text-sm font-medium leading-none">{userProfile.userProfile?.username}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    m@example.com
+                    {userProfile.userProfile?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <Link className="w-full" to={ROUTE_NAME.PROFILE_SETTING}>
-                  Settings
+                  {t('SETTINGS')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Form className="w-full" method="post" action="/logout">
                   <button className="w-full text-start" type="submit">
-                    Logout
+                    {t('LOGOUT')}
                   </button>
                 </Form>
               </DropdownMenuItem>

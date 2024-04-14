@@ -30,7 +30,7 @@ import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/groups" label="Create role" />
+    <BreadcrumbsLink to="/settings/groups" label="CREATE_ROLE" />
   ),
 };
 

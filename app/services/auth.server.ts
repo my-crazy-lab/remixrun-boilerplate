@@ -11,6 +11,7 @@ import { type Users } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
 import { mongodb } from '~/utils/db.server';
 
+import { toast } from '@/components/ui/use-toast';
 import {
   EXPIRED_RESET_PASSWORD,
   EXPIRED_VERIFICATION_CODE,
@@ -199,6 +200,11 @@ authenticator.use(
   new FormStrategy(async ({ form }) => {
     const code = form.get('code')?.toString();
     if (!code) {
+      toast({
+        variant: 'error',
+        title: 'ERROR',
+        description: 'LOGIN_FAILURE'
+      })
       throw new Error('Login failure');
     }
     const user = await verifyCode(code);

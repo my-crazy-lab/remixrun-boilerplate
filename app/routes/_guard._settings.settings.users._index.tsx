@@ -38,7 +38,7 @@ import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/users" label="Users management" />
+    <BreadcrumbsLink to="/settings/users" label="USERS_MANAGEMENT" />
   ),
 };
 
@@ -103,13 +103,13 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {// TODO fix typing for react hook form
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            row.getValue('cities')?.map((e, index) => (
-              <Badge variant="secondary" key={index}>
-                {e}
-              </Badge>
-            ))}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              row.getValue('cities')?.map((e, index) => (
+                <Badge className='bg-blue-50 text-blue rounded-md' key={index}>
+                  {e}
+                </Badge>
+              ))}
           </span>
         </div>
       );
@@ -121,7 +121,7 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
   },
 ];
 
-export const action = hocAction(async ({}, { formData }) => {
+export const action = hocAction(async ({ }, { formData }) => {
   try {
     const { username, email, password, cities } = formData;
 

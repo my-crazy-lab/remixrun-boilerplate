@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/use-toast';
 import { type Document } from 'mongodb';
 import { PERMISSIONS } from '~/constants/common';
 import { res404 } from '~/hoc/remix';
@@ -46,7 +47,11 @@ export async function requirePermissions(
 ) {
   const isAccepted = await verifyPermissions({ request }, permissions);
   if (!isAccepted) {
-    throw new Error("User don't have permission");
+    toast({
+      variant: 'error',
+      title: 'ERROR',
+      description: 'USER_DONT_HAVE_PERMISSION'
+    })
   }
 }
 
@@ -108,7 +113,11 @@ export async function createGroup({
 
   const parentGroup = await groupCol.findOne({ _id: parent });
   if (!parentGroup) {
-    throw new Error('PARENT_GROUP_NOT_FOUND');
+    toast({
+      variant: 'error',
+      title: 'ERROR',
+      description: 'PARENT_GROUP_NOT_FOUND'
+    })
   }
 
   await groupCol.insertOne({
@@ -228,8 +237,8 @@ export async function getGroupDetail<T = Document>({
     const matchParent = root
       ? {}
       : {
-          'parents.userIds': userId,
-        };
+        'parents.userIds': userId,
+      };
 
     const group = await mongodb
       .collection('groups')

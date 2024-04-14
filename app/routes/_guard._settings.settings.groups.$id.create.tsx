@@ -15,6 +15,7 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
+import ROUTE_NAME from '~/constants/route';
 import { hocAction, hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
@@ -76,7 +77,7 @@ export const loader = hocLoader(
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/groups" label="Create group" />
+    <BreadcrumbsLink to={ROUTE_NAME.GROUP_SETTING} label="CREATE_GROUP" />
   ),
 };
 

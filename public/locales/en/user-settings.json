@@ -36,5 +36,8 @@
   "CHANGE_PICTURE_FROM_HERE": "Change your profile picture from here",
   "PERSONAL_DETAILS_TEXT_HELPER": "To change your personal detail, edit and save from here",
   "AUTHORIZATION": "Authorization",
-  "PERSONAL_DETAILS": "Personal Details"
+  "PERSONAL_DETAILS": "Personal Details",
+  "NO_USER_GROUP_HERE": "No user group here",
+  "EDIT": "Edit",
+  "DELETE": "Delete"
 }

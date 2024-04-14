@@ -12,10 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
-  type ActionFunctionArgs,
-  type LoaderFunctionArgs,
   json,
   redirect,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
 } from '@remix-run/node';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
@@ -37,7 +37,7 @@ import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Edit role" />,
+  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="EDIT_ROLE" />,
 };
 
 interface LoaderData {

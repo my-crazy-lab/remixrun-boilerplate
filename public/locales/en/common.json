@@ -1,10 +1,29 @@
 {
-  "CREATE_ACCOUNT": "Hello",
-  "SEND_EMAIL": "Send Email",
-  "settings": {
-    "SETTINGS": "Settings",
-    "groups": {
-      "GROUPS_MANAGEMENT": "Groups management"
-    }
-  }
+  "SETTINGS": "Settings",
+  "GO_BACK": "Go back",
+  "SUCCESS": "Success",
+  "INFORMATION": "Information",
+  "ERROR": "Error",
+  "WARNING": "Warning",
+  "PARENT_GROUP_NOT_FOUND": "Parent group not found",
+  "USER_DONT_HAVE_PERMISSION": "User don't have permission",
+  "EMAIL_SERVICE_ERROR": "Email service error",
+  "ENV_ERROR": "There is an error with the server environment variables",
+  "LOGIN_FAILURE": "Login failure",
+  "INCORRECT_ACCOUNT": "Incorrect account",
+  "EMAIL_INCORRECT": "Email incorrect",
+  "LOGOUT": "Logout",
+  "ACTIONS_HISTORY": "Actions History",
+  "USERS_MANAGEMENT": "Users Management",
+  "PROFILE": "Profile",
+  "GROUPS": "Groups",
+  "EDIT_ROLE": "Edit role",
+  "EDIT_GROUP": "Edit group",
+  "ACCESS_DENIED": "Access Denied",
+  "NOT_PERMISSION": "You do not have permission to access this page.",
+  "PAGE_NOT_FOUND": "Sorry, the page cannot be found",
+  "PAGE_NOT_FOUND_DESCRIPTION": "The page you are looking for does not exist!",
+  "SEARCH": "Search",
+  "CREATE_ROLE": "Create role",
+  "CREATE_GROUP": "Create group"
 }

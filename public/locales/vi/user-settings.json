@@ -36,5 +36,9 @@
   "CHANGE_PICTURE_FROM_HERE": "Thay đổi ảnh đại diện của bạn từ đây",
   "PERSONAL_DETAILS_TEXT_HELPER": "Để thay đổi thông tin cá nhân của bạn, chỉnh sửa và lưu từ đây",
   "AUTHORIZATION": "Ủy quyền",
-  "PERSONAL_DETAILS": "Chi tiết cá nhân"
+  "PERSONAL_DETAILS": "Chi tiết cá nhân",
+  "NO_USER_GROUP_HERE": "Không có nhóm người dùng nào tại đây.",
+  "EDIT": "Chỉnh sửa",
+  "DELETE": "Xoá",
+  "LOGOUT": "Đăng xuất"
 }

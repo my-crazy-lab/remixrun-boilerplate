@@ -1,46 +1,60 @@
+
+import {
+  Form,
+  FormField
+} from "@/components/ui/form"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useTranslation } from 'react-i18next';
+  SelectValue
+} from "@/components/ui/select"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import { z } from "zod"
 
-export const defaultLanguage = [
-  {
-    name: '🇺🇸 English',
-    key: 'en',
-  },
-  {
-    name: '🇻🇳 Vietnamese',
-    key: 'vi',
-  },
-];
+const FormSchema = z.object({
+  language: z.string(),
+})
 
-const LanguageSelector = () => {
+export default function LanguageSelector() {
   const { i18n } = useTranslation();
 
-  const changeLanguage = (language: string) => {
-    i18n.changeLanguage(language);
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+  })
+  const { handleSubmit, control, setValue, getValues } = form;
+
+  const onSubmit = (data: z.infer<typeof FormSchema>) => {
+    i18n.changeLanguage(data.language)
+  };
+
+  const handleLanguageChange = (value: any) => {
+    setValue('language', value);
+    handleSubmit(onSubmit)();
   };
 
   return (
-    <Select
-      defaultValue={`${defaultLanguage[0].key}`}
-      onValueChange={value => changeLanguage(value)}>
-      <SelectTrigger className="h-10 w-[180px]">
-        <SelectValue placeholder={`${defaultLanguage[0].name}`} />
-      </SelectTrigger>
-      <SelectContent side="top">
-        {defaultLanguage.map(lang => (
-          <SelectItem key={lang.key} value={`${lang.key}`}>
-            {lang.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-};
-
-export default LanguageSelector;
+    <Form {...form}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormField
+          control={control}
+          name="language"
+          render={({ field }) => (
+            <Select onValueChange={handleLanguageChange} defaultValue={field.value}>
+              <SelectTrigger>
+                <SelectValue placeholder="Theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="vi">Vietnamese</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </form>
+    </Form>
+  )
+}

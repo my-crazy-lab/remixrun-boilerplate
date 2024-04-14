@@ -134,7 +134,7 @@ interface FormData {
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/groups" label="Edit group" />
+    <BreadcrumbsLink to="/settings/groups" label="EDIT_GROUP" />
   ),
 };
 

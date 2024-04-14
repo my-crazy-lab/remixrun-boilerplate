@@ -39,6 +39,7 @@ export interface Users {
     token: string;
     expired: Date;
   };
+  language?: string;
 }
 
 export type IUserType = 'ACTIVE' | 'INACTIVE';
