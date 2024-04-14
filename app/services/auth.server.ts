@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/use-toast';
 import { redirect } from '@remix-run/node';
 import bcrypt from 'bcrypt';
 import { Authenticator } from 'remix-auth';
@@ -11,7 +12,6 @@ import { type Users } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
 import { mongodb } from '~/utils/db.server';
 
-import { toast } from '@/components/ui/use-toast';
 import {
   EXPIRED_RESET_PASSWORD,
   EXPIRED_VERIFICATION_CODE,
@@ -203,8 +203,8 @@ authenticator.use(
       toast({
         variant: 'error',
         title: 'ERROR',
-        description: 'LOGIN_FAILURE'
-      })
+        description: 'LOGIN_FAILURE',
+      });
       throw new Error('Login failure');
     }
     const user = await verifyCode(code);

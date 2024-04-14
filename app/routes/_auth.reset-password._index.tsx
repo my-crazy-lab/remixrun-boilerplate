@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { json, type ActionFunctionArgs } from '@remix-run/node';
+import { type ActionFunctionArgs, json } from '@remix-run/node';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { ERROR } from '~/constants/common';
@@ -73,11 +73,15 @@ export default function Screen() {
                     placeholder="name@btaskee.com"
                   />
                 </div>
-                <Button>{state !== 'idle' ? <LoadingSpinner /> : t('SEND')}</Button>
+                <Button>
+                  {state !== 'idle' ? <LoadingSpinner /> : t('SEND')}
+                </Button>
               </div>
             </Form>
-            <Link to='/sign-in'>
-              <Button className='w-full' variant="outline">{t('BACK_TO_SIGN_IN')}</Button>
+            <Link to="/sign-in">
+              <Button className="w-full" variant="outline">
+                {t('BACK_TO_SIGN_IN')}
+              </Button>
             </Link>
           </Grid>
         )}

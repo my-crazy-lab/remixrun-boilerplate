@@ -50,8 +50,8 @@ export async function requirePermissions(
     toast({
       variant: 'error',
       title: 'ERROR',
-      description: 'USER_DONT_HAVE_PERMISSION'
-    })
+      description: 'USER_DONT_HAVE_PERMISSION',
+    });
   }
 }
 
@@ -116,8 +116,8 @@ export async function createGroup({
     toast({
       variant: 'error',
       title: 'ERROR',
-      description: 'PARENT_GROUP_NOT_FOUND'
-    })
+      description: 'PARENT_GROUP_NOT_FOUND',
+    });
   }
 
   await groupCol.insertOne({
@@ -237,8 +237,8 @@ export async function getGroupDetail<T = Document>({
     const matchParent = root
       ? {}
       : {
-        'parents.userIds': userId,
-      };
+          'parents.userIds': userId,
+        };
 
     const group = await mongodb
       .collection('groups')

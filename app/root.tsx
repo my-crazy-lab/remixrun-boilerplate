@@ -1,3 +1,5 @@
+import { Grid } from '@/components/btaskee/Grid';
+import { Toaster } from '@/components/btaskee/ToasterBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import AccessDenied from '@/images/403.svg';
@@ -14,15 +16,13 @@ import {
   ScrollRestoration,
   useLoaderData,
   useNavigate,
-  useRouteError
+  useRouteError,
 } from '@remix-run/react';
 import { HomeIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useChangeLanguage } from 'remix-i18next/react';
 import i18next from '~/i18next.server';
 
-import { Grid } from '@/components/btaskee/Grid';
-import { Toaster } from '@/components/btaskee/ToasterBase';
-import { useTranslation } from 'react-i18next';
 import styles from './tailwind.css';
 import type { MustBeAny } from './types';
 
@@ -61,8 +61,8 @@ export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
   const navigate = useNavigate();
-  const { t } = useTranslation(['common'])
-  const error: MustBeAny = useRouteError()
+  const { t } = useTranslation(['common']);
+  const error: MustBeAny = useRouteError();
 
   function renderContentBasedOnErrorStatus(status: number) {
     switch (status) {
@@ -79,7 +79,7 @@ export function ErrorBoundary() {
             <Typography className="mt-3" variant="h3">
               {t('ACCESS_DENINED')}
             </Typography>
-            <Typography variant='p' className='text-gray'>
+            <Typography variant="p" className="text-gray">
               {t('NOT_PERMISSION')}
             </Typography>
           </Grid>
@@ -97,7 +97,7 @@ export function ErrorBoundary() {
             <Typography className="mt-3" variant="h3">
               {t('PAGE_NOT_FOUND')}
             </Typography>
-            <Typography variant='p' className='text-gray'>
+            <Typography variant="p" className="text-gray">
               {t('PAGE_NOT_FOUND_DESCRIPTION')}
             </Typography>
           </Grid>

@@ -21,7 +21,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const userPermissions = await getUserPermissions(user.userId);
   const userProfile = await getUserProfile(user.userId);
 
-
   return json(
     {
       user: { userId: user.userId, permissions: userPermissions },
@@ -36,7 +35,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function Screen() {
-  const { user, userProfile } = useLoaderData<{ user: GlobalProps, userProfile: Users }>();
+  const { user, userProfile } = useLoaderData<{
+    user: GlobalProps;
+    userProfile: Users;
+  }>();
 
   const storeRef = useRef<GlobalStore>();
   if (!storeRef.current) {

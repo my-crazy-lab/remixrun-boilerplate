@@ -4,14 +4,14 @@ import { useMatches } from '@remix-run/react';
 import { ChevronRight } from 'lucide-react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { Fragment } from 'react';
-
 import { useTranslation } from 'react-i18next';
+
 import { NavigationLink } from './NavigationLink';
 
 type BreadcrumbsItemProps = HTMLAttributes<HTMLElement> &
   NavLinkProps & {
     label: ReactNode;
-    disabled?: boolean
+    disabled?: boolean;
   };
 
 export const BreadcrumbsLink = ({
@@ -20,7 +20,7 @@ export const BreadcrumbsLink = ({
   disabled,
   ...props
 }: BreadcrumbsItemProps) => {
-  const { t } = useTranslation(['common'])
+  const { t } = useTranslation(['common']);
   return (
     <NavigationLink
       itemProp="item"

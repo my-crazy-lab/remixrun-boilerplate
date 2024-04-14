@@ -14,11 +14,12 @@ import { UserCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
 import { MustBeAny } from '~/types';
+
 import { Logo } from './BTaskeeLogo';
 import LanguageSelector from './LanguageSelector';
 
 export default function Header(userProfile: MustBeAny) {
-  const { t } = useTranslation(['common'])
+  const { t } = useTranslation(['common']);
 
   return (
     <div className="border-b">
@@ -50,7 +51,9 @@ export default function Header(userProfile: MustBeAny) {
             <DropdownMenuContent className="mt-2 w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{userProfile.userProfile?.username}</p>
+                  <p className="text-sm font-medium leading-none">
+                    {userProfile.userProfile?.username}
+                  </p>
                   <p className="text-xs leading-none text-muted-foreground">
                     {userProfile.userProfile?.email}
                   </p>

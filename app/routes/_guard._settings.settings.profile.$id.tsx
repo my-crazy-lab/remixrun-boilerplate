@@ -11,20 +11,22 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
 import { getUserProfile } from '~/services/settings.server';
 import type { ReturnValueIgnorePromise, Users } from '~/types';
 
-
 export const handle = {
   breadcrumb: (data: { userProfile: Users }) => {
-    const { userProfile } = data
+    const { userProfile } = data;
 
     return (
-      <BreadcrumbsLink to={`${ROUTE_NAME.PROFILE_SETTING}/${userProfile._id}`} label="PROFILE" />
+      <BreadcrumbsLink
+        to={`${ROUTE_NAME.PROFILE_SETTING}/${userProfile._id}`}
+        label="PROFILE"
+      />
     );
   },
 };

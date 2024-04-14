@@ -19,7 +19,10 @@ import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to={ROUTE_NAME.ACTION_HISTORY_SETTING} label="ACTIONS_HISTORY" />
+    <BreadcrumbsLink
+      to={ROUTE_NAME.ACTION_HISTORY_SETTING}
+      label="ACTIONS_HISTORY"
+    />
   ),
 };
 
@@ -128,7 +131,6 @@ export default function Screen() {
       <div className="grid space-y-2 bg-secondary p-4 rounded-xl mb-4">
         <Typography variant="h3">{t('ACTIONS_HISTORY')}</Typography>
         <Breadcrumbs />
-
       </div>
       <BTaskeeTable
         total={total || 0}

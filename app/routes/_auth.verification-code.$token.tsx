@@ -67,7 +67,9 @@ export default function Screen() {
                 placeholder={t('ENTER_VERIFICATION_CODE')}
               />
             </div>
-            <Button>{navigation.state !== 'idle' ? <LoadingSpinner /> : t('VERIFY')}</Button>
+            <Button>
+              {navigation.state !== 'idle' ? <LoadingSpinner /> : t('VERIFY')}
+            </Button>
           </div>
         </Form>
       </div>

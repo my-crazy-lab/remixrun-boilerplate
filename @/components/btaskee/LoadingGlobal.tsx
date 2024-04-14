@@ -68,7 +68,6 @@ export const LoadingLIThird = styled.li`
   }
 `;
 
-
 const LoadingGlobal = ({ backgroundColor = 'transparent' }) => (
   <LoadingGlobalContainer style={{ backgroundColor }}>
     <LoadingUL>

@@ -12,10 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
-  json,
-  redirect,
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
+  json,
+  redirect,
 } from '@remix-run/node';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';

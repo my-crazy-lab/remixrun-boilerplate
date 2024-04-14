@@ -8,7 +8,9 @@ import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink disabled to="/settings" label="SETTINGS" />,
+  breadcrumb: () => (
+    <BreadcrumbsLink disabled to="/settings" label="SETTINGS" />
+  ),
 };
 
 const navigation = [

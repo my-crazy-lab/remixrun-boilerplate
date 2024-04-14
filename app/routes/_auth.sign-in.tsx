@@ -38,7 +38,7 @@ export default function Screen() {
   const actionData = useActionData<ActionData>();
 
   if (actionData?.error) {
-    throw new Error(actionData.error)
+    throw new Error(actionData.error);
   }
 
   const navigation = useNavigation();

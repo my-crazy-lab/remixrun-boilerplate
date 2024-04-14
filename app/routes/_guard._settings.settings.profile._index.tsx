@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
@@ -20,7 +20,9 @@ import { getUserProfile } from '~/services/settings.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to={`${ROUTE_NAME.PROFILE_SETTING}`} label="PROFILE" />,
+  breadcrumb: () => (
+    <BreadcrumbsLink to={`${ROUTE_NAME.PROFILE_SETTING}`} label="PROFILE" />
+  ),
 };
 
 interface LoaderData {
