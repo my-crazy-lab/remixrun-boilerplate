@@ -81,12 +81,44 @@ db.getCollection("roles").insert({
 
 ```
 db.getCollection("permissions").insert(
-  {
-    "_id" : "root",
-    "description" : "This is root user, with all power",
-    "module" : "special",
-    "name" : "ROOT"
-  }
+  [
+    {
+      "_id" : "root",
+      "description" : "This is root user, with all power",
+      "module" : "special",
+      "name" : "ROOT"
+    },
+    {
+      "_id" : "write/user-management",
+      "description" : "User management feature: Write",
+      "module" : "special",
+      "name" : "User management feature: Write"
+    },
+    {
+      "_id" : "write/role-management",
+      "description" : "Groups management feature: Write roles (create - update - remove)",
+      "module" : "special",
+      "name" : "Groups management feature: Write roles (create - update)"
+    },
+    {
+      "_id" : "read/role-management",
+      "description" : "Groups management feature: Read roles",
+      "module" : "special",
+      "name" : "Groups management feature: Read roles"
+    },
+    {
+      "_id" : "write/group-management",
+      "description" : "Groups management feature: Write children groups (create - update - remove)",
+      "module" : "special",
+      "name" : "Groups management feature: Write children groups (create - update - remove)"
+    },
+    {
+      "_id" : "read/group-management",
+      "description" : "Groups management feature: Read children groups",
+      "module" : "special",
+      "name" : "Groups management feature: Read children groups"
+    },
+  ]
 )
 
 db.getCollection("roles").insert({
