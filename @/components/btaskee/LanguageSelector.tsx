@@ -21,7 +21,7 @@ export default function LanguageSelector() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
-  const { handleSubmit, control, setValue, getValues } = form;
+  const { handleSubmit, control, setValue } = form;
 
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     i18n.changeLanguage(data.language);
@@ -42,8 +42,8 @@ export default function LanguageSelector() {
             <Select
               onValueChange={handleLanguageChange}
               defaultValue={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="Theme" />
+              <SelectTrigger className="h-10 w-[180px]">
+                <SelectValue placeholder="Vietnamese" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="vi">Vietnamese</SelectItem>
