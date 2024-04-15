@@ -30,10 +30,10 @@ export const authenticator = new Authenticator<AuthenticatorSessionData>(
 );
 
 export function hashPassword(password: string) {
-  return bcrypt.hashSync(`${dotenv.PLAIN_TEXT}${password}`, dotenv.SALT_ROUND);
+  return bcrypt.hashSync(`${dotenv.BCRYPT_PLAIN_TEXT}${password}`, dotenv.BCRYPT_SALT_ROUND);
 }
 function compareHash({ password, hash }: { password: string; hash: string }) {
-  return bcrypt.compare(dotenv.PLAIN_TEXT + password, hash);
+  return bcrypt.compare(dotenv.BCRYPT_PLAIN_TEXT + password, hash);
 }
 
 export async function verifyAndSendCode({
@@ -88,7 +88,7 @@ export async function sendVerificationCode(email: string) {
 
   await sendEmail({
     to: email,
-    from: dotenv.MAIL_FROM,
+    from: dotenv.MAIL_SERVER_ADDRESS,
     subject: 'Your verification code',
     text: `${verificationCode} is your verification code.`,
   });
@@ -158,9 +158,9 @@ export async function resetPassword(email: string) {
 
   await sendEmail({
     to: email,
-    from: dotenv.MAIL_FROM,
+    from: dotenv.MAIL_SERVER_ADDRESS,
     subject: 'Your link to reset password',
-    text: `${dotenv.DOMAIN_BTASKEE_BE}${ROUTE_NAME.RESET_PASSWORD}/${resetToken} is link to reset your password`,
+    text: `${dotenv.ORIGINAL_DOMAIN}${ROUTE_NAME.RESET_PASSWORD}/${resetToken} is link to reset your password`,
   });
 }
 

@@ -2,7 +2,7 @@ import { BSON, MongoClient } from 'mongodb';
 import type { Db } from 'mongodb';
 import { dotenv } from '~/services/dotenv.server';
 
-const connectionString = dotenv.URI_APP;
+const connectionString = dotenv.MONGO_URI;
 
 if (!connectionString) {
   throw new Error(
@@ -16,14 +16,14 @@ if (process.env.NODE_ENV === 'production') {
   const client = new MongoClient(connectionString);
   client.connect();
 
-  mongodb = client.db(process.env.DB_APP);
+  mongodb = client.db(process.env.DB_NAME);
 } else {
   if (!global?.__db) {
     global.__db = new MongoClient(connectionString);
   }
   global.__db.connect();
 
-  mongodb = global.__db.db(process.env.DB_APP);
+  mongodb = global.__db.db(process.env.DB_NAME);
 }
 
 const ObjectId = BSON.ObjectId;

@@ -53,12 +53,12 @@ describe('Authentication', () => {
 
       expect(bcryptCompareSpy).toHaveBeenNthCalledWith(
         1,
-        dotenv.PLAIN_TEXT + mockPassword,
+        dotenv.BCRYPT_PLAIN_TEXT + mockPassword,
         mockUser.services.password.bcrypt,
       );
       expect(EmailService.sendEmail).toHaveBeenNthCalledWith(1, {
         to: mockUser.email,
-        from: dotenv.MAIL_FROM,
+        from: dotenv.MAIL_SERVER_ADDRESS,
         subject: 'Your verification code',
         text: `${mockVerificationCode} is your verification code.`,
       });
