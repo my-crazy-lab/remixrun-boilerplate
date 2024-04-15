@@ -113,7 +113,7 @@ export async function createGroup({
 
   const parentGroup = await groupCol.findOne({ _id: parent });
   if (!parentGroup) {
-    throw new Error('PARENT_GROUP_NOT_FOUND')
+    throw new Error('PARENT_GROUP_NOT_FOUND');
   }
 
   await groupCol.insertOne({
@@ -233,8 +233,8 @@ export async function getGroupDetail<T = Document>({
     const matchParent = root
       ? {}
       : {
-        'parents.userIds': userId,
-      };
+          'parents.userIds': userId,
+        };
 
     const group = await mongodb
       .collection('groups')
