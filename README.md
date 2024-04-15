@@ -61,7 +61,7 @@
 ### Add hierarchy 1:
 
 ```
-db.collection("permissions").insert(
+db.getCollection("permissions").insert(
   {
     "_id" : "manager",
     "description" : "This is manager, with can access data all cities of each country",
@@ -70,7 +70,7 @@ db.collection("permissions").insert(
   }
 )
 
-db.collection("roles").insert({
+db.getCollection("roles").insert({
     "_id" : "manager",
     "permissions" : [
         "manager"
@@ -80,7 +80,7 @@ db.collection("roles").insert({
 ```
 
 ```
-db.collection("permissions").insert(
+db.getCollection("permissions").insert(
   {
     "_id" : "root",
     "description" : "This is root user, with all power",
@@ -89,7 +89,7 @@ db.collection("permissions").insert(
   }
 )
 
-db.collection("roles").insert({
+db.getCollection("roles").insert({
     "_id" : "root",
     "permissions" : [
         "root"
@@ -97,7 +97,7 @@ db.collection("roles").insert({
     "name":"ROOT",
 })
 
-db.collection("groups").insert({
+db.getCollection("groups").insert({
     "name" : "Group root",
     "roleIds" : [
         "root"
@@ -114,7 +114,7 @@ Because this is internal applications, the User cannot register freely. We will 
 Example:
 
 ```
-db.collection("users").insert({
+db.getCollection("users").insert({
   "_id": "root",
   "username" : "MinLee",
   "email" : "test@gmail.com",
