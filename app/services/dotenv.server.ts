@@ -12,6 +12,7 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
+  MAX_AGE_SESSION: z.number(),
 });
 
 const envServer = envSchema.safeParse({
@@ -23,6 +24,7 @@ const envServer = envSchema.safeParse({
   BCRYPT_SALT_ROUND: Number(process.env.BCRYPT_SALT_ROUND),
   MAIL_SERVER_ADDRESS: process.env.MAIL_SERVER_ADDRESS,
   ORIGINAL_DOMAIN: process.env.ORIGINAL_DOMAIN,
+  MAX_AGE_SESSION: Number(process.env.MAX_AGE_SESSION),
 });
 
 if (!envServer.success) {
