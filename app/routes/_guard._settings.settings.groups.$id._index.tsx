@@ -14,85 +14,19 @@ import { Separator } from '@/components/ui/separator';
 import TabGroupIcon from '@/images/tab-group.svg';
 import UsersIcon from '@/images/user-group.svg';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
-import { Link, useLoaderData, useParams } from '@remix-run/react';
+import { Link, useOutletContext, useParams } from '@remix-run/react';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '~/constants/common';
-import { hoc404, res403 } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
-import { getUserId } from '~/services/helpers.server';
-import {
-  getGroupDetail,
-  isParentOfGroup,
-  verifyUserInGroup,
-} from '~/services/role-base-access-control.server';
-
-interface LoaderData {
-  group: {
-    _id: string;
-    roles: Array<{
-      _id: string;
-      name: string;
-      description: string;
-    }>;
-    users: Array<{
-      _id: string;
-      email: string;
-      username: string;
-    }>;
-    children: Array<{
-      _id: string;
-      name?: string;
-      description?: string;
-    }>;
-    name: string;
-    description: string;
-  };
-  isParent: boolean;
-}
-
-export const loader = async ({ params, request }: LoaderFunctionArgs) => {
-  const groupId = params.id || '';
-  const userId = await getUserId({ request });
-  const isParent = await isParentOfGroup({
-    userId,
-    groupId,
-  });
-
-  const userInGroup = await verifyUserInGroup({ userId, groupId });
-  // just accept user is parent or member of group
-  if (!isParent && !userInGroup) {
-    throw new Response(null, res403);
-  }
-
-  const group = await hoc404(async () =>
-    getGroupDetail<LoaderData>({
-      userId,
-      groupId,
-      isParent,
-      projection: {
-        roles: 1,
-        users: 1,
-        children: 1,
-        parent: 1,
-        hierarchy: 1,
-        name: 1,
-        description: 1,
-        parents: 1,
-      },
-    }),
-  );
-  return json({ group, isParent });
-};
+import { type GroupDetail } from '~/types/LoaderData';
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
 
   const params = useParams();
-  const loaderData = useLoaderData<LoaderData>();
   const globalData = useGlobalStore(state => state);
+  const loaderData = useOutletContext<GroupDetail>();
 
   return (
     <>
@@ -101,7 +35,6 @@ export default function Screen() {
           <Typography variant="h3">{loaderData.group?.name}</Typography>
           <Breadcrumbs />
         </div>
-
         {globalData.permissions?.includes(PERMISSIONS.WRITE_GROUP) ? (
           <Link to={`/settings/groups/${params.id}/create`}>
             <Button className="gap-2">

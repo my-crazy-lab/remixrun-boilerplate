@@ -2,6 +2,11 @@ import { type LucideIcon } from 'lucide-react';
 import type { Document } from 'mongodb';
 import type { TActionPermissionModule } from '~/constants/common';
 
+export interface AuthenticatorSessionData {
+  userId: string;
+  isSuperUser: boolean;
+}
+
 export interface NavItem {
   title: string;
   href: string;

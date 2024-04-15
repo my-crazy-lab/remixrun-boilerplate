@@ -1,9 +1,12 @@
 import { createCookieSessionStorage } from '@remix-run/node';
+import { type AuthenticatorSessionData } from '~/types';
 
 import { dotenv } from './dotenv.server';
 
 // export the whole sessionStorage object
-export const sessionStorage = createCookieSessionStorage({
+export const sessionStorage = createCookieSessionStorage<{
+  user: AuthenticatorSessionData;
+}>({
   cookie: {
     name: '_session', // use any name you want here
     sameSite: 'lax', // this helps with CSRF

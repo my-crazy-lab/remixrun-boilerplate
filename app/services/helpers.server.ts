@@ -26,5 +26,9 @@ export async function saveActionHistory(
 
 export async function getUserId({ request }: { request: Request }) {
   const authSession = await getSession(request.headers.get('cookie'));
-  return authSession.get('user').userId;
+  return authSession.get('user')?.userId || '';
+}
+export async function getUserSession({ request }: { request: Request }) {
+  const authSession = await getSession(request.headers.get('cookie'));
+  return authSession.get('user') || { userId: '', isSuperUser: false };
 }

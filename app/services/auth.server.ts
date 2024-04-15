@@ -5,21 +5,18 @@ import { FormStrategy } from 'remix-auth-form';
 import { v4 as uuidv4 } from 'uuid';
 import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
-import { sendEmail } from '~/services/mail.server';
-import { sessionStorage } from '~/services/session.server';
-import { type Users } from '~/types';
-import { getFutureTimeFromToday, momentTz } from '~/utils/common';
-import { mongodb } from '~/utils/db.server';
-
 import {
   EXPIRED_RESET_PASSWORD,
   EXPIRED_VERIFICATION_CODE,
-} from './constants.server';
-import { dotenv } from './dotenv.server';
+} from '~/services/constants.server';
+import { dotenv } from '~/services/dotenv.server';
+import { sendEmail } from '~/services/mail.server';
+import { isRoot } from '~/services/role-base-access-control.server';
+import { sessionStorage } from '~/services/session.server';
+import { type AuthenticatorSessionData, type Users } from '~/types';
+import { getFutureTimeFromToday, momentTz } from '~/utils/common';
+import { mongodb } from '~/utils/db.server';
 
-interface AuthenticatorSessionData {
-  userId: string;
-}
 // Create an instance of the authenticator, pass a generic with what
 // strategies will return and will store in the session
 export const authenticator = new Authenticator<AuthenticatorSessionData>(
@@ -30,7 +27,10 @@ export const authenticator = new Authenticator<AuthenticatorSessionData>(
 );
 
 export function hashPassword(password: string) {
-  return bcrypt.hashSync(`${dotenv.BCRYPT_PLAIN_TEXT}${password}`, dotenv.BCRYPT_SALT_ROUND);
+  return bcrypt.hashSync(
+    `${dotenv.BCRYPT_PLAIN_TEXT}${password}`,
+    dotenv.BCRYPT_SALT_ROUND,
+  );
 }
 function compareHash({ password, hash }: { password: string; hash: string }) {
   return bcrypt.compare(dotenv.BCRYPT_PLAIN_TEXT + password, hash);
@@ -62,6 +62,7 @@ export async function verifyAndSendCode({
 }
 
 export async function sendVerificationCode(email: string) {
+  // 6 numbers code
   const verificationCode = Math.floor(
     100000 + Math.random() * 900000,
   ).toString();
@@ -130,7 +131,10 @@ export async function verifyCode(
   if (!account?._id) {
     throw new Error('CODE_INCORRECT_OR_EXPIRED');
   }
-  return { userId: account._id };
+
+  const isSuperUser = await isRoot(account._id);
+
+  return { userId: account._id, isSuperUser };
 }
 
 export async function resetPassword(email: string) {
