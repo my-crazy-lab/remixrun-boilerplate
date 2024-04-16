@@ -4,17 +4,22 @@ import { json } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
 import { hoc404 } from '~/hoc/remix';
 import { getUserSession } from '~/services/helpers.server';
-import { getGroupDetail } from '~/services/role-base-access-control.server';
+import { getGroupDetail, isParentOfGroup } from '~/services/role-base-access-control.server';
 import { type Groups } from '~/types';
 import { type GroupDetail } from '~/types/LoaderData';
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const groupId = params.id || '';
   const { userId, isSuperUser } = await getUserSession({ request });
+  const isParent = await isParentOfGroup({
+    userId,
+    groupId,
+  });
 
   const group = await hoc404(async () =>
     getGroupDetail<GroupDetail>({
       isSuperUser,
+      isParent,
       userId,
       groupId,
       projection: {
@@ -29,7 +34,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       },
     }),
   );
-  return json({ group });
+  return json({ group, isParent });
 };
 
 export const handle = {

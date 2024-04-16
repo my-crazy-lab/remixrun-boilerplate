@@ -15,14 +15,11 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader, res403 } from '~/hoc/remix';
-import { getUserId } from '~/services/helpers.server';
+import { hocAction, hocLoader } from '~/hoc/remix';
 import {
   createGroup,
   getRolesOfGroups,
-  isParentOfGroup,
   searchUser,
-  verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 
@@ -53,16 +50,6 @@ interface LoaderData {
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
-    const groupId = params.id || '';
-    const userId = await getUserId({ request });
-    const isParent = await isParentOfGroup({
-      userId,
-      groupId,
-    });
-    const userInGroup = await verifyUserInGroup({ userId, groupId });
-    if (!isParent && !userInGroup) {
-      throw new Response(null, res403);
-    }
     const roles = await getRolesOfGroups(params.id || '');
 
     const url = new URL(request.url);

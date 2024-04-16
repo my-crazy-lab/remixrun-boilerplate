@@ -5,6 +5,7 @@ import { FormStrategy } from 'remix-auth-form';
 import { v4 as uuidv4 } from 'uuid';
 import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
+import UsersModel from '~/model/users.server';
 import {
   EXPIRED_RESET_PASSWORD,
   EXPIRED_VERIFICATION_CODE,
@@ -13,9 +14,8 @@ import { dotenv } from '~/services/dotenv.server';
 import { sendEmail } from '~/services/mail.server';
 import { isRoot } from '~/services/role-base-access-control.server';
 import { sessionStorage } from '~/services/session.server';
-import { type AuthenticatorSessionData, type Users } from '~/types';
+import { type AuthenticatorSessionData } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
-import { mongodb } from '~/utils/db.server';
 
 // Create an instance of the authenticator, pass a generic with what
 // strategies will return and will store in the session
@@ -43,7 +43,7 @@ export async function verifyAndSendCode({
   password: string;
   username: string;
 }) {
-  const user = await mongodb.collection<Users>('users').findOne({ username });
+  const user = await UsersModel.findOne({ username });
   const bcrypt = user?.services?.password?.bcrypt;
 
   // always display incorrect account error
@@ -68,8 +68,7 @@ export async function sendVerificationCode(email: string) {
   ).toString();
   const token = uuidv4();
 
-  const accountsCol = mongodb.collection('users');
-  await accountsCol.updateOne(
+  await UsersModel.updateOne(
     {
       email,
     },
@@ -97,7 +96,7 @@ export async function sendVerificationCode(email: string) {
 }
 
 export async function isVerificationCodeExpired({ token }: { token: string }) {
-  const account = await mongodb.collection('users').findOne({
+  const account = await UsersModel.findOne({
     'verification.token': token,
     'verification.expired': { $gt: momentTz().toDate() },
   });
@@ -106,7 +105,7 @@ export async function isVerificationCodeExpired({ token }: { token: string }) {
 }
 
 export async function isResetPassExpired({ token }: { token: string }) {
-  const account = await mongodb.collection('users').findOne({
+  const account = await UsersModel.findOne({
     'resetPassword.token': token,
     'resetPassword.expired': { $gt: momentTz().toDate() },
   });
@@ -117,7 +116,7 @@ export async function isResetPassExpired({ token }: { token: string }) {
 export async function verifyCode(
   code: string,
 ): Promise<AuthenticatorSessionData> {
-  const account = await mongodb.collection<Users>('users').findOneAndUpdate(
+  const account = await UsersModel.findOneAndUpdate(
     {
       'verification.expired': { $gt: momentTz().toDate() },
       'verification.code': code,
@@ -140,7 +139,7 @@ export async function verifyCode(
 export async function resetPassword(email: string) {
   const resetToken = uuidv4();
 
-  const account = await mongodb.collection('users').findOneAndUpdate(
+  const account = await UsersModel.findOneAndUpdate(
     {
       email,
     },
@@ -179,7 +178,7 @@ export async function changePassword({
 
   const hashedPassword = hashPassword(newPassword);
 
-  const account = await mongodb.collection('users').findOneAndUpdate(
+  const account = await UsersModel.findOneAndUpdate(
     {
       'resetPassword.expired': { $gt: momentTz().toDate() },
       'resetPassword.token': token,

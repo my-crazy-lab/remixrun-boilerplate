@@ -1,6 +1,6 @@
 import { type LucideIcon } from 'lucide-react';
-import type { Document } from 'mongodb';
 import type { TActionPermissionModule } from '~/constants/common';
+import { type Document } from '~/utils/db.server';
 
 export interface AuthenticatorSessionData {
   userId: string;
