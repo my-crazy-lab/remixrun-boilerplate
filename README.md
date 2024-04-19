@@ -61,16 +61,16 @@
 ### Add hierarchy 1:
 
 ```
-db.collection("permissions").insert({
+db.getCollection("permissions").insert(
   {
     "_id" : "manager",
     "description" : "This is manager, with can access data all cities of each country",
     "module" : "special",
     "name" : "MANAGER"
   }
-})
+)
 
-db.collection("roles").insert({
+db.getCollection("roles").insert({
     "_id" : "manager",
     "permissions" : [
         "manager"
@@ -80,16 +80,48 @@ db.collection("roles").insert({
 ```
 
 ```
-db.collection("permissions").insert({
-  {
-    "_id" : "root",
-    "description" : "This is root user, with all power",
-    "module" : "special",
-    "name" : "ROOT"
-  }
-})
+db.getCollection("permissions").insert(
+  [
+    {
+      "_id" : "root",
+      "description" : "This is root user, with all power",
+      "module" : "special",
+      "name" : "ROOT"
+    },
+    {
+      "_id" : "write/user-management",
+      "description" : "User management feature: Write",
+      "module" : "special",
+      "name" : "User management feature: Write"
+    },
+    {
+      "_id" : "write/role-management",
+      "description" : "Groups management feature: Write roles (create - update - remove)",
+      "module" : "special",
+      "name" : "Groups management feature: Write roles (create - update)"
+    },
+    {
+      "_id" : "read/role-management",
+      "description" : "Groups management feature: Read roles",
+      "module" : "special",
+      "name" : "Groups management feature: Read roles"
+    },
+    {
+      "_id" : "write/group-management",
+      "description" : "Groups management feature: Write children groups (create - update - remove)",
+      "module" : "special",
+      "name" : "Groups management feature: Write children groups (create - update - remove)"
+    },
+    {
+      "_id" : "read/group-management",
+      "description" : "Groups management feature: Read children groups",
+      "module" : "special",
+      "name" : "Groups management feature: Read children groups"
+    },
+  ]
+)
 
-db.collection("roles").insert({
+db.getCollection("roles").insert({
     "_id" : "root",
     "permissions" : [
         "root"
@@ -97,7 +129,8 @@ db.collection("roles").insert({
     "name":"ROOT",
 })
 
-db.collection("groups").insert({
+db.getCollection("groups").insert({
+    "_id": "group-superuser",
     "name" : "Group root",
     "roleIds" : [
         "root"
@@ -114,7 +147,7 @@ Because this is internal applications, the User cannot register freely. We will 
 Example:
 
 ```
-db.collection("users").insert({
+db.getCollection("users").insert({
   "_id": "root",
   "username" : "MinLee",
   "email" : "test@gmail.com",
