@@ -24,14 +24,12 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
-import { hocAction, hocLoader, res403 } from '~/hoc/remix';
+import { hocAction, hocLoader } from '~/hoc/remix';
 import { getUserSession } from '~/services/helpers.server';
 import {
   getGroupPermissions,
   getRoleDetail,
-  isParentOfGroup,
   updateRole,
-  verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
@@ -45,19 +43,11 @@ interface LoaderData {
   activePermissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
   allPermissionsAvailable: ReturnType<typeof groupPermissionsByModule>;
 }
+
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
-    const { userId, isSuperUser } = await getUserSession({ request });
-    const isParent = await isParentOfGroup({
-      userId,
-      groupId,
-    });
-    const userInGroup = await verifyUserInGroup({ userId, groupId });
-
-    if (!isParent && !userInGroup) {
-      throw new Response(null, res403);
-    }
+    const { isSuperUser } = await getUserSession({ request });
 
     const role = await getRoleDetail(params.roleId || '');
     const permissions = await getGroupPermissions({ groupId, isSuperUser });
@@ -123,6 +113,7 @@ export default function Screen() {
 
     const permissionMap: Record<string, boolean> = {};
     const currentPermissionsMap: Record<string, boolean> = {};
+
     for (const permission of loaderData.role.actionPermissions) {
       currentPermissionsMap[permission._id] = true;
     }
@@ -199,7 +190,7 @@ export default function Screen() {
                     <Controller
                       key={action._id}
                       control={control}
-                      name={`permissions.${actionPermission.module}.${action._id}`}
+                      name={`permissions.${action._id}`}
                       render={({ field: { onChange, value } }) => (
                         <div key={action._id} className="my-2">
                           <Label

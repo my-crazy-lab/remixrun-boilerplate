@@ -12,13 +12,8 @@ import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import _ from 'lodash';
 import { PERMISSIONS } from '~/constants/common';
-import { hocLoader, res403 } from '~/hoc/remix';
-import { getUserId } from '~/services/helpers.server';
-import {
-  getRoleDetail,
-  isParentOfGroup,
-  verifyUserInGroup,
-} from '~/services/role-base-access-control.server';
+import { hocLoader } from '~/hoc/remix';
+import { getRoleDetail } from '~/services/role-base-access-control.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
@@ -30,20 +25,6 @@ interface LoaderData {
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
-    const groupId = params.id || '';
-    const userId = await getUserId({ request });
-
-    const isParent = await isParentOfGroup({
-      userId,
-      groupId,
-    });
-    const userInGroup = await verifyUserInGroup({ userId, groupId });
-
-    // just parent or member in group can view role detail of group
-    if (!isParent && !userInGroup) {
-      throw new Response(null, res403);
-    }
-
     const role = await getRoleDetail(params.roleId || '');
     return json({
       role: {

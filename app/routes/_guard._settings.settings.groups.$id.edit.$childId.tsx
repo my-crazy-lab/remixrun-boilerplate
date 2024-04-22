@@ -15,8 +15,8 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
-import { hoc404, hocAction, hocLoader, res403GroupParent } from '~/hoc/remix';
-import { getUserId } from '~/services/helpers.server';
+import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
+import { getUserSession } from '~/services/helpers.server';
 import {
   getGroupDetail,
   getRolesOfGroups,
@@ -33,8 +33,8 @@ export const action = hocAction(async ({ params }, { formData }) => {
       name,
       description,
       userIds: JSON.parse(userIds),
-      roleIds: JSON.parse(roleIds),
-      groupId: params.id || '',
+      roleAssignedIds: JSON.parse(roleIds),
+      groupId: params.childId || '',
     });
 
     return redirect(`/settings/groups/${params.id}`);
@@ -50,7 +50,7 @@ interface LoaderData {
   group: ReturnValueIgnorePromise<
     typeof getGroupDetail<{
       _id: string;
-      roles: Array<{
+      roleAssigned: Array<{
         _id: string;
         name: string;
         description: string;
@@ -85,21 +85,17 @@ export const loader = hocLoader(
     const url = new URL(request.url);
     const searchText = url.searchParams.get('users') || '';
     const users = await searchUser(searchText);
-    const userId = await getUserId({ request });
+    const { userId, isSuperUser } = await getUserSession({ request });
 
     const isParent = await isParentOfGroup({
       userId,
       groupId: childId,
     });
-    // just parent can modify their children groups
-    if (!isParent) {
-      throw new Response(null, res403GroupParent);
-    }
 
     const group = await hoc404(async () =>
       getGroupDetail<LoaderData['group']>({
         projection: {
-          roles: 1,
+          roleAssigned: 1,
           users: 1,
           children: 1,
           parent: 1,
@@ -111,6 +107,7 @@ export const loader = hocLoader(
         userId,
         groupId: childId,
         isParent,
+        isSuperUser,
       }),
     );
 
@@ -154,7 +151,7 @@ export default function Screen() {
         value: user._id,
         label: user.username,
       })),
-      roleIds: group.roles?.map(role => ({
+      roleIds: group.roleAssigned?.map(role => ({
         value: role._id,
         label: role.name,
       })),
