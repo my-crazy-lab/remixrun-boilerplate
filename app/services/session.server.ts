@@ -1,7 +1,12 @@
 import { createCookieSessionStorage } from '@remix-run/node';
+import { type AuthenticatorSessionData } from '~/types';
+
+import { dotenv } from './dotenv.server';
 
 // export the whole sessionStorage object
-export const sessionStorage = createCookieSessionStorage({
+export const sessionStorage = createCookieSessionStorage<{
+  user: AuthenticatorSessionData;
+}>({
   cookie: {
     name: '_session', // use any name you want here
     sameSite: 'lax', // this helps with CSRF
@@ -9,7 +14,7 @@ export const sessionStorage = createCookieSessionStorage({
     httpOnly: true, // for security reasons, make this cookie http only
     secrets: ['s3cr3t'], // replace this with an actual secret
     secure: process.env.NODE_ENV === 'production', // enable this in prod only
-    maxAge: 60 * 60 * 24, // 1 day
+    maxAge: dotenv.MAX_AGE_SESSION,
   },
 });
 

@@ -16,8 +16,8 @@ export async function sendEmail({ to, from, text, subject }: EmailArgs) {
       port: 465,
       secure: true,
       auth: {
-        user: dotenv.MAIL_FROM,
-        pass: dotenv.MAIL_APP_PWD,
+        user: dotenv.MAIL_SERVER_ADDRESS,
+        pass: dotenv.MAIL_SERVER_PASSWORD,
       },
     });
     await transporter.sendMail({

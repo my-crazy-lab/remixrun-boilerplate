@@ -559,7 +559,7 @@ describe('Role base access control', () => {
     });
     it('should return group detail if user is root', async () => {
       const groupDetail = await getGroupDetail({
-        isParent: true,
+        isSuperUser: true,
         userId: userId1,
         groupId: groupId1,
         projection: { _id: 1 },
@@ -570,7 +570,7 @@ describe('Role base access control', () => {
     });
     it('should return group detail if user is parent of group', async () => {
       const groupDetail = await getGroupDetail({
-        isParent: false,
+        isSuperUser: false,
         userId: userId1,
         groupId: groupId1,
         projection: { _id: 1 },
@@ -583,7 +583,7 @@ describe('Role base access control', () => {
       const { errorText, restore } = mockResponseThrowError();
       await expect(
         getGroupDetail({
-          isParent: false,
+          isSuperUser: false,
           userId,
           groupId: 'nonexistentGroupId',
           projection: { _id: 1 },
@@ -595,7 +595,7 @@ describe('Role base access control', () => {
       const { errorText, restore } = mockResponseThrowError();
       await expect(
         getGroupDetail({
-          isParent: true,
+          isSuperUser: true,
           userId,
           groupId: 'nonexistentGroupId',
           projection: { _id: 1 },
@@ -921,3 +921,25 @@ describe('Role base access control', () => {
     });
   });
 });
+
+/**
+ * MANUAL TEST FLOW FOR RBAC
+ * 
+ * -> is expected
+ * 
+ * Read group detail
+ *    - super user
+ *        create a group, don't add this group for super user
+ *        -> can read all group detail
+ *    - user is owner of group (parent)
+ *        create a group G1, user U1, add U1 into G1
+ *        create children groups G2 from G1, don't add U1
+ *        -> U1 can view G2
+ *    - user in group
+ *        create a group G1, user U1, add U1 into G1
+ *        -> U1 can view G1
+ *    - user not in group
+ *        create a group G1, user U1
+ *        U1 go to G1
+ *        -> redirect 404 page error
+ */

@@ -1,7 +1,7 @@
-image: node:latest 
-
-services:
-  - mongo:latest
+stages:
+  - code convention 
+  - test
+  - deploy
 
 cache:
   paths:
@@ -9,25 +9,33 @@ cache:
 
 variables:
   GIT_SSL_NO_VERIFY: 'true'
-  MONGODB_VERSION: 5.0.0
+  STAGING_BRANCH: 'staging'
+  PRODUCTION_BRANCH: 'prod'
 
-before_script:
-  - npm install
+default:
+  image: node:18
 
-stages:
-  - code standard
-  - test
+services:
+  - mongo:5.0.0
 
 workflow:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $PRODUCTION_BRANCH
+      when: always
+      allow_failure: false 
+    - if: $CI_COMMIT_MESSAGE =~ /-draft$/
+      when: never
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+
+before_script:
+  - npm install
 
 Typescript checker:
   stage: code standard
   script:
     - npm run typecheck
 
-Lint:
+Linter:
   stage: code standard
   script:
     - npm run lint
@@ -46,3 +54,10 @@ Unit testing:
       coverage_report:
         coverage_format: cobertura
         path: coverage/coverage.txt
+
+Deployment:
+  stage: deploy
+  script:
+    - npm run build 
+  rules: 
+    - if: $CI_COMMIT_BRANCH == $PRODUCTION_BRANCH

@@ -17,13 +17,11 @@ import _ from 'lodash';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
-import { hocAction, hocLoader, res403 } from '~/hoc/remix';
-import { getUserId } from '~/services/helpers.server';
+import { hocAction, hocLoader } from '~/hoc/remix';
+import { getUserSession } from '~/services/helpers.server';
 import {
   createRole,
   getGroupPermissions,
-  isParentOfGroup,
-  verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
@@ -64,18 +62,9 @@ interface LoaderData {
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
-    const userId = await getUserId({ request });
+    const { isSuperUser } = await getUserSession({ request });
 
-    const isParent = await isParentOfGroup({
-      userId,
-      groupId,
-    });
-    const userInGroup = await verifyUserInGroup({ userId, groupId });
-    if (!isParent && !userInGroup) {
-      throw new Response(null, res403);
-    }
-
-    const permissions = await getGroupPermissions(groupId);
+    const permissions = await getGroupPermissions({ groupId, isSuperUser });
 
     return json({
       permissions,
@@ -94,6 +83,7 @@ export default function Screen() {
   const { t } = useTranslation(['user-settings']);
 
   const loaderData = useLoaderData<LoaderData>();
+
   const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
       name: '',

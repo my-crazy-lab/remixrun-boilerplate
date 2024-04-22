@@ -1,9 +1,10 @@
+import ActionsHistoryModel from '~/model/actionHistory.server';
+import UsersModel from '~/model/users.server';
 import { type Users } from '~/types';
 import { momentTz } from '~/utils/common';
-import { mongodb } from '~/utils/db.server';
+import { type PipelineStage } from '~/utils/db.server';
 
 import { hashPassword } from './auth.server';
-import type { FindOptionsClient } from './constants.server';
 import { newRecordCommonField } from './constants.server';
 
 interface ISearch {
@@ -29,27 +30,24 @@ export async function getTotalActionsHistory({
     };
   }
 
-  const result = await mongodb
-    .collection('actionsHistory')
-    .aggregate([
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'user',
-        },
+  const result = await ActionsHistoryModel.aggregate([
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
       },
-      {
-        $unwind: {
-          path: '$user',
-          preserveNullAndEmptyArrays: true,
-        },
+    },
+    {
+      $unwind: {
+        path: '$user',
+        preserveNullAndEmptyArrays: true,
       },
-      $search,
-      { $count: 'total' },
-    ])
-    .toArray();
+    },
+    $search,
+    { $count: 'total' },
+  ]);
 
   return result.length > 0 ? result[0].total : 0;
 }
@@ -59,7 +57,12 @@ export async function getActionsHistory({
   limit,
   projection,
   searchText,
-}: FindOptionsClient & { searchText: string }) {
+}: {
+  searchText: string;
+  skip: PipelineStage.Skip['$skip'];
+  limit: PipelineStage.Limit['$limit'];
+  projection: PipelineStage.Project['$project'];
+}) {
   const $search: ISearch = { $match: {} };
 
   if (searchText) {
@@ -69,63 +72,65 @@ export async function getActionsHistory({
     };
   }
 
-  const actionsHistory = await mongodb
-    .collection('actionsHistory')
-    .aggregate([
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'userId',
-          foreignField: '_id',
-          as: 'user',
-        },
+  const actionsHistory = await ActionsHistoryModel.aggregate([
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user',
       },
-      {
-        $unwind: {
-          path: '$user',
-          preserveNullAndEmptyArrays: true,
-        },
+    },
+    {
+      $unwind: {
+        path: '$user',
+        preserveNullAndEmptyArrays: true,
       },
-      { $sort: { createdAt: -1 } },
-      { $project: { ...projection } },
-      $search,
-      { $skip: skip },
-      { $limit: limit },
-    ])
-    .toArray();
+    },
+    { $sort: { createdAt: -1 } },
+    { $project: { ...projection } },
+    $search,
+    { $skip: skip },
+    { $limit: limit },
+  ]);
 
   return actionsHistory;
 }
 
 export async function getTotalUsers() {
-  const total = await mongodb.collection('users').count({});
+  const total = await UsersModel.countDocuments({});
 
   return total;
 }
 
-export async function getUsers({ skip, limit, projection }: FindOptionsClient) {
-  const users = await mongodb
-    .collection<Users>('users')
-    .find(
-      {},
-      {
-        sort: {
-          createdAt: -1,
-        },
-        projection: {
-          ...projection,
-        },
-        skip,
-        limit,
+export async function getUsers({
+  skip,
+  limit,
+  projection,
+}: {
+  skip: PipelineStage.Skip['$skip'];
+  limit: PipelineStage.Limit['$limit'];
+  projection: PipelineStage.Project['$project'];
+}) {
+  const users = await UsersModel.find(
+    {},
+    {
+      sort: {
+        createdAt: -1,
       },
-    )
-    .toArray();
+      projection: {
+        ...projection,
+      },
+      skip,
+      limit,
+    },
+  );
 
   return users;
 }
 
 export function getUserProfile(_id: string) {
-  return mongodb.collection<Users>('users').findOne({ _id });
+  return UsersModel.findOne({ _id });
 }
 
 export async function createNewUser({
@@ -134,10 +139,9 @@ export async function createNewUser({
   email,
   cities,
 }: Pick<Users, 'username' | 'email' | 'cities'> & { password: string }) {
-  const usersCol = mongodb.collection<Users>('users');
   const passwordHashed = hashPassword(password);
 
-  await usersCol.insertOne({
+  await UsersModel.create({
     ...newRecordCommonField(),
     username,
     email,
@@ -150,7 +154,7 @@ export async function setUserLanguage({
   language,
   _id,
 }: Pick<Users, 'language' | '_id'>) {
-  await mongodb.collection<Users>('users').updateOne(
+  await UsersModel.updateOne(
     { _id },
     {
       $set: {

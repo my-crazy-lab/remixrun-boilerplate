@@ -4,7 +4,6 @@ import { RemixServer } from '@remix-run/react';
 import { createInstance } from 'i18next';
 import Backend from 'i18next-fs-backend';
 import * as isbotModule from 'isbot';
-// your i18n configuration file
 import { resolve } from 'node:path';
 import { PassThrough } from 'node:stream';
 import { renderToPipeableStream } from 'react-dom/server';
