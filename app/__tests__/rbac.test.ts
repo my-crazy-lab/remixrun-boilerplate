@@ -924,9 +924,9 @@ describe('Role base access control', () => {
 
 /**
  * MANUAL TEST FLOW FOR RBAC
- * 
+ *
  * -> is expected
- * 
+ *
  * Read group detail
  *    - super user
  *        create a group, don't add this group for super user
