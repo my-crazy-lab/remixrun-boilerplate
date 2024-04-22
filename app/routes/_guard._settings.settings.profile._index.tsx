@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
@@ -58,14 +57,18 @@ export default function Screen() {
             <Separator />
             <CardContent className="py-4">
               <div className="flex flex-col gap-5">
-                <Typography variant="h4" affects="small">
+                <Typography variant="h3" affects="small">
                   {t('EMAIL')}
                 </Typography>
-                <Input defaultValue={loaderData.userProfile?.email}></Input>
                 <Typography variant="h4" affects="small">
+                  {loaderData.userProfile?.email}
+                </Typography>
+                <Typography variant="h3" affects="small">
                   {t('USERNAME')}
                 </Typography>
-                <Input defaultValue={loaderData.userProfile?.username}></Input>
+                <Typography variant="h4" affects="small">
+                  {loaderData.userProfile?.username}
+                </Typography>
               </div>
             </CardContent>
           </Card>

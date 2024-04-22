@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import type { NavLinkProps, UIMatch } from '@remix-run/react';
 import { useMatches } from '@remix-run/react';
 import { ChevronRight } from 'lucide-react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes } from 'react';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +10,7 @@ import { NavigationLink } from './NavigationLink';
 
 type BreadcrumbsItemProps = HTMLAttributes<HTMLElement> &
   NavLinkProps & {
-    label: ReactNode;
+    label: string;
     disabled?: boolean;
   };
 
@@ -34,7 +34,7 @@ export const BreadcrumbsLink = ({
       end
       {...props}>
       {children}
-      <span itemProp="name">{t(`${label}`)}</span>
+      <span itemProp="name">{t(label)}</span>
     </NavigationLink>
   );
 };

@@ -28,6 +28,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
+import useGlobalStore from '~/hooks/useGlobalStore';
 import {
   createNewUser,
   getTotalUsers,
@@ -177,6 +178,7 @@ export default function Screen() {
   const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData<LoaderData>();
+  const globalData = useGlobalStore(state => state);
 
   const { register, control, reset, handleSubmit } = useForm<FormData>({
     defaultValues: {
@@ -221,12 +223,14 @@ export default function Screen() {
             }
             setOpen(open);
           }}>
-          <DialogTrigger asChild>
-            <Button className="gap-2" variant="default">
-              <Plus />
-              {t('ADD_NEW_USER')}
-            </Button>
-          </DialogTrigger>
+          {globalData.permissions?.includes(PERMISSIONS.WRITE_USER) ? (
+            <DialogTrigger asChild>
+              <Button className="gap-2" variant="default">
+                <Plus />
+                {t('ADD_NEW_USER')}
+              </Button>
+            </DialogTrigger>
+          ) : null}
           <DialogContent className="sm:max-w-[560px]">
             <form onSubmit={handleSubmit(onSubmit)}>
               <DialogHeader>

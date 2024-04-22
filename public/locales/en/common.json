@@ -12,6 +12,7 @@
   "LOGIN_FAILURE": "Login failure",
   "INCORRECT_ACCOUNT": "Incorrect account",
   "EMAIL_INCORRECT": "Email incorrect",
+  "CODE_INCORRECT_OR_EXPIRED": "Code incorrect or expired",
   "LOGOUT": "Logout",
   "ACTIONS_HISTORY": "Actions History",
   "USERS_MANAGEMENT": "Users Management",

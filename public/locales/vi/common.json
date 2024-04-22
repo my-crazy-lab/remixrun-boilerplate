@@ -11,6 +11,7 @@
   "LOGIN_FAILURE": "Đăng nhập thất bại",
   "INCORRECT_ACCOUNT": "Tài khoản không chính xác",
   "EMAIL_INCORRECT": "Email không chính xác",
+  "CODE_INCORRECT_OR_EXPIRED": "Mã không chính xác hoặc hết hạn",
   "SETTINGS": "Cài đặt",
   "ACTIONS_HISTORY": "Lịch sử hành động",
   "USERS_MANAGEMENT": "Quản lý người dùng",
