@@ -74,6 +74,7 @@ export interface Groups {
   description: string;
   userIds: Array<string>;
   roleIds: Array<string>;
+  roleAssignedIds: Array<string>;
   genealogy?: Array<string>;
   hierarchy: number;
   createdAt: Date;

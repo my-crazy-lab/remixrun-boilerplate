@@ -19,9 +19,12 @@ const GroupsSchema = new Schema(
       $type: [String],
       required: true,
     },
-    roleIds: {
+    roleAssignedIds: {
       $type: [String],
       required: true,
+    },
+    roleIds: {
+      $type: [String],
     },
     genealogy: {
       $type: [String],

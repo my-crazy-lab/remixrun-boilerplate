@@ -37,6 +37,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       },
     }),
   );
+
   return json({ group, isParent });
 };
 

@@ -14,12 +14,31 @@ import { Separator } from '@/components/ui/separator';
 import TabGroupIcon from '@/images/tab-group.svg';
 import UsersIcon from '@/images/user-group.svg';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { Link, useOutletContext, useParams } from '@remix-run/react';
+import { type ActionFunctionArgs } from '@remix-run/node';
+import { Form, Link, useOutletContext, useParams } from '@remix-run/react';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '~/constants/common';
 import useGlobalStore from '~/hooks/useGlobalStore';
+import {
+  deleteGroup,
+  deleteRole,
+} from '~/services/role-base-access-control.server';
 import { type GroupDetail } from '~/types/LoaderData';
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const formData = await request.clone().formData();
+
+  const roleIdDeleted = formData.get('delete-role')?.toString();
+  const groupIdDeleted = formData.get('delete-group')?.toString();
+
+  if (roleIdDeleted) {
+    await deleteRole({ roleId: roleIdDeleted, groupId: params.id || '' });
+  } else if (groupIdDeleted) {
+    await deleteGroup({ groupId: groupIdDeleted });
+  }
+  return null;
+}
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
@@ -52,49 +71,55 @@ export default function Screen() {
           {loaderData.group?.children?.length
             ? loaderData.group.children.map((child, index: number) => {
                 return (
-                  <Link key={index} to={`/settings/groups/${child?._id}`}>
-                    <Card className="bg-gray-100">
-                      <CardHeader className="p-4">
-                        <div className="flex justify-between items-center">
-                          <Typography variant="h4" affects="removePMargin">
-                            {child.name}
-                          </Typography>
-                          {globalData.permissions?.includes(
-                            PERMISSIONS.WRITE_GROUP,
-                          ) ? (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-                                  <DotsHorizontalIcon className="h-4 w-4" />
-                                  <span className="sr-only">Open menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="start"
-                                className="w-[160px]">
-                                <Link
-                                  to={`/settings/groups/${params.id}/edit/${child._id}`}>
-                                  <DropdownMenuItem>
-                                    {t('EDIT')}
-                                  </DropdownMenuItem>
-                                </Link>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>
-                                  {t('DELETE')}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          ) : null}
-                        </div>
-                        <Typography
-                          className="text-gray-500"
-                          variant="p"
-                          affects="removePMargin">
-                          {child?.description}
+                  <Card key={index} className="bg-gray-100">
+                    <CardHeader className="p-4">
+                      <div className="flex justify-between items-center">
+                        <Typography variant="h4" affects="removePMargin">
+                          {child.name}
                         </Typography>
-                      </CardHeader>
+                        {globalData.permissions?.includes(
+                          PERMISSIONS.WRITE_GROUP,
+                        ) ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+                                <DotsHorizontalIcon className="h-4 w-4" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="start"
+                              className="w-[160px]">
+                              <Link
+                                to={`/settings/groups/${params.id}/edit/${child._id}`}>
+                                <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
+                              </Link>
+                              <DropdownMenuSeparator />
+                              <Form className="w-full" method="post">
+                                <button
+                                  name="delete-group"
+                                  value={child._id}
+                                  className="w-full text-start"
+                                  type="submit">
+                                  <DropdownMenuItem>
+                                    {t('DELETE')}
+                                  </DropdownMenuItem>
+                                </button>
+                              </Form>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : null}
+                      </div>
+                      <Typography
+                        className="text-gray-500"
+                        variant="p"
+                        affects="removePMargin">
+                        {child?.description}
+                      </Typography>
+                    </CardHeader>
+                    <Link to={`/settings/groups/${child?._id}`}>
                       <CardContent className="flex flex-row gap-4 p-4">
                         <div className="flex items-center gap-2">
                           <div className="bg-primary-50 p-3 rounded-md">
@@ -126,8 +151,8 @@ export default function Screen() {
                           </div>
                         </div>
                       </CardContent>
-                    </Card>
-                  </Link>
+                    </Link>
+                  </Card>
                 );
               })
             : t('NO_USER_GROUP_HERE')}
@@ -160,35 +185,39 @@ export default function Screen() {
 
           {loaderData.group?.roles?.map(role => {
             return (
-              <Link
-                key={role._id}
-                to={`/settings/groups/${params.id}/roles/${role._id}`}>
-                <Button variant="secondary" className="mr-4">
+              <Button key={role._id} variant="secondary" className="mr-4">
+                <Link to={`/settings/groups/${params.id}/roles/${role._id}`}>
                   {role.name}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-                        <DotsHorizontalIcon className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    {globalData.permissions?.includes(
-                      PERMISSIONS.WRITE_ROLE,
-                    ) ? (
-                      <DropdownMenuContent align="end" className="w-[160px]">
-                        <Link
-                          to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
-                          <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
-                        </Link>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>{t('DELETE')}</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    ) : null}
-                  </DropdownMenu>
-                </Button>
-              </Link>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+                      <DotsHorizontalIcon className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  {globalData.permissions?.includes(PERMISSIONS.WRITE_ROLE) ? (
+                    <DropdownMenuContent align="end" className="w-[160px]">
+                      <Link
+                        to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
+                        <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
+                      </Link>
+                      <DropdownMenuSeparator />
+                      <Form className="w-full" method="post">
+                        <button
+                          name="delete-role"
+                          value={role._id}
+                          className="w-full text-start"
+                          type="submit">
+                          <DropdownMenuItem>{t('DELETE')}</DropdownMenuItem>
+                        </button>
+                      </Form>
+                    </DropdownMenuContent>
+                  ) : null}
+                </DropdownMenu>
+              </Button>
             );
           })}
         </Card>

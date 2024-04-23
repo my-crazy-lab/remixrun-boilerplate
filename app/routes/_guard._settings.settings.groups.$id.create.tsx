@@ -26,13 +26,16 @@ import { type ReturnValueIgnorePromise } from '~/types';
 
 export const action = hocAction(async ({ params }, { formData }) => {
   try {
+    if (!params.id) {
+      return json({ error: ERROR.UNKNOWN_ERROR });
+    }
     const { name, description, userIds, roleIds } = formData;
     await createGroup({
       name,
       description,
       userIds: JSON.parse(userIds),
-      roleIds: JSON.parse(roleIds),
-      parent: params.id || '',
+      roleAssignedIds: JSON.parse(roleIds),
+      parent: params.id,
     });
 
     return redirect(`/settings/groups/${params.id}`);
