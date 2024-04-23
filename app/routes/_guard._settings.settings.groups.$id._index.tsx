@@ -65,7 +65,7 @@ export default function Screen() {
       </div>
       <div>
         <Typography className="py-4 font-medium text-base" variant="p">
-          {t('CHILDREN_GROUP')}
+          {t('Children group')}
         </Typography>
         <div className="grid grid-cols-3 gap-8">
           {loaderData.group?.children?.length
@@ -127,7 +127,7 @@ export default function Screen() {
                           </div>
                           <div>
                             <Typography className="text-gray-400" variant="p">
-                              {t('CHILDREN_GROUP')}
+                              {t('Children group')}
                             </Typography>
                             <Typography className="text-primary" variant="h4">
                               2
