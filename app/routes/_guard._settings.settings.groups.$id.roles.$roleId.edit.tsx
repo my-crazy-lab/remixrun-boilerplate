@@ -76,6 +76,7 @@ export const action = hocAction(
         description,
         permissions: JSON.parse(permissions),
         roleId: params.roleId || '',
+        groupId: params.id || '',
       });
 
       return redirect(`${ROUTE_NAME.GROUP_SETTING}/${params.id}`);

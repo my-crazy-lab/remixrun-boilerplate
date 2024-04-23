@@ -50,7 +50,7 @@ export default function RolesDetail() {
       <Typography variant="p">{loaderData.role.description}</Typography>
 
       {_.map(loaderData.role.actionPermissions, actionPermission => (
-        <Accordion type="single" collapsible>
+        <Accordion type="single" collapsible key={actionPermission.module}>
           <AccordionItem value={actionPermission.module}>
             <AccordionTrigger className="capitalize">
               {actionPermission?.module}
