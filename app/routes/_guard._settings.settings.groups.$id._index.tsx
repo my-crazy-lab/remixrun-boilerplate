@@ -64,7 +64,7 @@ export default function Screen() {
         ) : null}
       </div>
       <div>
-        <Typography className="py-4 font-medium text-base" variant="p">
+        <Typography className="py-4 font-medium text-base">
           {t('Children group')}
         </Typography>
         <div className="grid grid-cols-3 gap-8">

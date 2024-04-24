@@ -21,7 +21,7 @@ export async function getModels({
   if (isoCode === 'TH') {
     return TH[name];
   }
-  if (isoCode === 'Id') {
+  if (isoCode === 'ID') {
     return ID[name];
   }
 
