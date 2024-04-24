@@ -1,5 +1,7 @@
 import { getSession } from '~/services/session.server';
 
+import { getModels } from './model/isoCode/method.server';
+
 export async function getUserId({ request }: { request: Request }) {
   const authSession = await getSession(request.headers.get('cookie'));
   return authSession.get('user')?.userId || '';
@@ -16,4 +18,19 @@ export async function getUserSession({
   const defaultReturnValue = { userId: '', isSuperUser: false, isoCode: '' };
 
   return authSession.get('user') || defaultReturnValue;
+}
+
+export async function getCities(isoCode: string) {
+  const workingPlaces = await getModels(isoCode)
+    .workingPlaces.findOne(
+      {
+        countryCode: isoCode,
+      },
+      {
+        cities: 1,
+      },
+    )
+    .lean();
+
+  return workingPlaces?.cities.map(city => city.name);
 }

@@ -113,6 +113,7 @@ export async function getUsers({
 }) {
   const users = await UsersModel.find(
     {},
+    {},
     {
       sort: {
         createdAt: -1,
@@ -123,7 +124,7 @@ export async function getUsers({
       skip,
       limit,
     },
-  );
+  ).lean();
 
   return users;
 }
