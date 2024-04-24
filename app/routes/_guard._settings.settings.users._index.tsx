@@ -321,6 +321,8 @@ export default function Screen() {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         data={loaderData?.users || []}
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         columns={columns}
         pagination={getPageSizeAndPageIndex({
           total: loaderData?.total || 0,

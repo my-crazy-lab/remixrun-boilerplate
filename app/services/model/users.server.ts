@@ -15,6 +15,10 @@ const UsersSchema = new Schema(
       $type: String,
       required: true,
     },
+    isoCode: {
+      $type: String,
+      required: true,
+    },
     createdAt: { $type: Date, default: Date.now },
     status: {
       $type: String,

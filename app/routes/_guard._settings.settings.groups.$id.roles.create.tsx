@@ -18,7 +18,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
-import { getUserSession } from '~/services/helpers.server';
 import {
   createRole,
   getGroupPermissions,
@@ -62,9 +61,8 @@ interface LoaderData {
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
-    const { isSuperUser } = await getUserSession({ request });
 
-    const permissions = await getGroupPermissions({ groupId, isSuperUser });
+    const permissions = await getGroupPermissions({ groupId });
 
     return json({
       permissions,

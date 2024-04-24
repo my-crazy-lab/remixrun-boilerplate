@@ -6,14 +6,14 @@ import { FormStrategy } from 'remix-auth-form';
 import { v4 as uuidv4 } from 'uuid';
 import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
-import UsersModel from '~/model/users.server';
 import {
   EXPIRED_RESET_PASSWORD,
   EXPIRED_VERIFICATION_CODE,
 } from '~/services/constants.server';
 import { dotenv } from '~/services/dotenv.server';
 import { sendEmail } from '~/services/mail.server';
-import { isRoot } from '~/services/role-base-access-control.server';
+import UsersModel from '~/services/model/users.server';
+import { verifySuperUser } from '~/services/role-base-access-control.server';
 import { sessionStorage } from '~/services/session.server';
 import { type AuthenticatorSessionData } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
@@ -132,9 +132,11 @@ export async function verifyCode(
     throw new Error('CODE_INCORRECT_OR_EXPIRED');
   }
 
-  const isSuperUser = await isRoot(account._id);
+  const isSuperUser = await verifySuperUser(account._id);
 
-  return { userId: account._id, isSuperUser };
+  const isoCode = account.isoCode;
+
+  return { userId: account._id, isSuperUser, isoCode };
 }
 
 export async function resetPassword(email: string) {
@@ -214,7 +216,7 @@ authenticator.use(
     // the type of this user must match the type you pass to the Authenticator
     // the strategy will automatically inherit the type if you instantiate
     // directly inside the `use` method
-    return user;
+    return user; // will be save into sessions storage
   }),
   // each strategy has a name and can be changed to use another one
   // same strategy multiple times, especially useful for the OAuth2 strategy.

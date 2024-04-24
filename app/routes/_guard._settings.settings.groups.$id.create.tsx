@@ -19,7 +19,7 @@ import ROUTE_NAME from '~/constants/route';
 import { hocAction, hocLoader } from '~/hoc/remix';
 import {
   createGroup,
-  getRolesOfGroups,
+  getRolesByGroupId,
   searchUser,
 } from '~/services/role-base-access-control.server';
 import { type ReturnValueIgnorePromise } from '~/types';
@@ -35,7 +35,7 @@ export const action = hocAction(async ({ params }, { formData }) => {
       description,
       userIds: JSON.parse(userIds),
       roleAssignedIds: JSON.parse(roleIds),
-      parent: params.id,
+      parentId: params.id,
     });
 
     return redirect(`/settings/groups/${params.id}`);
@@ -48,13 +48,13 @@ export const action = hocAction(async ({ params }, { formData }) => {
 }, PERMISSIONS.WRITE_GROUP);
 
 interface LoaderData {
-  roles: ReturnValueIgnorePromise<typeof getRolesOfGroups>;
+  roles: ReturnValueIgnorePromise<typeof getRolesByGroupId>;
   users: ReturnValueIgnorePromise<typeof searchUser>;
 }
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
-    const roles = await getRolesOfGroups(params.id || '');
+    const roles = await getRolesByGroupId(params.id || '');
 
     const url = new URL(request.url);
     const searchText = url.searchParams.get('users') || '';

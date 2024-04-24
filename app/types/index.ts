@@ -5,6 +5,7 @@ import { type Document } from '~/utils/db.server';
 export interface AuthenticatorSessionData {
   userId: string;
   isSuperUser: boolean;
+  isoCode: Users['isoCode'];
 }
 
 export interface NavItem {
@@ -27,6 +28,7 @@ export interface Users {
   _id: string;
   username: string;
   email: string;
+  isoCode: string;
   createdAt: Date;
   status: string;
   cities: Array<string>;
@@ -73,7 +75,7 @@ export interface Groups {
   name: string;
   description: string;
   userIds: Array<string>;
-  roleIds: Array<string>;
+  roleIds?: Array<string>;
   roleAssignedIds: Array<string>;
   genealogy?: Array<string>;
   hierarchy: number;

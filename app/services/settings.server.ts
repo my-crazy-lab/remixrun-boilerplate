@@ -1,5 +1,5 @@
-import ActionsHistoryModel from '~/model/actionHistory.server';
-import UsersModel from '~/model/users.server';
+import ActionsHistoryModel from '~/services/model/actionHistory.server';
+import UsersModel from '~/services/model/users.server';
 import { type Users } from '~/types';
 import { momentTz } from '~/utils/common';
 import { type PipelineStage } from '~/utils/db.server';
@@ -130,7 +130,7 @@ export async function getUsers({
 }
 
 export function getUserProfile(_id: string) {
-  return UsersModel.findOne({ _id });
+  return UsersModel.findOne({ _id }).lean<Users>();
 }
 
 export async function createNewUser({
