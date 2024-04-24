@@ -124,7 +124,9 @@ export default function Screen() {
           <div className="grid items-center gap-2">
             <Label htmlFor="group_name">{t('GROUP_NAME')}</Label>
             <Input
-              {...register('name' as const, { required: t('THIS_FIELD_IS_REQUIRED'), })}
+              {...register('name' as const, {
+                required: t('THIS_FIELD_IS_REQUIRED'),
+              })}
               className="col-span-2"
               placeholder={t('ENTER_GROUP_NAME')}
             />
@@ -133,7 +135,9 @@ export default function Screen() {
           <div className="grid items-center gap-2">
             <Label htmlFor="group_description">{t('GROUP_DESCRIPTION')}</Label>
             <Input
-              {...register('description' as const, { required: t('THIS_FIELD_IS_REQUIRED'), })}
+              {...register('description' as const, {
+                required: t('THIS_FIELD_IS_REQUIRED'),
+              })}
               className="col-span-2"
               placeholder={t('ENTER_DESCRIPTION')}
             />

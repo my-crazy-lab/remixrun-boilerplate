@@ -29,8 +29,13 @@ import { groupPermissionsByModule } from '~/utils/common';
 export const handle = {
   breadcrumb: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const params = useParams()
-    return <BreadcrumbsLink to={`/settings/groups/${params.id}/roles/create`} label="CREATE_ROLE" />
+    const params = useParams();
+    return (
+      <BreadcrumbsLink
+        to={`/settings/groups/${params.id}/roles/create`}
+        label="CREATE_ROLE"
+      />
+    );
   },
 };
 
@@ -123,7 +128,9 @@ export default function Screen() {
             <Input
               placeholder={t('ENTER_ROLE_NAME')}
               className="mt-2"
-              {...register('name' as const, { required: t('THIS_FIELD_IS_REQUIRED'), })}
+              {...register('name' as const, {
+                required: t('THIS_FIELD_IS_REQUIRED'),
+              })}
             />
             <ErrorMessageBase name="name" errors={formState.errors} />
           </div>
@@ -132,7 +139,9 @@ export default function Screen() {
             <Input
               placeholder={t('ENTER_DESCRIPTION')}
               className="mt-2"
-              {...register('description' as const, { required: t('THIS_FIELD_IS_REQUIRED'), })}
+              {...register('description' as const, {
+                required: t('THIS_FIELD_IS_REQUIRED'),
+              })}
             />
             <ErrorMessageBase name="description" errors={formState.errors} />
           </div>

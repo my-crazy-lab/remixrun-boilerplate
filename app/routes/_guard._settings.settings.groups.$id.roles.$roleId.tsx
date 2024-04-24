@@ -1,5 +1,5 @@
 import { BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { Outlet, useLoaderData, useParams } from '@remix-run/react';
 import { PERMISSIONS } from '~/constants/common';
 import { hocLoader, res403 } from '~/hoc/remix';
@@ -45,7 +45,10 @@ export const handle = {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const params = useParams();
     return (
-      <BreadcrumbsLink to={`/settings/groups/${params.id}/roles/${params.roleId}`} label={role.name} />
+      <BreadcrumbsLink
+        to={`/settings/groups/${params.id}/roles/${params.roleId}`}
+        label={role.name}
+      />
     );
   },
 };

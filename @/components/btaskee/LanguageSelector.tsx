@@ -22,7 +22,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const formData = await request.formData();
     const { language } = Object.fromEntries(formData);
 
-    console.log('language', language)
+    console.log('language', language);
     if (language && typeof language === 'string') {
       await setUserLanguage({ language: language, _id: 'R5pRgZqKyhTKRX2N22' });
     } else {
@@ -46,17 +46,14 @@ export default function LanguageSelector() {
   });
 
   const handleLanguageChange = (value: any) => {
-    const formData = new FormData()
-    formData.append('language', value)
-    i18n.changeLanguage(value)
+    const formData = new FormData();
+    formData.append('language', value);
+    i18n.changeLanguage(value);
   };
 
   return (
-    <Form {...form} method='post'>
-      <Select
-        name='language'
-        onValueChange={handleLanguageChange}
-      >
+    <Form {...form} method="post">
+      <Select name="language" onValueChange={handleLanguageChange}>
         <SelectTrigger className="h-10 w-[180px]">
           <SelectValue placeholder="Vietnamese" />
         </SelectTrigger>

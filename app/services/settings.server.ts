@@ -112,7 +112,8 @@ export async function getUsers({
   projection: PipelineStage.Project['$project'];
 }) {
   const users = await UsersModel.find(
-    {}, {},
+    {},
+    {},
     {
       sort: {
         createdAt: -1,

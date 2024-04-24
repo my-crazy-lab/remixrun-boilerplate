@@ -58,7 +58,9 @@ export default function RolesDetail() {
             <AccordionContent>
               <div className="flex flex-wrap gap-3">
                 {_.map(actionPermission.actions, action => (
-                  <div key={action._id} className="my-2 flex items-center gap-2">
+                  <div
+                    key={action._id}
+                    className="my-2 flex items-center gap-2">
                     <Badge className="text-sm text-blue bg-blue-50 rounded-md">
                       {action.name}
                     </Badge>

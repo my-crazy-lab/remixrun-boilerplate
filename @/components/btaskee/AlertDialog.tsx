@@ -8,9 +8,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { MouseEvent, ReactNode } from "react";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { MouseEvent, ReactNode } from 'react';
 
 interface CommonAlertDialogProps {
   triggerText: string;
@@ -27,12 +27,16 @@ export const CommonAlertDialog = ({
   description,
   children,
   onCancel,
-  cancelText = "Cancel",
+  cancelText = 'Cancel',
 }: CommonAlertDialogProps) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button className="px-2 py-1 border-none w-full font-normal justify-start h-8" variant="outline">{triggerText}</Button>
+        <Button
+          className="px-2 py-1 border-none w-full font-normal justify-start h-8"
+          variant="outline">
+          {triggerText}
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -41,9 +45,7 @@ export const CommonAlertDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onCancel}>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction>
-            {children}
-          </AlertDialogAction>
+          <AlertDialogAction>{children}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

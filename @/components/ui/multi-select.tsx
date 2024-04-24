@@ -71,8 +71,9 @@ export function MultiSelectAsync<T extends CommonFunction>({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
-            }`}
+          className={`w-full justify-between ${
+            selected.length > 1 ? 'h-full' : 'h-10'
+          }`}
           onClick={() => setOpen(!open)}>
           <div className="flex gap-1 flex-wrap">
             {selected.map(item => (
@@ -200,8 +201,9 @@ export function MultiSelect<T extends CommonFunction>({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
-            }`}
+          className={`w-full justify-between ${
+            selected.length > 1 ? 'h-full' : 'h-10'
+          }`}
           onClick={() => setOpen(!open)}>
           <div className="flex gap-1 flex-wrap">
             {selected.map(item => (

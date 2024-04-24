@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
 import { getUserProfile } from '~/services/settings.server';
 import { ReturnValueIgnorePromise } from '~/types';
+
 import { Logo } from './BTaskeeLogo';
 import LanguageSelector from './LanguageSelector';
 
@@ -42,7 +43,7 @@ export default function Header(userProfile: LoaderData) {
             className="md:w-[100px] lg:w-[270px]"
           />
           <LanguageSelector />
-          <DropdownMenu >
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-10 w-10">

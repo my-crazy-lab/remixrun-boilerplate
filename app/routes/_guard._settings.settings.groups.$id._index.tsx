@@ -71,93 +71,94 @@ export default function Screen() {
         <div className="grid grid-cols-3 gap-8">
           {loaderData.group?.children?.length
             ? loaderData.group.children.map((child, index: number) => {
-              return (
-                <Card key={index} className="bg-gray-100">
-                  <CardHeader className="p-4">
-                    <div className="flex justify-between items-center">
-                      <Typography variant="h4" affects="removePMargin">
-                        {child.name}
+                return (
+                  <Card key={index} className="bg-gray-100">
+                    <CardHeader className="p-4">
+                      <div className="flex justify-between items-center">
+                        <Typography variant="h4" affects="removePMargin">
+                          {child.name}
+                        </Typography>
+                        {globalData.permissions?.includes(
+                          PERMISSIONS.WRITE_GROUP,
+                        ) ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+                                <DotsHorizontalIcon className="h-4 w-4" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="start"
+                              className="w-[160px]">
+                              <Link
+                                to={`/settings/groups/${params.id}/edit/${child._id}`}>
+                                <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
+                              </Link>
+                              <DropdownMenuSeparator />
+                              <CommonAlertDialog
+                                triggerText={t('DELETE')}
+                                title="Are you absolutely sure?"
+                                description="This action cannot be undone. This will permanently delete your account
+        and remove your data from our servers.">
+                                <Form className="w-full" method="post">
+                                  <button
+                                    name="delete-group"
+                                    value={child._id}
+                                    className="w-full text-start"
+                                    type="submit">
+                                    {t('DELETE')}
+                                  </button>
+                                </Form>
+                              </CommonAlertDialog>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : null}
+                      </div>
+                      <Typography
+                        className="text-gray-500"
+                        variant="p"
+                        affects="removePMargin">
+                        {child?.description}
                       </Typography>
-                      {globalData.permissions?.includes(
-                        PERMISSIONS.WRITE_GROUP,
-                      ) ? (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-                              <DotsHorizontalIcon className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="start"
-                            className="w-[160px]">
-                            <Link
-                              to={`/settings/groups/${params.id}/edit/${child._id}`}>
-                              <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
-                            </Link>
-                            <DropdownMenuSeparator />
-                            <CommonAlertDialog triggerText={t('DELETE')}
-                              title="Are you absolutely sure?"
-                              description='This action cannot be undone. This will permanently delete your account
-        and remove your data from our servers.'>
-                              <Form className="w-full" method="post">
-                                <button
-                                  name="delete-group"
-                                  value={child._id}
-                                  className="w-full text-start"
-                                  type="submit">
-                                  {t('DELETE')}
-                                </button>
-                              </Form>
-                            </CommonAlertDialog>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      ) : null}
-                    </div>
-                    <Typography
-                      className="text-gray-500"
-                      variant="p"
-                      affects="removePMargin">
-                      {child?.description}
-                    </Typography>
-                  </CardHeader>
-                  <Link to={`/settings/groups/${child?._id}`}>
-                    <CardContent className="flex flex-row gap-4 p-4">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-primary-50 p-3 rounded-md">
-                          <img src={TabGroupIcon} alt="tab-group-icon" />
+                    </CardHeader>
+                    <Link to={`/settings/groups/${child?._id}`}>
+                      <CardContent className="flex flex-row gap-4 p-4">
+                        <div className="flex items-center gap-2">
+                          <div className="bg-primary-50 p-3 rounded-md">
+                            <img src={TabGroupIcon} alt="tab-group-icon" />
+                          </div>
+                          <div>
+                            <Typography className="text-gray-400" variant="p">
+                              {t('CHILDREN_GROUP')}
+                            </Typography>
+                            <Typography className="text-primary" variant="h4">
+                              2
+                            </Typography>
+                          </div>
                         </div>
-                        <div>
-                          <Typography className="text-gray-400" variant="p">
-                            {t('CHILDREN_GROUP')}
-                          </Typography>
-                          <Typography className="text-primary" variant="h4">
-                            2
-                          </Typography>
+                        <div className="flex items-center gap-2">
+                          <div className="bg-secondary p-3 rounded-md">
+                            <img src={UsersIcon} alt="user-group-icon" />
+                          </div>
+                          <div>
+                            <Typography className="text-gray-400" variant="p">
+                              {t('USERS')}
+                            </Typography>
+                            <Typography
+                              className="text-secondary-foreground"
+                              variant="h3">
+                              2
+                            </Typography>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="bg-secondary p-3 rounded-md">
-                          <img src={UsersIcon} alt="user-group-icon" />
-                        </div>
-                        <div>
-                          <Typography className="text-gray-400" variant="p">
-                            {t('USERS')}
-                          </Typography>
-                          <Typography
-                            className="text-secondary-foreground"
-                            variant="h3">
-                            2
-                          </Typography>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Link>
-                </Card>
-              );
-            })
+                      </CardContent>
+                    </Link>
+                  </Card>
+                );
+              })
             : t('NO_USER_GROUP_HERE')}
         </div>
       </div>
@@ -186,10 +187,13 @@ export default function Screen() {
             ) : null}
           </div>
 
-          <div className='flex flex-wrap gap-3'>
+          <div className="flex flex-wrap gap-3">
             {loaderData.group?.roles?.map(role => {
               return (
-                <Button key={role._id} variant='secondary' className="flex text-blue bg-blue-50 gap-2">
+                <Button
+                  key={role._id}
+                  variant="secondary"
+                  className="flex text-blue bg-blue-50 gap-2">
                   <Link to={`/settings/groups/${params.id}/roles/${role._id}`}>
                     {role.name}
                   </Link>
@@ -202,17 +206,20 @@ export default function Screen() {
                         <span className="sr-only">Open menu</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    {globalData.permissions?.includes(PERMISSIONS.WRITE_ROLE) ? (
+                    {globalData.permissions?.includes(
+                      PERMISSIONS.WRITE_ROLE,
+                    ) ? (
                       <DropdownMenuContent align="center" className="w-[160px]">
                         <Link
                           to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
                           <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <CommonAlertDialog triggerText={t('DELETE')}
+                        <CommonAlertDialog
+                          triggerText={t('DELETE')}
                           title="Are you absolutely sure?"
-                          description='This action cannot be undone. This will permanently delete your account
-        and remove your data from our servers.'>
+                          description="This action cannot be undone. This will permanently delete your account
+        and remove your data from our servers.">
                           <Form className="w-full" method="post">
                             <button
                               name="delete-role"
@@ -270,7 +277,7 @@ export default function Screen() {
             })}
           </div>
         </Card>
-      </div >
+      </div>
     </>
   );
 }
