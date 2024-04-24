@@ -25,7 +25,6 @@ import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hocAction, hocLoader } from '~/hoc/remix';
-import { getUserSession } from '~/services/helpers.server';
 import {
   getGroupPermissions,
   getRoleDetail,
@@ -47,10 +46,9 @@ interface LoaderData {
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
-    const { isSuperUser } = await getUserSession({ request });
 
     const role = await getRoleDetail(params.roleId || '');
-    const permissions = await getGroupPermissions({ groupId, isSuperUser });
+    const permissions = await getGroupPermissions({ groupId });
 
     return json({
       role,

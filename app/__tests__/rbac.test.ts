@@ -924,9 +924,9 @@ describe('Role base access control', () => {
 
 /**
  * MANUAL TEST FLOW FOR RBAC
- * 
+ *
  * -> is expected
- * 
+ *
  * Read group detail
  *    - super user
  *        create a group, don't add this group for super user
@@ -942,13 +942,13 @@ describe('Role base access control', () => {
  *        create a group G1, user U1
  *        U1 go to G1
  *        -> redirect 404 page error
- * 
+ *
  * Single edit group
  * Single create role
  * Single edit role
  * Single create group
  * View role, group
  * Remove group
- * 
+ *
  * Link stuck when delete group
  */

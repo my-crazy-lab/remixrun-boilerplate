@@ -129,7 +129,7 @@ export async function getUsers({
 }
 
 export function getUserProfile(_id: string) {
-  return UsersModel.findOne({ _id });
+  return UsersModel.findOne({ _id }).lean<Users>();
 }
 
 export async function createNewUser({

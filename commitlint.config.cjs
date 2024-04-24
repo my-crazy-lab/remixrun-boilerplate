@@ -20,7 +20,7 @@ const Configuration = {
         'revert',
         'style',
         'test',
-        'draft'
+        'draft',
       ],
     ],
     'subject-case': [

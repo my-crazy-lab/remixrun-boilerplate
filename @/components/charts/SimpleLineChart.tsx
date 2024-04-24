@@ -3,7 +3,9 @@ import CartesianGridBase, {
 } from '@/components/base/CartesianGridBase';
 import LegendBase from '@/components/base/LegendBase';
 import LineBase, { type LineBaseProps } from '@/components/base/LineBase';
-import LineChartBase, { type LineChartBaseProps } from '@/components/base/LineChartBase';
+import LineChartBase, {
+  type LineChartBaseProps,
+} from '@/components/base/LineChartBase';
 import ResponsiveContainerBase, {
   type ResponsiveContainerBaseProps,
 } from '@/components/base/ResponsiveContainerBase';

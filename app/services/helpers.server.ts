@@ -1,9 +1,7 @@
 import type { Document } from 'mongodb';
 import ActionsHistoryModel from '~/model/actionHistory.server';
-import { momentTz } from '~/utils/common';
-import { Types } from '~/utils/db.server';
-
-import { getSession } from './session.server';
+import { newRecordCommonField } from '~/services/constants.server';
+import { getSession } from '~/services/session.server';
 
 export async function saveActionHistory(
   { request }: { request: Request },
@@ -13,11 +11,10 @@ export async function saveActionHistory(
   const userId = await getUserId({ request });
 
   await ActionsHistoryModel.create({
-    _id: new Types.ObjectId().toString(),
+    ...newRecordCommonField(),
     data,
-    userId,
+    actor: userId,
     action,
-    createdAt: momentTz().toDate(),
   });
 }
 

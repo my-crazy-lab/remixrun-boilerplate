@@ -19,7 +19,7 @@ import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
 import { getUserSession } from '~/services/helpers.server';
 import {
   getGroupDetail,
-  getRolesOfGroups,
+  getRolesByGroupId,
   isParentOfGroup,
   searchUser,
   updateGroups,
@@ -72,7 +72,7 @@ interface LoaderData {
     }>
   >;
   users: ReturnValueIgnorePromise<typeof searchUser>;
-  roles: ReturnValueIgnorePromise<typeof getRolesOfGroups>;
+  roles: ReturnValueIgnorePromise<typeof getRolesByGroupId>;
 }
 
 export const loader = hocLoader(
@@ -80,7 +80,7 @@ export const loader = hocLoader(
     const groupId = params.id || '';
     const childId = params.childId || '';
 
-    const roles = await getRolesOfGroups(groupId);
+    const roles = await getRolesByGroupId(groupId);
 
     const url = new URL(request.url);
     const searchText = url.searchParams.get('users') || '';

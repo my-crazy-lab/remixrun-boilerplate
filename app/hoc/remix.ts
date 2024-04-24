@@ -48,7 +48,7 @@ export function hocLoader(
 
 export const res500 = {
   status: 500,
-  statusText: 'SERVER_ERROR',
+  statusText: 'INTERNAL_SERVER_ERROR',
 };
 export const res404 = {
   status: 404,

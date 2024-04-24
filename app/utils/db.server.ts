@@ -12,4 +12,6 @@ const mongoClientBE = createConnection(`${dotenv.MONGO_URI}/${dotenv.DB_NAME}`);
 console.log(`Connected db backend ${dotenv.MONGO_URI}/${dotenv.DB_NAME}`);
 export { mongoClientBE };
 
+export type Projection = PipelineStage.Project['$project'];
+
 export { Document, Types, ObjectId, PipelineStage };

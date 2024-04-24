@@ -12,7 +12,7 @@ import {
 } from '~/services/constants.server';
 import { dotenv } from '~/services/dotenv.server';
 import { sendEmail } from '~/services/mail.server';
-import { isRoot } from '~/services/role-base-access-control.server';
+import { verifySuperUser } from '~/services/role-base-access-control.server';
 import { sessionStorage } from '~/services/session.server';
 import { type AuthenticatorSessionData } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
@@ -131,8 +131,7 @@ export async function verifyCode(
     throw new Error('CODE_INCORRECT_OR_EXPIRED');
   }
 
-  const isSuperUser = await isRoot(account._id);
-
+  const isSuperUser = await verifySuperUser(account._id);
   return { userId: account._id, isSuperUser };
 }
 
@@ -208,7 +207,7 @@ authenticator.use(
     // the type of this user must match the type you pass to the Authenticator
     // the strategy will automatically inherit the type if you instantiate
     // directly inside the `use` method
-    return user;
+    return user; // will be save into sessions strorage
   }),
   // each strategy has a name and can be changed to use another one
   // same strategy multiple times, especially useful for the OAuth2 strategy.
