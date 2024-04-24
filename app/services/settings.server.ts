@@ -1,5 +1,5 @@
-import ActionsHistoryModel from '~/model/actionHistory.server';
-import UsersModel from '~/model/users.server';
+import ActionsHistoryModel from '~/services/model/actionHistory.server';
+import UsersModel from '~/services/model/users.server';
 import { type Users } from '~/types';
 import { type PipelineStage } from '~/utils/db.server';
 

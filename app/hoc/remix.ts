@@ -1,6 +1,8 @@
 // HIGHER ORDER COMPONENT
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { getUserId, saveActionHistory } from '~/services/helpers.server';
+import { newRecordCommonField } from '~/services/constants.server';
+import { getUserId } from '~/services/helpers.server';
+import ActionsHistoryModel from '~/services/model/actionHistory.server';
 import { getUserPermissions } from '~/services/role-base-access-control.server';
 import { type CommonFunction, type MustBeAny } from '~/types';
 
@@ -22,7 +24,15 @@ export function hocAction(
     const formData = await args.request.formData();
     const data = Object.fromEntries(formData);
 
-    await saveActionHistory(args, data);
+    const action = new URL(args.request.url).pathname;
+
+    await ActionsHistoryModel.create({
+      ...newRecordCommonField(),
+      data,
+      actor: userId,
+      action,
+    });
+
     return callback(args, { formData: data });
   }
 

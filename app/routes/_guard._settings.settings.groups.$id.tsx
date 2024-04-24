@@ -13,7 +13,9 @@ import { type GroupDetail } from '~/types/LoaderData';
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const groupId = params.id || '';
-  const { userId, isSuperUser } = await getUserSession({ request });
+  const { userId, isSuperUser } = await getUserSession({
+    headers: request.headers,
+  });
   const isParent = await isParentOfGroup({
     userId,
     groupId,

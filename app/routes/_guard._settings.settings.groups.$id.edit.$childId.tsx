@@ -85,7 +85,9 @@ export const loader = hocLoader(
     const url = new URL(request.url);
     const searchText = url.searchParams.get('users') || '';
     const users = await searchUser(searchText);
-    const { userId, isSuperUser } = await getUserSession({ request });
+    const { userId, isSuperUser } = await getUserSession({
+      headers: request.headers,
+    });
 
     const isParent = await isParentOfGroup({
       userId,

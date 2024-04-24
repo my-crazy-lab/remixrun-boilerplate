@@ -1,9 +1,9 @@
 import { PERMISSIONS } from '~/constants/common';
 import { res403, res404 } from '~/hoc/remix';
-import GroupsModel from '~/model/groups.server';
-import PermissionsModel from '~/model/permissions.server';
-import RolesModel from '~/model/roles.servers';
-import UsersModel from '~/model/users.server';
+import GroupsModel from '~/services/model/groups.server';
+import PermissionsModel from '~/services/model/permissions.server';
+import RolesModel from '~/services/model/roles.servers';
+import UsersModel from '~/services/model/users.server';
 import {
   newRecordCommonField,
   statusOriginal,
