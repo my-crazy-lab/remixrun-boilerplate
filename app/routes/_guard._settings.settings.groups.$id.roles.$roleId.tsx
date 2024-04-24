@@ -1,7 +1,6 @@
 import { BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
-import { type LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
-import { Outlet, useLoaderData } from '@remix-run/react';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
+import { Outlet, useLoaderData, useParams } from '@remix-run/react';
 import { PERMISSIONS } from '~/constants/common';
 import { hocLoader, res403 } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
@@ -43,9 +42,10 @@ export const loader = hocLoader(
 export const handle = {
   breadcrumb: (data: { role: Roles }) => {
     const { role } = data;
-
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const params = useParams();
     return (
-      <BreadcrumbsLink to={`/settings/groups/${role._id}`} label={role.name} />
+      <BreadcrumbsLink to={`/settings/groups/${params.id}/roles/${params.roleId}`} label={role.name} />
     );
   },
 };

@@ -28,8 +28,6 @@ export async function sendEmail({ to, from, text, subject }: EmailArgs) {
     });
   } catch (error) {
     toast({
-      variant: 'error',
-      title: 'ERROR',
       description: 'EMAIL_SERVICE_ERROR',
     });
   }

@@ -13,12 +13,16 @@ import { Form, Link } from '@remix-run/react';
 import { UserCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
-import { MustBeAny } from '~/types';
-
+import { getUserProfile } from '~/services/settings.server';
+import { ReturnValueIgnorePromise } from '~/types';
 import { Logo } from './BTaskeeLogo';
 import LanguageSelector from './LanguageSelector';
 
-export default function Header(userProfile: MustBeAny) {
+interface LoaderData {
+  userProfile: ReturnValueIgnorePromise<typeof getUserProfile>;
+}
+
+export default function Header(userProfile: LoaderData) {
   const { t } = useTranslation(['common']);
 
   return (
@@ -38,7 +42,7 @@ export default function Header(userProfile: MustBeAny) {
             className="md:w-[100px] lg:w-[270px]"
           />
           <LanguageSelector />
-          <DropdownMenu>
+          <DropdownMenu >
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-10 w-10">
@@ -60,12 +64,12 @@ export default function Header(userProfile: MustBeAny) {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link className="w-full" to={ROUTE_NAME.PROFILE_SETTING}>
                   {t('SETTINGS')}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Form className="w-full" method="post" action="/logout">
                   <button className="w-full text-start" type="submit">
                     {t('LOGOUT')}

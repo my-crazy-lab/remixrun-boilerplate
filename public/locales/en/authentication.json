@@ -17,5 +17,6 @@
   "VERIFICATION_CODE": "Verification code",
   "VERIFY": "Verify",
   "CREATE_NEW_PASSWORD": "Create new password",
-  "ENTER_VERIFICATION_CODE": "Enter code"
+  "ENTER_VERIFICATION_CODE": "Enter code",
+  "VERIFICATION_CODE_HELPER": "Open your gmail and verify your code."
 }

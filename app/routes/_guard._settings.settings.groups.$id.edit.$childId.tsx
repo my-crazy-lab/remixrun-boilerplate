@@ -183,8 +183,8 @@ export default function Screen() {
         <Typography variant="h3">{t('EDIT_GROUP')}</Typography>
         <Breadcrumbs />
       </div>
-      <form className="gap-4 pb-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid gap-4 py-4 grid-cols-2">
+      <form className="gap-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid gap-6 py-4 grid-cols-2">
           <div className="grid items-center gap-4">
             <Label htmlFor="group" className="text-left">
               {t('GROUP_NAME')}

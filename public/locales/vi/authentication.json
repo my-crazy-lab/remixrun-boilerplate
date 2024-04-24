@@ -17,5 +17,6 @@
   "VERIFICATION_CODE": "Mã xác minh",
   "VERIFY": "Xác minh",
   "CREATE_NEW_PASSWORD": "Tạo mật khẩu mới",
-  "ENTER_VERIFICATION_CODE": "Nhập mã"
+  "ENTER_VERIFICATION_CODE": "Nhập mã",
+  "VERIFICATION_CODE_HELPER": "Mở gmail của bạn và nhập mã xác minh"
 }

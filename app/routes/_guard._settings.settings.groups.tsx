@@ -3,6 +3,6 @@ import ROUTE_NAME from '~/constants/route';
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to={ROUTE_NAME.GROUP_SETTING} label="GROUPS" />
+    <BreadcrumbsLink to={ROUTE_NAME.GROUP_SETTING} label="GROUPS_MANAGEMENT" />
   ),
 };

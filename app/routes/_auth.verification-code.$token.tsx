@@ -55,7 +55,7 @@ export default function Screen() {
       <div className="flex flex-col space-y-1 text-start">
         <Typography variant="h3">{t('VERIFICATION_CODE')}</Typography>
         <Typography variant="p" affects="removePMargin">
-          Open your gmail and verify your code.
+          {t("VERIFICATION_CODE_HELPER")}
         </Typography>
       </div>
       <div className="grid gap-6">

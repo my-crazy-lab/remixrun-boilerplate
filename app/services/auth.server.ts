@@ -206,8 +206,6 @@ authenticator.use(
     const code = form.get('code')?.toString();
     if (!code) {
       toast({
-        variant: 'error',
-        title: 'ERROR',
         description: 'LOGIN_FAILURE',
       });
       throw new Error('Login failure');

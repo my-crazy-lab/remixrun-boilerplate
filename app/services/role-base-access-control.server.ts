@@ -1,9 +1,11 @@
+import { toast } from '@/components/ui/use-toast';
 import { PERMISSIONS } from '~/constants/common';
 import { res403, res404 } from '~/hoc/remix';
 import {
   newRecordCommonField,
   statusOriginal,
 } from '~/services/constants.server';
+import { getUserId } from '~/services/helpers.server';
 import GroupsModel from '~/services/model/groups.server';
 import PermissionsModel from '~/services/model/permissions.server';
 import RolesModel from '~/services/model/roles.servers';
@@ -21,6 +23,40 @@ export async function verifySuperUser(userId: string) {
 
   // use in group ROOT is super user
   return Boolean(permissions.includes(PERMISSIONS.ROOT));
+}
+
+export async function verifyPermissions(
+  { request }: { request: Request },
+  permissions: Array<string>,
+) {
+  const userId = await getUserId({ request });
+  const roles = await RolesModel.find(
+    { permissions: { $in: permissions }, status: statusOriginal.ACTIVE },
+    { projection: { _id: 1 } },
+  ).exec();
+
+  const groupFound = await GroupsModel.findOne({
+    userIds: userId,
+    roleIds: { $in: roles.map(role => role._id) },
+    status: statusOriginal.ACTIVE,
+  });
+
+  if (groupFound) {
+    return true;
+  }
+  return false;
+}
+
+export async function requirePermissions(
+  { request }: { request: Request },
+  permissions: Array<string>,
+) {
+  const isAccepted = await verifyPermissions({ request }, permissions);
+  if (!isAccepted) {
+    toast({
+      description: 'USER_DONT_HAVE_PERMISSION',
+    });
+  }
 }
 
 export async function getUserPermissions(userId: string) {

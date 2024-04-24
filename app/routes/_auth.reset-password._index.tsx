@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { type ActionFunctionArgs, json } from '@remix-run/node';
+import { json, type ActionFunctionArgs } from '@remix-run/node';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { ERROR } from '~/constants/common';

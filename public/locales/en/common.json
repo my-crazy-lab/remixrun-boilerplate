@@ -26,5 +26,6 @@
   "PAGE_NOT_FOUND_DESCRIPTION": "The page you are looking for does not exist!",
   "SEARCH": "Search",
   "CREATE_ROLE": "Create role",
-  "CREATE_GROUP": "Create group"
+  "CREATE_GROUP": "Create group",
+  "GROUPS_MANAGEMENT": "Group permission"
 }
