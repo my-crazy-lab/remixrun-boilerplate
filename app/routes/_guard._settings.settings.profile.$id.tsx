@@ -1,6 +1,6 @@
-import { AvatarUpload } from '@/components/btaskee/AvatarUpload';
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import Typography from '@/components/btaskee/Typography';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -9,10 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { type LoaderFunctionArgs, json } from '@remix-run/node';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
+import { User2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
 import { getUserProfile } from '~/services/settings.server';
@@ -64,14 +64,18 @@ export default function Screen() {
             <Separator />
             <CardContent className="py-4">
               <div className="flex flex-col gap-5">
-                <Typography variant="h4" affects="small">
+                <Typography variant="h3" affects="small">
                   {t('EMAIL')}
                 </Typography>
-                <Input defaultValue={loaderData.userProfile?.email}></Input>
                 <Typography variant="h4" affects="small">
+                  {loaderData.userProfile?.email}
+                </Typography>
+                <Typography variant="h3" affects="small">
                   {t('USERNAME')}
                 </Typography>
-                <Input defaultValue={loaderData.userProfile?.username}></Input>
+                <Typography variant="h4" affects="small">
+                  {loaderData.userProfile?.username}
+                </Typography>
               </div>
             </CardContent>
           </Card>
@@ -101,17 +105,21 @@ export default function Screen() {
             </CardContent>
           </Card>
         </div>
-        <Card className="h-[448px]">
+        <Card className="h-[370px]">
           <CardHeader>
             <CardTitle className="text-lg">{t('CHANGE_PROFILE')}</CardTitle>
             <CardDescription>{t('CHANGE_PICTURE_FROM_HERE')}</CardDescription>
           </CardHeader>
           <Separator />
           <div className="justify-center flex flex-col items-center">
-            <AvatarUpload />
-            <Typography variant="p" affects="muted" className="pt-4">
-              {t('IMAGE_HELPER_TEXT')}
-            </Typography>
+            <div className="w-40 h-40 text-center mt-10">
+              <Avatar className="w-full h-full">
+                <AvatarImage className="object-cover" />
+                <AvatarFallback className="bg-secondary">
+                  <User2Icon className="w-16 h-16" />
+                </AvatarFallback>
+              </Avatar>
+            </div>
           </div>
         </Card>
       </div>
