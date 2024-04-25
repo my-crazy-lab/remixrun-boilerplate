@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, MultiSelectAsync } from '@/components/ui/multi-select';
+import { toast } from '@/components/ui/use-toast';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import {
+  useActionData,
   useLoaderData,
   useNavigation,
   useSearchParams,
@@ -42,7 +44,7 @@ export const action = hocAction(
     });
     setInformationActionHistory({
       action: ACTION_NAME.CREATE_GROUP,
-      insertCase: { groupId: group._id },
+      dataRelated: { groupId: group._id },
     });
 
     return redirect(`/settings/groups/${params.id}`);
@@ -83,6 +85,14 @@ interface FormData {
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
+
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
+
   const navigation = useNavigation();
 
   const loaderData = useLoaderData<LoaderData>();

@@ -4,20 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import type { ActionFunctionArgs } from '@remix-run/node';
-import { json, redirect } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import { ERROR } from '~/constants/common';
+import { ACTION_NAME } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
+import { hocAction } from '~/hoc/remix';
 import { verifyAndSendCode } from '~/services/auth.server';
 
 interface ActionData {
   error?: string;
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-  try {
+export const action = hocAction(
+  async ({ request }, { setInformationActionHistory }) => {
     const formData = await request.formData();
     const { username, password } = Object.fromEntries(formData);
 
@@ -25,14 +25,12 @@ export async function action({ request }: ActionFunctionArgs) {
       username: username.toString(),
       password: password.toString(),
     });
+    setInformationActionHistory({
+      action: ACTION_NAME.LOGIN,
+    });
     return redirect(`${ROUTE_NAME.VERIFICATION_CODE}/${verificationToken}`);
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
-  }
-}
+  },
+);
 
 export default function Screen() {
   const { t } = useTranslation(['authentication']);

@@ -18,8 +18,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, type OptionType } from '@/components/ui/multi-select';
+import { toast } from '@/components/ui/use-toast';
 import { type LoaderFunctionArgs, json } from '@remix-run/node';
-import { useLoaderData, useSearchParams, useSubmit } from '@remix-run/react';
+import {
+  useActionData,
+  useLoaderData,
+  useSearchParams,
+  useSubmit,
+} from '@remix-run/react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -137,11 +143,11 @@ export const action = hocAction(
       password,
       email,
       isoCode,
-      cities: JSON.parse(cities) || [],
+      cities,
     });
     setInformationActionHistory({
       action: ACTION_NAME.CREATE_USER,
-      insertCase: { userId: newUser._id },
+      dataRelated: { userId: newUser?._id },
     });
 
     return null;
@@ -187,6 +193,13 @@ interface FormData {
 }
 
 export default function Screen() {
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
+
   const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData<LoaderData>();

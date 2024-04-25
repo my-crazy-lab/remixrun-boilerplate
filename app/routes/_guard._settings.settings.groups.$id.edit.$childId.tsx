@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, MultiSelectAsync } from '@/components/ui/multi-select';
+import { toast } from '@/components/ui/use-toast';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import {
+  useActionData,
   useLoaderData,
   useNavigation,
   useSearchParams,
@@ -145,6 +147,13 @@ export const handle = {
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
+
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
 
   const { group, roles, users } = useLoaderData<LoaderData>();
   const navigation = useNavigation();

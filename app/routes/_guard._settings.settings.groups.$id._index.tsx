@@ -11,14 +11,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/components/ui/use-toast';
 import TabGroupIcon from '@/images/tab-group.svg';
 import UsersIcon from '@/images/user-group.svg';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { type ActionFunctionArgs } from '@remix-run/node';
-import { Form, Link, useOutletContext, useParams } from '@remix-run/react';
+import {
+  Form,
+  Link,
+  useActionData,
+  useOutletContext,
+  useParams,
+} from '@remix-run/react';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { PERMISSIONS } from '~/constants/common';
+import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
+import { hocAction } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import {
   deleteGroup,
@@ -26,22 +33,41 @@ import {
 } from '~/services/role-base-access-control.server';
 import { type GroupDetail } from '~/types/LoaderData';
 
-export async function action({ request, params }: ActionFunctionArgs) {
-  const formData = await request.clone().formData();
+export const action = hocAction(
+  async ({ request, params }, { setInformationActionHistory }) => {
+    const formData = await request.formData();
 
-  const roleIdDeleted = formData.get('delete-role')?.toString();
-  const groupIdDeleted = formData.get('delete-group')?.toString();
+    const roleIdDeleted = formData.get('roleDeleted')?.toString();
+    const groupIdDeleted = formData.get('groupDeleted')?.toString();
 
-  if (roleIdDeleted) {
-    await deleteRole({ roleId: roleIdDeleted, groupId: params.id || '' });
-  } else if (groupIdDeleted) {
-    await deleteGroup({ groupId: groupIdDeleted });
-  }
-  return null;
-}
+    if (roleIdDeleted) {
+      await deleteRole({ roleId: roleIdDeleted, groupId: params.id || '' });
+      setInformationActionHistory({
+        action: ACTION_NAME.REMOVE_ROLE,
+        dataRelated: {
+          groupId: params.id,
+        },
+      });
+    } else if (groupIdDeleted) {
+      await deleteGroup({ groupId: groupIdDeleted });
+      setInformationActionHistory({
+        action: ACTION_NAME.REMOVE_GROUP,
+      });
+    }
+    return null;
+  },
+  PERMISSIONS.WRITE_GROUP,
+);
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
+
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ title: 'SERVER_ERROR', description: actionData.error });
+  }
 
   const params = useParams();
   const globalData = useGlobalStore(state => state);
@@ -99,7 +125,7 @@ export default function Screen() {
                               <DropdownMenuSeparator />
                               <Form className="w-full" method="post">
                                 <button
-                                  name="delete-group"
+                                  name="groupDeleted"
                                   value={child._id}
                                   className="w-full text-start"
                                   type="submit">
@@ -207,7 +233,7 @@ export default function Screen() {
                       <DropdownMenuSeparator />
                       <Form className="w-full" method="post">
                         <button
-                          name="delete-role"
+                          name="roleDeleted"
                           value={role._id}
                           className="w-full text-start"
                           type="submit">

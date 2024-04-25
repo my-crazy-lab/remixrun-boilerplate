@@ -10,14 +10,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { toast } from '@/components/ui/use-toast';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { useLoaderData, useSubmit } from '@remix-run/react';
+import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
+import { getUserSession } from '~/services/helpers.server';
 import {
   createRole,
   getGroupPermissions,
@@ -51,7 +53,7 @@ export const action = hocAction(
     });
     setInformationActionHistory({
       action: ACTION_NAME.CREATE_ROLE,
-      insertCase: { roleId: role._id },
+      dataRelated: { roleId: role._id },
     });
 
     return redirect(`/settings/groups/${params.id}`);
@@ -64,19 +66,17 @@ interface LoaderData {
   permissionsGrouped: ReturnType<typeof groupPermissionsByModule>;
 }
 
-export const loader = hocLoader(
-  async ({ params, request }: LoaderFunctionArgs) => {
-    const groupId = params.id || '';
+export const loader = hocLoader(async ({ params, request }: LoaderFunctionArgs) => {
+  const groupId = params.id || '';
 
-    const permissions = await getGroupPermissions({ groupId });
+  const { isSuperUser } = await getUserSession({ headers: request.headers });
+  const permissions = await getGroupPermissions({ groupId, isSuperUser });
 
-    return json({
-      permissions,
-      permissionsGrouped: groupPermissionsByModule(permissions),
-    });
-  },
-  PERMISSIONS.WRITE_ROLE,
-);
+  return json({
+    permissions,
+    permissionsGrouped: groupPermissionsByModule(permissions),
+  });
+}, PERMISSIONS.WRITE_ROLE);
 
 interface FormData {
   permissions: { [key: string]: boolean };
@@ -84,6 +84,13 @@ interface FormData {
   description: string;
 }
 export default function Screen() {
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
+
   const { t } = useTranslation(['user-settings']);
 
   const loaderData = useLoaderData<LoaderData>();

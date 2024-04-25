@@ -11,13 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { toast } from '@/components/ui/use-toast';
 import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
   json,
   redirect,
 } from '@remix-run/node';
-import { useLoaderData, useSubmit } from '@remix-run/react';
+import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -25,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hocAction, hocLoader } from '~/hoc/remix';
+import { getUserSession } from '~/services/helpers.server';
 import {
   getGroupPermissions,
   getRoleDetail,
@@ -48,7 +50,9 @@ export const loader = hocLoader(
     const groupId = params.id || '';
 
     const role = await getRoleDetail(params.roleId || '');
-    const permissions = await getGroupPermissions({ groupId });
+
+    const { isSuperUser } = await getUserSession({ headers: request.headers });
+    const permissions = await getGroupPermissions({ groupId, isSuperUser });
 
     return json({
       role,
@@ -95,6 +99,13 @@ export const action = hocAction(
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
+
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
 
   const loaderData = useLoaderData<LoaderData>();
 

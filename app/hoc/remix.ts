@@ -17,8 +17,8 @@ import { type CommonFunction, type MustBeAny } from '~/types';
  * @warning can make memory leak
  * @returns
  */
-export function closureControllerDeeply<T>() {
-  let action: T;
+export function closureControllerDeeply<T>(defaultValue: T) {
+  let action = defaultValue;
 
   function get() {
     return action;
@@ -35,15 +35,32 @@ export function hocAction(
     args: ActionFunctionArgs,
     { setInformationActionHistory }: MustBeAny,
   ) => MustBeAny,
-  permission: string,
+  permission?: string | Array<string>,
 ) {
   async function action(args: ActionFunctionArgs) {
     try {
       const userId = await getUserId({ request: args.request });
-      const userPermissions = await getUserPermissions(userId);
 
-      if (!userPermissions.includes(permission)) {
-        throw new Response(null, res403);
+      if (permission) {
+        const userPermissions = await getUserPermissions(userId);
+
+        if (typeof permission === 'string') {
+          if (!userPermissions.includes(permission)) {
+            throw new Response(null, res403);
+          }
+        } else {
+          let flag = false;
+
+          // verify array permissions with user's permission
+          permission.forEach(p => {
+            if (userPermissions.includes(p)) {
+              flag = true;
+            }
+          });
+          if (!flag) {
+            throw new Response(null, res403);
+          }
+        }
       }
 
       const formData = await args.request.clone().formData();
@@ -56,20 +73,20 @@ export function hocAction(
 
       const { get, set } = closureControllerDeeply<{
         action: string;
-        insertCase?: MustBeAny;
-      }>();
+        dataRelated?: MustBeAny;
+      }>({ action: 'Action not provide' });
       const actionResult = await callback(args, {
         setInformationActionHistory: set,
       });
 
-      const { action, insertCase } = get();
+      const { action, dataRelated } = get();
       newActionHistory.action = action;
 
       // case insert data
-      if (insertCase) {
+      if (dataRelated) {
         newActionHistory.requestFormData = {
           ...requestFormData,
-          ...insertCase,
+          ...dataRelated,
         };
       } else {
         newActionHistory.requestFormData = requestFormData;

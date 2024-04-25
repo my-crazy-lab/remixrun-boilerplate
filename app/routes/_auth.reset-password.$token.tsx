@@ -3,24 +3,25 @@ import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { json, redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { Form, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import { ERROR } from '~/constants/common';
+import { ACTION_NAME, ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
+import { hocAction } from '~/hoc/remix';
 import { changePassword, isResetPassExpired } from '~/services/auth.server';
 
 interface ActionData {
   error?: string;
 }
 
-export async function action({ request, params }: ActionFunctionArgs) {
-  try {
+export const action = hocAction(
+  async ({ request, params }, { setInformationActionHistory }) => {
     const formData = await request.formData();
     const { newPassword, reEnterPassword } = Object.fromEntries(formData);
 
-    // client validation
+    // TODO move logic validation to client with React hook form
     if (
       typeof newPassword !== 'string' ||
       typeof reEnterPassword !== 'string'
@@ -32,14 +33,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
 
     await changePassword({ newPassword, token: params.token || '' });
+
+    setInformationActionHistory({
+      action: ACTION_NAME.CHANGE_PASSWORD,
+    });
+
     return redirect(ROUTE_NAME.SIGN_IN);
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
-  }
-}
+  },
+);
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const isExpired = await isResetPassExpired({ token: params.token || '' });

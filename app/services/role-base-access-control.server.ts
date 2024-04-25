@@ -183,7 +183,18 @@ export async function searchUser(searchText: string) {
   return users;
 }
 
-export async function getGroupPermissions({ groupId }: { groupId: string }) {
+export async function getGroupPermissions({
+  groupId,
+  isSuperUser,
+}: {
+  groupId: string;
+  isSuperUser: boolean;
+}) {
+  // with super user, show all permissions in create/update roles
+  if (isSuperUser) {
+    return getAllPermissions();
+  }
+
   const group = await GroupsModel.findOne({
     _id: groupId,
     status: statusOriginal.ACTIVE,
@@ -276,7 +287,8 @@ export async function createRole({
 }
 
 export function getAllPermissions() {
-  return PermissionsModel.find({}).lean();
+  // permissions ROOT is private
+  return PermissionsModel.find({ _id: { $ne: PERMISSIONS.ROOT } }).lean();
 }
 
 export async function updateUser({
