@@ -124,7 +124,7 @@ export async function getUsers({
       skip,
       limit,
     },
-  );
+  ).lean();
 
   return users;
 }

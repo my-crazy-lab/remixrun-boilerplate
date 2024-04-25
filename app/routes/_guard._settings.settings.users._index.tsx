@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { ERROR, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
+import { getCities, getUserSession } from '~/services/helpers.server';
 import {
   createNewUser,
   getTotalUsers,
@@ -104,13 +105,13 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {// TODO fix typing for react hook form
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            row.getValue('cities')?.map((e, index) => (
-              <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
-                {e}
-              </Badge>
-            ))}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              row.getValue('cities')?.map((e, index) => (
+                <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
+                  {e}
+                </Badge>
+              ))}
           </span>
         </div>
       );
@@ -122,7 +123,7 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
   },
 ];
 
-export const action = hocAction(async ({}, { formData }) => {
+export const action = hocAction(async ({ }, { formData }) => {
   try {
     const { username, email, password, cities } = formData;
 
@@ -164,7 +165,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     limit,
     projection: { cities: 1, username: 1, email: 1 },
   });
-  return json({ users, total });
+
+  const { isoCode } = await getUserSession({ headers: request.headers });
+
+  const cities = await getCities(isoCode);
+  return json({ users, cities, total });
 };
 
 interface FormData {
