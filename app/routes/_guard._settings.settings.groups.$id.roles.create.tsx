@@ -16,7 +16,7 @@ import { useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ERROR, PERMISSIONS } from '~/constants/common';
+import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
 import {
   createRole,
@@ -32,23 +32,29 @@ export const handle = {
 };
 
 export const action = hocAction(
-  async ({ params }: ActionFunctionArgs, { formData }) => {
-    try {
-      const { name, description, permissions } = formData;
-      await createRole({
-        name,
-        groupId: params.id || '',
-        description,
-        permissions: JSON.parse(permissions),
-      });
+  async (
+    { request, params }: ActionFunctionArgs,
+    { setInformationActionHistory },
+  ) => {
+    const formData = await request.formData();
 
-      return redirect(`/settings/groups/${params.id}`);
-    } catch (error) {
-      if (error instanceof Error) {
-        return json({ error: error.message });
-      }
-      return json({ error: ERROR.UNKNOWN_ERROR });
-    }
+    const name = formData.get('name')?.toString() || '';
+    const description = formData.get('description')?.toString() || '';
+    const permissions =
+      JSON.parse(formData.get('permissions')?.toString() || '') || [];
+
+    const role = await createRole({
+      name,
+      groupId: params.id || '',
+      description,
+      permissions,
+    });
+    setInformationActionHistory({
+      action: ACTION_NAME.CREATE_ROLE,
+      insertCase: { roleId: role._id },
+    });
+
+    return redirect(`/settings/groups/${params.id}`);
   },
   PERMISSIONS.WRITE_ROLE,
 );

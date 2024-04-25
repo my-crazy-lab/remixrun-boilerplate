@@ -12,7 +12,10 @@ import {
 import { dotenv } from '~/services/dotenv.server';
 import { sendEmail } from '~/services/mail.server';
 import UsersModel from '~/services/model/users.server';
-import { verifySuperUser } from '~/services/role-base-access-control.server';
+import {
+  verifyManager,
+  verifySuperUser,
+} from '~/services/role-base-access-control.server';
 import { sessionStorage } from '~/services/session.server';
 import { type AuthenticatorSessionData } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
@@ -116,7 +119,7 @@ export async function isResetPassExpired({ token }: { token: string }) {
 export async function verifyCode(
   code: string,
 ): Promise<AuthenticatorSessionData> {
-  const account = await UsersModel.findOneAndUpdate(
+  const user = await UsersModel.findOneAndUpdate(
     {
       'verification.expired': { $gt: momentTz().toDate() },
       'verification.code': code,
@@ -127,15 +130,20 @@ export async function verifyCode(
       },
     },
   );
-  if (!account?._id) {
+  if (!user?._id) {
     throw new Error('CODE_INCORRECT_OR_EXPIRED');
   }
 
-  const isSuperUser = await verifySuperUser(account._id);
+  const isSuperUser = await verifySuperUser(user._id);
+  const isManager = await verifyManager(user._id);
 
-  const isoCode = account.isoCode;
-
-  return { userId: account._id, isSuperUser, isoCode };
+  return {
+    userId: user._id,
+    isSuperUser,
+    isManager,
+    isoCode: user.isoCode,
+    cities: user.cities,
+  };
 }
 
 export async function resetPassword(email: string) {

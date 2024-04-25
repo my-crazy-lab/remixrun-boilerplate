@@ -14,7 +14,7 @@ import {
 } from '@remix-run/react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ERROR, PERMISSIONS } from '~/constants/common';
+import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
 import {
   createGroup,
@@ -23,28 +23,32 @@ import {
 } from '~/services/role-base-access-control.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 
-export const action = hocAction(async ({ params }, { formData }) => {
-  try {
-    if (!params.id) {
-      return json({ error: ERROR.UNKNOWN_ERROR });
-    }
-    const { name, description, userIds, roleIds } = formData;
-    await createGroup({
+export const action = hocAction(
+  async ({ request, params }, { setInformationActionHistory }) => {
+    const formData = await request.formData();
+
+    const name = formData.get('name')?.toString() || '';
+    const description = formData.get('description')?.toString() || '';
+    const userIds = JSON.parse(formData.get('userIds')?.toString() || '') || [];
+    const roleAssignedIds =
+      JSON.parse(formData.get('roleIds')?.toString() || '') || [];
+
+    const group = await createGroup({
       name,
       description,
-      userIds: JSON.parse(userIds),
-      roleAssignedIds: JSON.parse(roleIds),
-      parentId: params.id,
+      userIds,
+      roleAssignedIds,
+      parentId: params.id || '',
+    });
+    setInformationActionHistory({
+      action: ACTION_NAME.CREATE_GROUP,
+      insertCase: { groupId: group._id },
     });
 
     return redirect(`/settings/groups/${params.id}`);
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
-  }
-}, PERMISSIONS.WRITE_GROUP);
+  },
+  PERMISSIONS.WRITE_GROUP,
+);
 
 interface LoaderData {
   roles: ReturnValueIgnorePromise<typeof getRolesByGroupId>;

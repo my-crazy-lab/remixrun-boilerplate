@@ -1,10 +1,20 @@
 export const PERMISSIONS = {
   ROOT: 'root',
+  MANAGER: 'manager',
   WRITE_USER: 'write/user-management',
   WRITE_ROLE: 'write/role-management',
   READ_ROLE: 'read/role-management',
   WRITE_GROUP: 'write/group-management',
   READ_GROUP: 'read/group-management',
+  READ_ACTION_HISTORY: 'read/action-history',
+};
+
+export const ACTION_NAME = {
+  CREATE_GROUP: 'Create group',
+  UPDATE_GROUP: 'Update group',
+  CREATE_ROLE: 'Create role',
+  UPDATE_ROLE: 'Update role',
+  CREATE_USER: 'Create user',
 };
 
 export enum IActionPermissionModule {

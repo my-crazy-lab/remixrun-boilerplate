@@ -1,39 +1,89 @@
 // HIGHER ORDER COMPONENT
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import {
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+  json,
+} from '@remix-run/node';
+import { ERROR } from '~/constants/common';
 import { newRecordCommonField } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
 import { getUserPermissions } from '~/services/role-base-access-control.server';
 import { type CommonFunction, type MustBeAny } from '~/types';
 
+/**
+ *
+ * @param _defaultValue
+ * @warning can make memory leak
+ * @returns
+ */
+export function closureControllerDeeply<T>() {
+  let action: T;
+
+  function get() {
+    return action;
+  }
+  function set(_action: T) {
+    action = _action;
+  }
+
+  return { get, set };
+}
+
 export function hocAction(
   callback: (
     args: ActionFunctionArgs,
-    { formData }: { formData: MustBeAny },
+    { setInformationActionHistory }: MustBeAny,
   ) => MustBeAny,
   permission: string,
 ) {
   async function action(args: ActionFunctionArgs) {
-    const userId = await getUserId({ request: args.request });
-    const userPermissions = await getUserPermissions(userId);
+    try {
+      const userId = await getUserId({ request: args.request });
+      const userPermissions = await getUserPermissions(userId);
 
-    if (!userPermissions.includes(permission)) {
-      throw new Response(null, res403);
+      if (!userPermissions.includes(permission)) {
+        throw new Response(null, res403);
+      }
+
+      const formData = await args.request.clone().formData();
+      const requestFormData = Object.fromEntries(formData);
+
+      const newActionHistory = new ActionsHistoryModel({
+        ...newRecordCommonField(),
+        actorId: userId,
+      });
+
+      const { get, set } = closureControllerDeeply<{
+        action: string;
+        insertCase?: MustBeAny;
+      }>();
+      const actionResult = await callback(args, {
+        setInformationActionHistory: set,
+      });
+
+      const { action, insertCase } = get();
+      newActionHistory.action = action;
+
+      // case insert data
+      if (insertCase) {
+        newActionHistory.requestFormData = {
+          ...requestFormData,
+          ...insertCase,
+        };
+      } else {
+        newActionHistory.requestFormData = requestFormData;
+      }
+
+      await newActionHistory.save();
+
+      return actionResult;
+    } catch (error) {
+      if (error instanceof Error) {
+        return json({ error: error.message });
+      }
+      return json({ error: ERROR.UNKNOWN_ERROR });
     }
-
-    const formData = await args.request.formData();
-    const data = Object.fromEntries(formData);
-
-    const action = new URL(args.request.url).pathname;
-
-    await ActionsHistoryModel.create({
-      ...newRecordCommonField(),
-      data,
-      actor: userId,
-      action,
-    });
-
-    return callback(args, { formData: data });
   }
 
   return action;

@@ -19,7 +19,7 @@ const UsersSchema = new Schema(
       $type: String,
       required: true,
     },
-    createdAt: { $type: Date, default: Date.now },
+    createdAt: { $type: Date, require: true },
     status: {
       $type: String,
       required: true,

@@ -9,6 +9,8 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
+import { PERMISSIONS } from '~/constants/common';
+import { hocLoader } from '~/hoc/remix';
 import {
   getActionsHistory,
   getTotalActionsHistory,
@@ -25,7 +27,7 @@ interface IActionsHistory {
   _id: string;
   userId: string;
   action: string;
-  data: unknown;
+  requestFormData: unknown;
   createdAt: Date;
 }
 
@@ -73,7 +75,7 @@ const columns: ColumnDef<IActionsHistory>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: 'data',
+    accessorKey: 'requestFormData',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Data" />
     ),
@@ -91,35 +93,38 @@ const columns: ColumnDef<IActionsHistory>[] = [
   },
 ];
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
-  const searchText = url.searchParams.get('username') || '';
-  const total = await getTotalActionsHistory({
-    searchText,
-  });
+export const loader = hocLoader(
+  async ({ params, request }: LoaderFunctionArgs) => {
+    const url = new URL(request.url);
+    const searchText = url.searchParams.get('username') || '';
+    const total = await getTotalActionsHistory({
+      searchText,
+    });
 
-  const { limit, skip } = getSkipAndLimit(
-    getPageSizeAndPageIndex({
-      total,
-      pageSize: Number(url.searchParams.get('pageSize')) || 0,
-      pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
-    }),
-  );
+    const { limit, skip } = getSkipAndLimit(
+      getPageSizeAndPageIndex({
+        total,
+        pageSize: Number(url.searchParams.get('pageSize')) || 0,
+        pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
+      }),
+    );
 
-  const actionsHistory = await getActionsHistory({
-    searchText: url.searchParams.get('username') || '',
-    skip,
-    limit,
-    projection: {
-      username: '$user.username',
-      action: 1,
-      data: 1,
-      createdAt: 1,
-    },
-  });
+    const actionsHistory = await getActionsHistory({
+      searchText: url.searchParams.get('username') || '',
+      skip,
+      limit,
+      projection: {
+        username: '$user.username',
+        action: 1,
+        requestFormData: 1,
+        createdAt: 1,
+      },
+    });
 
-  return json({ actionsHistory, total });
-};
+    return json({ actionsHistory, total });
+  },
+  PERMISSIONS.READ_ACTION_HISTORY,
+);
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
@@ -151,7 +156,7 @@ export default function Screen() {
         setSearchParams={setSearchParams}
         renderSubComponent={({ row }) => (
           <pre style={{ fontSize: '10px' }}>
-            <code>{JSON.stringify(row.getValue('data'), null, 2)}</code>
+            <code>{JSON.stringify(row.getValue('requestFormData'), null, 2)}</code>
           </pre>
         )}
         getRowCanExpand={() => true}

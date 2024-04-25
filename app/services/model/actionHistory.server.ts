@@ -3,12 +3,12 @@ import { mongoClientBE } from '~/utils/db.server';
 
 const ActionsHistorySchema = new Schema(
   {
-    actor: {
+    actorId: {
       $type: String,
       required: true,
     },
     action: { $type: String, required: true },
-    data: { $type: Schema.Types.Mixed, required: true },
+    requestFormData: { $type: Schema.Types.Mixed, required: true },
     createdAt: { $type: Date, required: true },
   },
   { typeKey: '$type', collection: 'actionHistory' },
