@@ -5,10 +5,6 @@ import VN from '~/services/model/isoCode/vn/index.server';
 export type ModelName = 'task' | 'workingPlaces';
 
 export function getModels(isoCode: string) {
-  if (typeof name !== 'string') {
-    throw new Error('Name of collection is not a string');
-  }
-
   if (isoCode === 'VN') {
     return VN;
   }
