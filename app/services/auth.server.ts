@@ -18,7 +18,7 @@ import {
   verifySuperUser,
 } from '~/services/role-base-access-control.server';
 import { sessionStorage } from '~/services/session.server';
-import { type AuthenticatorSessionData } from '~/types';
+import { type AuthenticatorSessionData, type Users } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
 
 // Create an instance of the authenticator, pass a generic with what
@@ -103,7 +103,7 @@ export async function isVerificationCodeExpired({ token }: { token: string }) {
   const account = await UsersModel.findOne({
     'verification.token': token,
     'verification.expired': { $gt: momentTz().toDate() },
-  });
+  }).lean();
 
   return !account?._id;
 }
@@ -112,9 +112,33 @@ export async function isResetPassExpired({ token }: { token: string }) {
   const account = await UsersModel.findOne({
     'resetPassword.token': token,
     'resetPassword.expired': { $gt: momentTz().toDate() },
-  });
+  }).lean();
 
   return !account?._id;
+}
+
+export async function getUserByUserId({ userId }: { userId: string }) {
+  const account = await UsersModel.findOne({
+    _id: userId,
+  }).lean<Users>();
+
+  return account;
+}
+
+export async function updateUser({
+  username,
+  email,
+  cities,
+  userId,
+}: Pick<Users, 'email' | 'username' | 'cities'> & { userId: string }) {
+  await UsersModel.updateOne(
+    {
+      _id: userId,
+    },
+    {
+      $set: { username, email, cities, updatedAt: momentTz().toDate() },
+    },
+  );
 }
 
 export async function verifyCode(

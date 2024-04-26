@@ -3,7 +3,6 @@ import { PasswordInput } from '@/components/btaskee/PasswordInput';
 import BTaskeeTable from '@/components/btaskee/TableBase';
 import Typography from '@/components/btaskee/Typography';
 import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-table-column-header';
-import { DataTableRowActions } from '@/components/btaskee/table-data/data-table-row-actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,12 +14,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, type OptionType } from '@/components/ui/multi-select';
 import { toast } from '@/components/ui/use-toast';
+import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import {
+  Link,
   useActionData,
   useLoaderData,
   useSearchParams,
@@ -51,7 +58,7 @@ export const handle = {
 
 const columns: ColumnDef<LoaderData['users'][0]>[] = [
   {
-    id: 'select',
+    accessorKey: '_id',
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -110,21 +117,37 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {// TODO fix typing for react hook form
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              row.getValue('cities')?.map((e, index) => (
-                <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
-                  {e}
-                </Badge>
-              ))}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            row.getValue('cities')?.map((e, index) => (
+              <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
+                {e}
+              </Badge>
+            ))}
           </span>
         </div>
       );
     },
   },
   {
-    id: 'actions',
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    accessorKey: 'actions',
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+            <DotsHorizontalIcon className="h-4 w-4" />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-[160px]">
+          <Link to={`/settings/users/${row.getValue('_id')}/edit`}>
+            <DropdownMenuItem>Edit</DropdownMenuItem>
+          </Link>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
   },
 ];
 
@@ -177,7 +200,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const users = await getUsers({
     skip,
     limit,
-    projection: { cities: 1, username: 1, email: 1 },
+    projection: { _id: 1, cities: 1, username: 1, email: 1 },
   });
 
   const { isoCode } = await getUserSession({ headers: request.headers });
