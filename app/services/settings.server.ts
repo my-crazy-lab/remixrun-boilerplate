@@ -5,7 +5,7 @@ import { momentTz } from '~/utils/common';
 import { type PipelineStage } from '~/utils/db.server';
 
 import { hashPassword } from './auth.server';
-import { newRecordCommonField } from './constants.server';
+import { newRecordCommonField, statusOriginal } from './constants.server';
 
 interface ISearch {
   $match: {
@@ -112,7 +112,7 @@ export async function getUsers({
   projection: PipelineStage.Project['$project'];
 }) {
   const users = await UsersModel.find(
-    {},
+    { status: statusOriginal.ACTIVE },
     {},
     {
       sort: {

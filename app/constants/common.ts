@@ -20,7 +20,8 @@ export const ACTION_NAME = {
   LOGIN: 'Login',
   REMOVE_ROLE: 'Remove role',
   REMOVE_GROUP: 'Remove group',
-  UPDATE_USER:'Update user'
+  UPDATE_USER: 'Update user',
+  DELETE_USER: 'Delete user',
 };
 
 export enum IActionPermissionModule {

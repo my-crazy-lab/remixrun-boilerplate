@@ -27,6 +27,7 @@ import { toast } from '@/components/ui/use-toast';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import {
+  Form,
   Link,
   useActionData,
   useLoaderData,
@@ -42,6 +43,7 @@ import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import { getCities, getUserSession } from '~/services/helpers.server';
+import { deleteUser } from '~/services/role-base-access-control.server';
 import {
   createNewUser,
   getTotalUsers,
@@ -145,6 +147,15 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
           <Link to={`/settings/users/${row.getValue('_id')}/edit`}>
             <DropdownMenuItem>Edit</DropdownMenuItem>
           </Link>
+          <Form className="w-full" method="post">
+            <button
+              style={{ width: '100%' }}
+              name="userDeleted"
+              value={row.getValue('_id')}
+              type="submit">
+              <DropdownMenuItem>Delete</DropdownMenuItem>
+            </button>
+          </Form>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
@@ -154,25 +165,33 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
 export const action = hocAction(
   async ({ request }, { setInformationActionHistory }) => {
     const formData = await request.formData();
+    const userDeleted = formData.get('userDeleted')?.toString() || '';
 
-    const username = formData.get('username')?.toString() || '';
-    const email = formData.get('email')?.toString() || '';
-    const password = formData.get('password')?.toString() || '';
-    const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
+    if (userDeleted) {
+      await deleteUser(userDeleted);
+      setInformationActionHistory({
+        action: ACTION_NAME.DELETE_USER,
+      });
+    } else {
+      const username = formData.get('username')?.toString() || '';
+      const email = formData.get('email')?.toString() || '';
+      const password = formData.get('password')?.toString() || '';
+      const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
 
-    const { isoCode } = await getUserSession({ headers: request.headers });
+      const { isoCode } = await getUserSession({ headers: request.headers });
 
-    const newUser = await createNewUser({
-      username,
-      password,
-      email,
-      isoCode,
-      cities,
-    });
-    setInformationActionHistory({
-      action: ACTION_NAME.CREATE_USER,
-      dataRelated: { userId: newUser?._id },
-    });
+      const newUser = await createNewUser({
+        username,
+        password,
+        email,
+        isoCode,
+        cities,
+      });
+      setInformationActionHistory({
+        action: ACTION_NAME.CREATE_USER,
+        dataRelated: { userId: newUser?._id },
+      });
+    }
 
     return null;
   },
@@ -248,6 +267,7 @@ export default function Screen() {
 
   const onSubmit = (data: FormData) => {
     const formData = new FormData();
+
     formData.append('email', data.email);
     formData.append('password', data.password);
     formData.append('cities', JSON.stringify(data.cities.map(c => c.value)));
