@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, MultiSelectAsync } from '@/components/ui/multi-select';
+import { toast } from '@/components/ui/use-toast';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import {
+  useActionData,
   useLoaderData,
   useNavigation,
   useSearchParams,
@@ -14,7 +16,7 @@ import {
 } from '@remix-run/react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ERROR, PERMISSIONS } from '~/constants/common';
+import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
 import { getUserSession } from '~/services/helpers.server';
 import {
@@ -26,25 +28,31 @@ import {
 } from '~/services/role-base-access-control.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 
-export const action = hocAction(async ({ params }, { formData }) => {
-  try {
-    const { name, description, userIds, roleIds } = formData;
+export const action = hocAction(
+  async ({ request, params }, { setInformationActionHistory }) => {
+    const formData = await request.formData();
+
+    const name = formData.get('name')?.toString() || '';
+    const description = formData.get('description')?.toString() || '';
+    const userIds = JSON.parse(formData.get('userIds')?.toString() || '') || [];
+    const roleAssignedIds =
+      JSON.parse(formData.get('roleIds')?.toString() || '') || [];
+
     await updateGroups({
       name,
       description,
-      userIds: JSON.parse(userIds),
-      roleAssignedIds: JSON.parse(roleIds),
+      userIds,
+      roleAssignedIds,
       groupId: params.childId || '',
+    });
+    setInformationActionHistory({
+      action: ACTION_NAME.UPDATE_GROUP,
     });
 
     return redirect(`/settings/groups/${params.id}`);
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
-  }
-}, PERMISSIONS.WRITE_GROUP);
+  },
+  PERMISSIONS.WRITE_GROUP,
+);
 
 interface LoaderData {
   group: ReturnValueIgnorePromise<
@@ -139,6 +147,13 @@ export const handle = {
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
+
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
 
   const { group, roles, users } = useLoaderData<LoaderData>();
   const navigation = useNavigation();

@@ -11,14 +11,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { toast } from '@/components/ui/use-toast';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { useLoaderData, useParams, useSubmit } from '@remix-run/react';
+import {
+  useActionData,
+  useLoaderData,
+  useParams,
+  useSubmit,
+} from '@remix-run/react';
 import _ from 'lodash';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ERROR, PERMISSIONS } from '~/constants/common';
+import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
+import { getUserSession } from '~/services/helpers.server';
 import {
   createRole,
   getGroupPermissions,
@@ -40,23 +47,29 @@ export const handle = {
 };
 
 export const action = hocAction(
-  async ({ params }: ActionFunctionArgs, { formData }) => {
-    try {
-      const { name, description, permissions } = formData;
-      await createRole({
-        name,
-        groupId: params.id || '',
-        description,
-        permissions: JSON.parse(permissions),
-      });
+  async (
+    { request, params }: ActionFunctionArgs,
+    { setInformationActionHistory },
+  ) => {
+    const formData = await request.formData();
 
-      return redirect(`/settings/groups/${params.id}`);
-    } catch (error) {
-      if (error instanceof Error) {
-        return json({ error: error.message });
-      }
-      return json({ error: ERROR.UNKNOWN_ERROR });
-    }
+    const name = formData.get('name')?.toString() || '';
+    const description = formData.get('description')?.toString() || '';
+    const permissions =
+      JSON.parse(formData.get('permissions')?.toString() || '') || [];
+
+    const role = await createRole({
+      name,
+      groupId: params.id || '',
+      description,
+      permissions,
+    });
+    setInformationActionHistory({
+      action: ACTION_NAME.CREATE_ROLE,
+      dataRelated: { roleId: role._id },
+    });
+
+    return redirect(`/settings/groups/${params.id}`);
   },
   PERMISSIONS.WRITE_ROLE,
 );
@@ -70,7 +83,8 @@ export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
 
-    const permissions = await getGroupPermissions({ groupId });
+    const { isSuperUser } = await getUserSession({ headers: request.headers });
+    const permissions = await getGroupPermissions({ groupId, isSuperUser });
 
     return json({
       permissions,
@@ -86,6 +100,13 @@ interface FormData {
   description: string;
 }
 export default function Screen() {
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
+
   const { t } = useTranslation(['user-settings']);
   const loaderData = useLoaderData<LoaderData>();
 

@@ -1,16 +1,14 @@
-import { toast } from '@/components/ui/use-toast';
 import { PERMISSIONS } from '~/constants/common';
 import { res403, res404 } from '~/hoc/remix';
 import {
   newRecordCommonField,
   statusOriginal,
 } from '~/services/constants.server';
-import { getUserId } from '~/services/helpers.server';
 import GroupsModel from '~/services/model/groups.server';
 import PermissionsModel from '~/services/model/permissions.server';
 import RolesModel from '~/services/model/roles.servers';
 import UsersModel from '~/services/model/users.server';
-import { type Groups, type Roles } from '~/types';
+import { type Groups, type Roles, type Users } from '~/types';
 import {
   convertRolesToPermissions,
   momentTz,
@@ -20,43 +18,12 @@ import { type Projection } from '~/utils/db.server';
 
 export async function verifySuperUser(userId: string) {
   const permissions = await getUserPermissions(userId);
-
-  // use in group ROOT is super user
   return Boolean(permissions.includes(PERMISSIONS.ROOT));
 }
 
-export async function verifyPermissions(
-  { request }: { request: Request },
-  permissions: Array<string>,
-) {
-  const userId = await getUserId({ request });
-  const roles = await RolesModel.find(
-    { permissions: { $in: permissions }, status: statusOriginal.ACTIVE },
-    { projection: { _id: 1 } },
-  ).exec();
-
-  const groupFound = await GroupsModel.findOne({
-    userIds: userId,
-    roleIds: { $in: roles.map(role => role._id) },
-    status: statusOriginal.ACTIVE,
-  });
-
-  if (groupFound) {
-    return true;
-  }
-  return false;
-}
-
-export async function requirePermissions(
-  { request }: { request: Request },
-  permissions: Array<string>,
-) {
-  const isAccepted = await verifyPermissions({ request }, permissions);
-  if (!isAccepted) {
-    toast({
-      description: 'USER_DONT_HAVE_PERMISSION',
-    });
-  }
+export async function verifyManager(userId: string) {
+  const permissions = await getUserPermissions(userId);
+  return Boolean(permissions.includes(PERMISSIONS.MANAGER));
 }
 
 export async function getUserPermissions(userId: string) {
@@ -116,7 +83,7 @@ export async function createGroup({
   // root group (hierarchy 1) not have genealogy field
   const genealogy = [...(parentGroup.genealogy || []), parentId];
 
-  await GroupsModel.create({
+  return GroupsModel.create({
     ...newRecordCommonField(),
     name,
     description,
@@ -216,7 +183,18 @@ export async function searchUser(searchText: string) {
   return users;
 }
 
-export async function getGroupPermissions({ groupId }: { groupId: string }) {
+export async function getGroupPermissions({
+  groupId,
+  isSuperUser,
+}: {
+  groupId: string;
+  isSuperUser: boolean;
+}) {
+  // with super user, show all permissions in create/update roles
+  if (isSuperUser) {
+    return getAllPermissions();
+  }
+
   const group = await GroupsModel.findOne({
     _id: groupId,
     status: statusOriginal.ACTIVE,
@@ -304,10 +282,34 @@ export async function createRole({
     { _id: groupId },
     { $push: { roleIds: createdRole._id } },
   );
+
+  return createdRole;
 }
 
 export function getAllPermissions() {
-  return PermissionsModel.find({}).lean();
+  // permissions ROOT is private
+  return PermissionsModel.find({ _id: { $ne: PERMISSIONS.ROOT } }).lean();
+}
+
+export async function updateUser({
+  userId,
+  email,
+  username,
+  cities,
+}: Pick<Users, 'email' | 'username' | 'cities'> & {
+  userId: string;
+}) {
+  await UsersModel.updateOne(
+    { _id: userId, status: statusOriginal.ACTIVE },
+    {
+      $set: {
+        updatedAt: momentTz().toDate(),
+        email,
+        username,
+        cities,
+      },
+    },
+  );
 }
 
 export async function deleteUser(userId: string) {
@@ -336,11 +338,9 @@ export async function deleteUser(userId: string) {
 }
 
 async function getPermissionsRemovedAfterUpdateOrRemoveRoles({
-  roleId,
   groupId,
   updateOrRemoveCallback,
 }: {
-  roleId: string;
   groupId: string;
   updateOrRemoveCallback: () => Promise<void>;
 }) {
@@ -360,11 +360,9 @@ async function getPermissionsRemovedAfterUpdateOrRemoveRoles({
 }
 
 async function getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
-  roleId,
   groupId,
   permissionsRemoved,
 }: {
-  roleId: string;
   groupId: string;
   permissionsRemoved: Array<string>;
 }) {
@@ -434,7 +432,6 @@ export async function deleteRole({
 
   const permissionsRemoved =
     await getPermissionsRemovedAfterUpdateOrRemoveRoles({
-      roleId,
       groupId,
       updateOrRemoveCallback: async () => {
         // remove role by id
@@ -466,7 +463,6 @@ export async function deleteRole({
   const rolesWillBeUpdated =
     await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
       groupId,
-      roleId,
       permissionsRemoved,
     });
 
@@ -496,7 +492,6 @@ export async function updateRole({
 
   const permissionsRemoved =
     await getPermissionsRemovedAfterUpdateOrRemoveRoles({
-      roleId,
       groupId,
       updateOrRemoveCallback: async () => {
         // update role by id
@@ -518,7 +513,6 @@ export async function updateRole({
   const rolesWillBeUpdated =
     await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
       groupId,
-      roleId,
       permissionsRemoved,
     });
 

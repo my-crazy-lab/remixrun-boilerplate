@@ -2,10 +2,11 @@ import { type LucideIcon } from 'lucide-react';
 import type { TActionPermissionModule } from '~/constants/common';
 import { type Document } from '~/utils/db.server';
 
-export interface AuthenticatorSessionData {
+export interface AuthenticatorSessionData
+  extends Pick<Users, 'isoCode' | 'cities'> {
   userId: string;
   isSuperUser: boolean;
-  isoCode: Users['isoCode'];
+  isManager: boolean;
 }
 
 export interface NavItem {

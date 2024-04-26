@@ -18,15 +18,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, type OptionType } from '@/components/ui/multi-select';
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
-import { useLoaderData, useSearchParams, useSubmit } from '@remix-run/react';
-import type { ColumnDef } from '@tanstack/react-table';
+import { toast } from '@/components/ui/use-toast';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
+import {
+  useActionData,
+  useLoaderData,
+  useSearchParams,
+  useSubmit,
+} from '@remix-run/react';
+import { type ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ERROR, PERMISSIONS } from '~/constants/common';
+import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import { getCities, getUserSession } from '~/services/helpers.server';
@@ -123,29 +128,38 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
   },
 ];
 
-export const action = hocAction(async ({ }, { formData }) => {
-  try {
-    const { username, email, password, cities } = formData;
+export const action = hocAction(
+  async ({ request }, { setInformationActionHistory }) => {
+    const formData = await request.formData();
 
-    await createNewUser({
+    const username = formData.get('username')?.toString() || '';
+    const email = formData.get('email')?.toString() || '';
+    const password = formData.get('password')?.toString() || '';
+    const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
+
+    const { isoCode } = await getUserSession({ headers: request.headers });
+
+    const newUser = await createNewUser({
       username,
       password,
       email,
-      cities: JSON.parse(cities) || [],
+      isoCode,
+      cities,
+    });
+    setInformationActionHistory({
+      action: ACTION_NAME.CREATE_USER,
+      dataRelated: { userId: newUser?._id },
     });
 
     return null;
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
-  }
-}, PERMISSIONS.WRITE_USER);
+  },
+  PERMISSIONS.WRITE_USER,
+);
 
 interface LoaderData {
   users: ReturnValueIgnorePromise<typeof getUsers>;
   total: number;
+  cities: Array<string>;
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -180,6 +194,13 @@ interface FormData {
 }
 
 export default function Screen() {
+  const actionData = useActionData<{
+    error?: string;
+  }>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
+
   const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData<LoaderData>();
@@ -291,20 +312,10 @@ export default function Screen() {
                           selected={value}
                           setSelected={onChange}
                           isDisplayAllOptions
-                          options={[
-                            {
-                              value: 'HCM',
-                              label: 'HCM',
-                            },
-                            {
-                              value: 'HN',
-                              label: 'Hanoi',
-                            },
-                            {
-                              value: 'DT',
-                              label: 'DT',
-                            },
-                          ]}
+                          options={loaderData.cities.map(e => ({
+                            label: e,
+                            value: e,
+                          }))}
                           className="w-[360px]"
                         />
                       )}

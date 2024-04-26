@@ -14,12 +14,13 @@ const UsersSchema = new Schema(
     email: {
       $type: String,
       required: true,
+      unique: true,
     },
     isoCode: {
       $type: String,
       required: true,
     },
-    createdAt: { $type: Date, default: Date.now },
+    createdAt: { $type: Date, require: true },
     status: {
       $type: String,
       required: true,

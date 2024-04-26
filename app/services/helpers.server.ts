@@ -1,6 +1,7 @@
+import { getModels } from '~/services/model/isoCode/method.server';
+import UsersModel from '~/services/model/users.server';
 import { getSession } from '~/services/session.server';
-
-import { getModels } from './model/isoCode/method.server';
+import { type Users } from '~/types';
 
 export async function getUserId({ request }: { request: Request }) {
   const authSession = await getSession(request.headers.get('cookie'));
@@ -34,4 +35,28 @@ export async function getCities(isoCode: string) {
     .lean();
 
   return workingPlaces?.cities.map(city => city.name);
+}
+
+export async function getCitiesByUserId({
+  userId,
+  isManager,
+}: {
+  userId: string;
+  isManager: boolean;
+}) {
+  const user = await UsersModel.findOne(
+    { _id: userId },
+    { cities: 1, isoCode: 1 },
+  ).lean<Users>();
+
+  if (!user) {
+    throw new Error('USER_NOT_FOUND');
+  }
+
+  // Manager can access all cities at country by iso code
+  if (isManager) {
+    return getCities(user.isoCode);
+  }
+
+  return user.cities || [];
 }

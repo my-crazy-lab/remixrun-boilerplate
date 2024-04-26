@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { type ActionFunctionArgs, json } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import { ERROR } from '~/constants/common';
+import { ACTION_NAME } from '~/constants/common';
+import { hocAction } from '~/hoc/remix';
 import { resetPassword } from '~/services/auth.server';
 
 interface ActionData {
@@ -16,25 +17,24 @@ interface ActionData {
   error?: string;
 }
 
-export async function action({ request }: ActionFunctionArgs) {
-  try {
+export const action = hocAction(
+  async ({ request }, { setInformationActionHistory }) => {
     const formData = await request.formData();
+
     const { email } = Object.fromEntries(formData);
 
     if (email && typeof email === 'string') {
       await resetPassword(email);
+      setInformationActionHistory({
+        action: ACTION_NAME.RESET_PASSWORD,
+      });
+
+      return json({ isSent: true });
     } else {
       throw new Error('Email incorrect');
     }
-
-    return json({ isSent: true });
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
-  }
-}
+  },
+);
 
 export async function loader() {
   return null;

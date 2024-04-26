@@ -34,7 +34,7 @@ export async function getTotalActionsHistory({
     {
       $lookup: {
         from: 'users',
-        localField: 'userId',
+        localField: 'actorId',
         foreignField: '_id',
         as: 'user',
       },
@@ -76,7 +76,7 @@ export async function getActionsHistory({
     {
       $lookup: {
         from: 'users',
-        localField: 'userId',
+        localField: 'actorId',
         foreignField: '_id',
         as: 'user',
       },
@@ -133,20 +133,24 @@ export function getUserProfile(_id: string) {
   return UsersModel.findOne({ _id }).lean<Users>();
 }
 
-export async function createNewUser({
+export function createNewUser({
   username,
   password,
   email,
   cities,
-}: Pick<Users, 'username' | 'email' | 'cities'> & { password: string }) {
+  isoCode,
+}: Pick<Users, 'username' | 'email' | 'cities' | 'isoCode'> & {
+  password: string;
+}) {
   const passwordHashed = hashPassword(password);
 
-  await UsersModel.create({
+  return UsersModel.create({
     ...newRecordCommonField(),
     username,
     email,
     cities,
     services: { password: { bcrypt: passwordHashed } },
+    isoCode,
   });
 }
 
