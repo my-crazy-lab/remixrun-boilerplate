@@ -1,10 +1,12 @@
+import { Grid } from '@/components/btaskee/Grid';
+import { LoadingSpinner } from '@/components/btaskee/LoadingSpinner';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { json } from '@remix-run/node';
-import { Form, useActionData, useNavigation } from '@remix-run/react';
+import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
@@ -59,23 +61,29 @@ export default function Screen() {
         {actionData?.isSent ? (
           t('CHECK_YOUR_EMAIL')
         ) : (
-          <Form method="post">
-            <div className="grid gap-6">
-              <div className="grid gap-2">
-                <Label>{t('EMAIL')}</Label>
-                <Input
-                  required
-                  name="email"
-                  type="email"
-                  placeholder="name@btaskee.com"
-                />
+          <Grid>
+            <Form method="post">
+              <div className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label>{t('EMAIL')}</Label>
+                  <Input
+                    required
+                    name="email"
+                    type="email"
+                    placeholder="name@btaskee.com"
+                  />
+                </div>
+                <Button>
+                  {state !== 'idle' ? <LoadingSpinner /> : t('SEND')}
+                </Button>
               </div>
-              <>
-                <Button>{state !== 'idle' ? t('LOADING') : t('SEND')}</Button>
-                <Button variant="outline">{t('BACK_TO_SIGN_IN')}</Button>
-              </>
-            </div>
-          </Form>
+            </Form>
+            <Link to="/sign-in">
+              <Button className="w-full" variant="outline">
+                {t('BACK_TO_SIGN_IN')}
+              </Button>
+            </Link>
+          </Grid>
         )}
       </div>
     </>

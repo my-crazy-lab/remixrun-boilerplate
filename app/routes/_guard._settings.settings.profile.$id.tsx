@@ -1,6 +1,6 @@
-import { AvatarUpload } from '@/components/btaskee/AvatarUpload';
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import Typography from '@/components/btaskee/Typography';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -12,24 +12,31 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
+import { User2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
-import { getUserId } from '~/services/helpers.server';
 import { getUserProfile } from '~/services/settings.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { ReturnValueIgnorePromise, Users } from '~/types';
 
 export const handle = {
-  breadcrumb: () => (
-    <BreadcrumbsLink to={`${ROUTE_NAME.PROFILE_SETTING}`} label="PROFILE" />
-  ),
+  breadcrumb: (data: { userProfile: Users }) => {
+    const { userProfile } = data;
+
+    return (
+      <BreadcrumbsLink
+        to={`${ROUTE_NAME.PROFILE_SETTING}/${userProfile._id}`}
+        label="PROFILE"
+      />
+    );
+  },
 };
 
 interface LoaderData {
   userProfile: ReturnValueIgnorePromise<typeof getUserProfile>;
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const userId = await getUserId({ request });
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+  const userId = params.id || '';
   const userProfile = await getUserProfile(userId);
 
   return json({ userProfile });
@@ -98,17 +105,21 @@ export default function Screen() {
             </CardContent>
           </Card>
         </div>
-        <Card className="h-[448px]">
+        <Card className="h-[370px]">
           <CardHeader>
             <CardTitle className="text-lg">{t('CHANGE_PROFILE')}</CardTitle>
             <CardDescription>{t('CHANGE_PICTURE_FROM_HERE')}</CardDescription>
           </CardHeader>
           <Separator />
           <div className="justify-center flex flex-col items-center">
-            <AvatarUpload />
-            <Typography variant="p" affects="muted" className="pt-4">
-              {t('IMAGE_HELPER_TEXT')}
-            </Typography>
+            <div className="w-40 h-40 text-center mt-10">
+              <Avatar className="w-full h-full">
+                <AvatarImage className="object-cover" />
+                <AvatarFallback className="bg-secondary">
+                  <User2Icon className="w-16 h-16" />
+                </AvatarFallback>
+              </Avatar>
+            </div>
           </div>
         </Card>
       </div>

@@ -53,17 +53,17 @@ export default function RolesDetail() {
         <Accordion type="single" collapsible key={actionPermission.module}>
           <AccordionItem value={actionPermission.module}>
             <AccordionTrigger className="capitalize">
-              {actionPermission?.module}
+              {actionPermission?.module} permission
             </AccordionTrigger>
             <AccordionContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="flex flex-wrap gap-3">
                 {_.map(actionPermission.actions, action => (
-                  <div key={action._id} className="my-2">
-                    <div className="mt-1 flex items-center gap-2">
-                      <Badge className="text-sm text-blue bg-blue-50 rounded-lg">
-                        {action.name}
-                      </Badge>
-                    </div>
+                  <div
+                    key={action._id}
+                    className="my-2 flex items-center gap-2">
+                    <Badge className="text-sm text-blue bg-blue-50 rounded-md">
+                      {action.name}
+                    </Badge>
                   </div>
                 ))}
               </div>

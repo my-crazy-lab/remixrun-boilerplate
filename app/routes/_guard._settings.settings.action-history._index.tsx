@@ -10,16 +10,21 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '~/constants/common';
+import ROUTE_NAME from '~/constants/route';
 import { hocLoader } from '~/hoc/remix';
 import {
   getActionsHistory,
   getTotalActionsHistory,
 } from '~/services/settings.server';
+import { type ActionsHistory } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/action-history" label="Actions history" />
+    <BreadcrumbsLink
+      to={ROUTE_NAME.ACTION_HISTORY_SETTING}
+      label="ACTIONS_HISTORY"
+    />
   ),
 };
 
@@ -131,7 +136,7 @@ export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { total, actionsHistory } = useLoaderData<{
     total: number;
-    actionsHistory: [IActionsHistory];
+    actionsHistory: ActionsHistory[];
   }>();
 
   return (

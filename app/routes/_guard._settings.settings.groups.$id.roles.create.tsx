@@ -1,4 +1,5 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import {
   Accordion,
@@ -28,9 +29,14 @@ import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
-  breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/groups" label="Create role" />
-  ),
+  breadcrumb: (data: { groupId: string }) => {
+    return (
+      <BreadcrumbsLink
+        to={`/settings/groups/${data.groupId}/roles/create`}
+        label="CREATE_ROLE"
+      />
+    );
+  },
 };
 
 export const action = hocAction(
@@ -38,6 +44,8 @@ export const action = hocAction(
     { request, params }: ActionFunctionArgs,
     { setInformationActionHistory },
   ) => {
+    const groupId = params.id || '';
+
     const formData = await request.formData();
 
     const name = formData.get('name')?.toString() || '';
@@ -47,7 +55,7 @@ export const action = hocAction(
 
     const role = await createRole({
       name,
-      groupId: params.id || '',
+      groupId,
       description,
       permissions,
     });
@@ -74,6 +82,7 @@ export const loader = hocLoader(
     const permissions = await getGroupPermissions({ groupId, isSuperUser });
 
     return json({
+      groupId,
       permissions,
       permissionsGrouped: groupPermissionsByModule(permissions),
     });
@@ -95,10 +104,9 @@ export default function Screen() {
   }
 
   const { t } = useTranslation(['user-settings']);
-
   const loaderData = useLoaderData<LoaderData>();
 
-  const { register, control, handleSubmit } = useForm<FormData>({
+  const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       name: '',
       description: '',
@@ -137,16 +145,22 @@ export default function Screen() {
             <Input
               placeholder={t('ENTER_ROLE_NAME')}
               className="mt-2"
-              {...register('name' as const, { required: true })}
+              {...register('name' as const, {
+                required: t('THIS_FIELD_IS_REQUIRED'),
+              })}
             />
+            <ErrorMessageBase name="name" errors={formState.errors} />
           </div>
           <div>
             <Label htmlFor="description">{t('DESCRIPTION')}</Label>
             <Input
               placeholder={t('ENTER_DESCRIPTION')}
               className="mt-2"
-              {...register('description' as const, { required: true })}
+              {...register('description' as const, {
+                required: t('THIS_FIELD_IS_REQUIRED'),
+              })}
             />
+            <ErrorMessageBase name="description" errors={formState.errors} />
           </div>
         </div>
 

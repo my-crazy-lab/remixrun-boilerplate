@@ -33,6 +33,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
+import useGlobalStore from '~/hooks/useGlobalStore';
 import { getCities, getUserSession } from '~/services/helpers.server';
 import {
   createNewUser,
@@ -44,7 +45,7 @@ import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/users" label="Users management" />
+    <BreadcrumbsLink to="/settings/users" label="USERS_MANAGEMENT" />
   ),
 };
 
@@ -109,13 +110,13 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {// TODO fix typing for react hook form
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            row.getValue('cities')?.map((e, index) => (
-              <Badge variant="secondary" key={index}>
-                {e}
-              </Badge>
-            ))}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              row.getValue('cities')?.map((e, index) => (
+                <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
+                  {e}
+                </Badge>
+              ))}
           </span>
         </div>
       );
@@ -203,6 +204,7 @@ export default function Screen() {
   const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
   const loaderData = useLoaderData<LoaderData>();
+  const globalData = useGlobalStore(state => state);
 
   const { register, control, reset, handleSubmit } = useForm<FormData>({
     defaultValues: {
@@ -247,12 +249,14 @@ export default function Screen() {
             }
             setOpen(open);
           }}>
-          <DialogTrigger asChild>
-            <Button className="gap-2" variant="default">
-              <Plus />
-              {t('ADD_NEW_USER')}
-            </Button>
-          </DialogTrigger>
+          {globalData.permissions?.includes(PERMISSIONS.WRITE_USER) ? (
+            <DialogTrigger asChild>
+              <Button className="gap-2" variant="default">
+                <Plus />
+                {t('ADD_NEW_USER')}
+              </Button>
+            </DialogTrigger>
+          ) : null}
           <DialogContent className="sm:max-w-[560px]">
             <form onSubmit={handleSubmit(onSubmit)}>
               <DialogHeader>

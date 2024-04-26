@@ -1,3 +1,4 @@
+import { CommonAlertDialog } from '@/components/btaskee/AlertDialog';
 import { Breadcrumbs } from '@/components/btaskee/Breadcrumbs';
 import Typography from '@/components/btaskee/Typography';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -123,17 +124,21 @@ export default function Screen() {
                                 <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
                               </Link>
                               <DropdownMenuSeparator />
-                              <Form className="w-full" method="post">
-                                <button
-                                  name="groupDeleted"
-                                  value={child._id}
-                                  className="w-full text-start"
-                                  type="submit">
-                                  <DropdownMenuItem>
+                              <CommonAlertDialog
+                                triggerText={t('DELETE')}
+                                title="Are you absolutely sure?"
+                                description="This action cannot be undone. This will permanently delete your account
+        and remove your data from our servers.">
+                                <Form className="w-full" method="post">
+                                  <button
+                                    name="groupDeleted"
+                                    value={child._id}
+                                    className="w-full text-start"
+                                    type="submit">
                                     {t('DELETE')}
-                                  </DropdownMenuItem>
-                                </button>
-                              </Form>
+                                  </button>
+                                </Form>
+                              </CommonAlertDialog>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         ) : null}
@@ -153,14 +158,13 @@ export default function Screen() {
                           </div>
                           <div>
                             <Typography className="text-gray-400" variant="p">
-                              {t('Children group')}
+                              {t('CHILDREN_GROUP')}
                             </Typography>
                             <Typography className="text-primary" variant="h4">
                               2
                             </Typography>
                           </div>
                         </div>
-
                         <div className="flex items-center gap-2">
                           <div className="bg-secondary p-3 rounded-md">
                             <img src={UsersIcon} alt="user-group-icon" />
@@ -209,43 +213,56 @@ export default function Screen() {
             ) : null}
           </div>
 
-          {loaderData.group?.roles?.map(role => {
-            return (
-              <Button key={role._id} variant="secondary" className="mr-4">
-                <Link to={`/settings/groups/${params.id}/roles/${role._id}`}>
-                  {role.name}
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-                      <DotsHorizontalIcon className="h-4 w-4" />
-                      <span className="sr-only">Open menu</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  {globalData.permissions?.includes(PERMISSIONS.WRITE_ROLE) ? (
-                    <DropdownMenuContent align="end" className="w-[160px]">
-                      <Link
-                        to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
-                        <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
-                      </Link>
-                      <DropdownMenuSeparator />
-                      <Form className="w-full" method="post">
-                        <button
-                          name="roleDeleted"
-                          value={role._id}
-                          className="w-full text-start"
-                          type="submit">
-                          <DropdownMenuItem>{t('DELETE')}</DropdownMenuItem>
-                        </button>
-                      </Form>
-                    </DropdownMenuContent>
-                  ) : null}
-                </DropdownMenu>
-              </Button>
-            );
-          })}
+          <div className="flex flex-wrap gap-3">
+            {loaderData.group?.roles?.map(role => {
+              return (
+                <Button
+                  key={role._id}
+                  variant="secondary"
+                  className="flex text-blue bg-blue-50 gap-2">
+                  <Link to={`/settings/groups/${params.id}/roles/${role._id}`}>
+                    {role.name}
+                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+                        <DotsHorizontalIcon className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    {globalData.permissions?.includes(
+                      PERMISSIONS.WRITE_ROLE,
+                    ) ? (
+                      <DropdownMenuContent align="center" className="w-[160px]">
+                        <Link
+                          to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>
+                          <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuSeparator />
+                        <CommonAlertDialog
+                          triggerText={t('DELETE')}
+                          title="Are you absolutely sure?"
+                          description="This action cannot be undone. This will permanently delete your account
+        and remove your data from our servers.">
+                          <Form className="w-full" method="post">
+                            <button
+                              name="roleDeleted"
+                              value={role._id}
+                              className="w-full text-start"
+                              type="submit">
+                              {t('DELETE')}
+                            </button>
+                          </Form>
+                        </CommonAlertDialog>
+                      </DropdownMenuContent>
+                    ) : null}
+                  </DropdownMenu>
+                </Button>
+              );
+            })}
+          </div>
         </Card>
 
         <Card className="p-4 col-span-1">
@@ -262,7 +279,7 @@ export default function Screen() {
           <div className="grid grid-cols-1 gap-2">
             {loaderData.group?.users?.map(user => {
               return (
-                <Link key={user._id} to={'/settings/profile'}>
+                <Link key={user._id} to={`/settings/profile/${user._id}`}>
                   <div className="mt-4 flex items-center gap-4">
                     <Button
                       variant="ghost"

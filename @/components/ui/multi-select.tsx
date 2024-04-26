@@ -80,7 +80,7 @@ export function MultiSelectAsync<T extends CommonFunction>({
               <Badge
                 variant="secondary"
                 key={item.value}
-                className="mr-1 rounded-md"
+                className="mr-1 rounded-md text-blue bg-blue-50"
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button
@@ -210,7 +210,7 @@ export function MultiSelect<T extends CommonFunction>({
               <Badge
                 variant="secondary"
                 key={item.value}
-                className="mr-1 rounded-md"
+                className="mr-1 rounded-md text-blue bg-blue-50"
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button

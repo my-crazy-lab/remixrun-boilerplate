@@ -1,6 +1,7 @@
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
 import UsersModel from '~/services/model/users.server';
 import { type Users } from '~/types';
+import { momentTz } from '~/utils/common';
 import { type PipelineStage } from '~/utils/db.server';
 
 import { hashPassword } from './auth.server';
@@ -97,8 +98,7 @@ export async function getActionsHistory({
 }
 
 export async function getTotalUsers() {
-  const total = await UsersModel.countDocuments({});
-
+  const total = await UsersModel.countDocuments();
   return total;
 }
 
@@ -152,4 +152,19 @@ export function createNewUser({
     services: { password: { bcrypt: passwordHashed } },
     isoCode,
   });
+}
+
+export async function setUserLanguage({
+  language,
+  userId,
+}: Pick<Users, 'language'> & { userId: string }) {
+  await UsersModel.updateOne(
+    { _id: userId },
+    {
+      $set: {
+        updatedAt: momentTz().toDate(),
+        language,
+      },
+    },
+  );
 }

@@ -36,7 +36,7 @@ import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
-  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="Edit role" />,
+  breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="EDIT_ROLE" />,
 };
 
 interface LoaderData {

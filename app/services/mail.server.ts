@@ -1,3 +1,4 @@
+import { toast } from '@/components/ui/use-toast';
 import nodemailer from 'nodemailer';
 
 import { dotenv } from './dotenv.server';
@@ -26,6 +27,8 @@ export async function sendEmail({ to, from, text, subject }: EmailArgs) {
       subject,
     });
   } catch (error) {
-    throw new Error('EMAIL_SERVICE_ERROR');
+    toast({
+      description: 'EMAIL_SERVICE_ERROR',
+    });
   }
 }

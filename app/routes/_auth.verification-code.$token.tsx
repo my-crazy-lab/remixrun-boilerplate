@@ -1,10 +1,11 @@
+import { LoadingSpinner } from '@/components/btaskee/LoadingSpinner';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { Form } from '@remix-run/react';
+import { Form, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
 import {
@@ -47,27 +48,30 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
 export default function Screen() {
   const { t } = useTranslation(['authentication']);
+  const navigation = useNavigation();
 
   return (
     <>
       <div className="flex flex-col space-y-1 text-start">
         <Typography variant="h3">{t('VERIFICATION_CODE')}</Typography>
         <Typography variant="p" affects="removePMargin">
-          Open your gmail and verify your code.
+          {t('VERIFICATION_CODE_HELPER')}
         </Typography>
       </div>
       <div className="grid gap-6">
         <Form method="post">
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="verificationCode">{t('VERIFICATION_CODE')}</Label>
+              <Label htmlFor="code">{t('VERIFICATION_CODE')}</Label>
               <Input
                 name="code"
                 required
                 placeholder={t('ENTER_VERIFICATION_CODE')}
               />
             </div>
-            <Button>{t('VERIFY')}</Button>
+            <Button>
+              {navigation.state !== 'idle' ? <LoadingSpinner /> : t('VERIFY')}
+            </Button>
           </div>
         </Form>
       </div>

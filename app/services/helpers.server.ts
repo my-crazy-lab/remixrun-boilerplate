@@ -7,6 +7,7 @@ export async function getUserId({ request }: { request: Request }) {
   const authSession = await getSession(request.headers.get('cookie'));
   return authSession.get('user')?.userId || '';
 }
+
 export async function getUserSession({
   headers,
 }: {

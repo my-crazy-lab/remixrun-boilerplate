@@ -1,6 +1,5 @@
 import { BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
-import { type LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
 import { PERMISSIONS } from '~/constants/common';
 import { hocLoader, res403 } from '~/hoc/remix';
@@ -16,6 +15,7 @@ import { groupPermissionsByModule } from '~/utils/common';
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
+    const roleId = params.roleId || '';
     const userId = await getUserId({ request });
 
     const isParent = await isParentOfGroup({
@@ -29,23 +29,27 @@ export const loader = hocLoader(
       throw new Response(null, res403);
     }
 
-    const role = await getRoleDetail(params.roleId || '');
+    const role = await getRoleDetail(roleId);
     return json({
       role: {
         ...role,
         actionPermissions: groupPermissionsByModule(role.actionPermissions),
       },
+      groupId,
+      roleId,
     });
   },
   PERMISSIONS.READ_ROLE,
 );
 
 export const handle = {
-  breadcrumb: (data: { role: Roles }) => {
-    const { role } = data;
-
+  breadcrumb: (data: { role: Roles; groupId: string; roleId: string }) => {
+    const { role, groupId, roleId } = data;
     return (
-      <BreadcrumbsLink to={`/settings/groups/${role._id}`} label={role.name} />
+      <BreadcrumbsLink
+        to={`/settings/groups/${groupId}/roles/${roleId}`}
+        label={role.name}
+      />
     );
   },
 };

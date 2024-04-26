@@ -1,4 +1,5 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
+import ROUTE_NAME from '~/constants/route';
 import { hocAction, hocLoader } from '~/hoc/remix';
 import {
   createGroup,
@@ -72,7 +74,7 @@ export const loader = hocLoader(
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/groups" label="Create group" />
+    <BreadcrumbsLink to={ROUTE_NAME.GROUP_SETTING} label="CREATE_GROUP" />
   ),
 };
 
@@ -98,7 +100,7 @@ export default function Screen() {
   const loaderData = useLoaderData<LoaderData>();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { register, control, handleSubmit } = useForm<FormData>({
+  const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       name: '',
       description: '',
@@ -132,28 +134,30 @@ export default function Screen() {
         <Breadcrumbs />
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-2 gap-4 py-4">
-          <div className="grid items-center gap-4">
+        <div className="grid grid-cols-2 gap-6 py-4">
+          <div className="grid items-center gap-2">
             <Label htmlFor="group_name">{t('GROUP_NAME')}</Label>
             <Input
               {...register('name' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               className="col-span-2"
               placeholder={t('ENTER_GROUP_NAME')}
             />
+            <ErrorMessageBase name="name" errors={formState.errors} />
           </div>
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label htmlFor="group_description">{t('GROUP_DESCRIPTION')}</Label>
             <Input
               {...register('description' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               className="col-span-2"
               placeholder={t('ENTER_DESCRIPTION')}
             />
+            <ErrorMessageBase name="description" errors={formState.errors} />
           </div>
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label htmlFor="users">{t('USERS')}</Label>
             <div className="col-span-2">
               <Controller
@@ -177,7 +181,7 @@ export default function Screen() {
               />
             </div>
           </div>
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label className="text-left">{t('ROLES')}</Label>
             <div className="col-span-2">
               <Controller
