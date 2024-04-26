@@ -25,7 +25,7 @@
   "NOT_PERMISSION": "Bạn không có quyền truy cập trang này.",
   "PAGE_NOT_FOUND": "Xin lỗi, không tìm thấy trang",
   "PAGE_NOT_FOUND_DESCRIPTION": "Trang bạn đang tìm kiếm không tồn tại!",
-  "SEARCH": "Tìm kiếm",
+  "SEARCH": "Tìm kiếm ...",
   "LOGOUT": "Đăng xuất",
   "CREATE_ROLE": "Tạo vai trò",
   "CREATE_GROUP": "Tạo nhóm",

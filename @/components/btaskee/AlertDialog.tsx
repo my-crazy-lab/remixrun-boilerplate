@@ -10,15 +10,15 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { MouseEvent, ReactNode } from 'react';
+import { AlertDialogCancelProps } from '@radix-ui/react-alert-dialog';
+import { PropsWithChildren } from 'react';
 
 interface CommonAlertDialogProps {
   triggerText: string;
   title: string;
   description: string;
-  onCancel?: (e: MouseEvent) => void;
+  onCancel?: AlertDialogCancelProps['onClick'];
   cancelText?: string;
-  children: ReactNode;
 }
 
 export const CommonAlertDialog = ({
@@ -28,7 +28,7 @@ export const CommonAlertDialog = ({
   children,
   onCancel,
   cancelText = 'Cancel',
-}: CommonAlertDialogProps) => {
+}: PropsWithChildren<CommonAlertDialogProps>) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>

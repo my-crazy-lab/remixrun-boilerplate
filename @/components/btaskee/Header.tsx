@@ -39,7 +39,7 @@ export default function Header(userProfile: LoaderData) {
         <div className="ml-auto flex items-center space-x-4">
           <Input
             type="search"
-            placeholder={`${t('SEARCH')}...`}
+            placeholder={`${t('SEARCH')}`}
             className="md:w-[100px] lg:w-[270px]"
           />
           <LanguageSelector />

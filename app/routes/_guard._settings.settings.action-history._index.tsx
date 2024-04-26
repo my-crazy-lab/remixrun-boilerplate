@@ -16,7 +16,7 @@ import {
   getActionsHistory,
   getTotalActionsHistory,
 } from '~/services/settings.server';
-import type { ActionsHistory } from '~/types';
+import { type ActionsHistory } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
@@ -136,7 +136,7 @@ export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { total, actionsHistory } = useLoaderData<{
     total: number;
-    actionsHistory: [ActionsHistory];
+    actionsHistory: ActionsHistory[];
   }>();
 
   return (

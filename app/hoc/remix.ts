@@ -74,25 +74,29 @@ export function hocAction(
       const { get, set } = closureControllerDeeply<{
         action: string;
         dataRelated?: MustBeAny;
-      }>({ action: 'Action not provide' });
+      }>({ action: '' });
       const actionResult = await callback(args, {
         setInformationActionHistory: set,
       });
 
       const { action, dataRelated } = get();
-      newActionHistory.action = action;
 
-      // case insert data
-      if (dataRelated) {
-        newActionHistory.requestFormData = {
-          ...requestFormData,
-          ...dataRelated,
-        };
-      } else {
-        newActionHistory.requestFormData = requestFormData;
+      // Just save action history when had action name
+      if (action) {
+        newActionHistory.action = action;
+
+        // case insert data
+        if (dataRelated) {
+          newActionHistory.requestFormData = {
+            ...requestFormData,
+            ...dataRelated,
+          };
+        } else {
+          newActionHistory.requestFormData = requestFormData;
+        }
+
+        await newActionHistory.save();
       }
-
-      await newActionHistory.save();
 
       return actionResult;
     } catch (error) {

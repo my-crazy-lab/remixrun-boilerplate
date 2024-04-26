@@ -6,11 +6,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ActionFunctionArgs, json } from '@remix-run/node';
+import { type ActionFunctionArgs, json } from '@remix-run/node';
 import { Form, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { ERROR } from '~/constants/common';
+import { getUserId } from '~/services/helpers.server';
 import { setUserLanguage } from '~/services/settings.server';
 
 const FormSchema = z.object({
@@ -22,9 +23,10 @@ export async function action({ request }: ActionFunctionArgs) {
     const formData = await request.formData();
     const { language } = Object.fromEntries(formData);
 
-    console.log('language', language);
+    const userId = await getUserId({ request });
+
     if (language && typeof language === 'string') {
-      await setUserLanguage({ language: language, _id: 'R5pRgZqKyhTKRX2N22' });
+      await setUserLanguage({ language: language, userId });
     } else {
       throw new Error(ERROR.UNKNOWN_ERROR);
     }
@@ -45,10 +47,12 @@ export default function LanguageSelector() {
     resolver: zodResolver(FormSchema),
   });
 
-  const handleLanguageChange = (value: any) => {
+  const handleLanguageChange = (
+    language: z.infer<typeof FormSchema>['language'],
+  ) => {
     const formData = new FormData();
-    formData.append('language', value);
-    i18n.changeLanguage(value);
+    formData.append('language', language);
+    i18n.changeLanguage(language);
   };
 
   return (

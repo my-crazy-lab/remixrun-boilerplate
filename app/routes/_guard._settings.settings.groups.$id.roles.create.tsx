@@ -14,12 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/use-toast';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import {
-  useActionData,
-  useLoaderData,
-  useParams,
-  useSubmit,
-} from '@remix-run/react';
+import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -34,12 +29,10 @@ import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
-  breadcrumb: () => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const params = useParams();
+  breadcrumb: (data: { groupId: string }) => {
     return (
       <BreadcrumbsLink
-        to={`/settings/groups/${params.id}/roles/create`}
+        to={`/settings/groups/${data.groupId}/roles/create`}
         label="CREATE_ROLE"
       />
     );
@@ -51,6 +44,8 @@ export const action = hocAction(
     { request, params }: ActionFunctionArgs,
     { setInformationActionHistory },
   ) => {
+    const groupId = params.id || '';
+
     const formData = await request.formData();
 
     const name = formData.get('name')?.toString() || '';
@@ -60,7 +55,7 @@ export const action = hocAction(
 
     const role = await createRole({
       name,
-      groupId: params.id || '',
+      groupId,
       description,
       permissions,
     });
@@ -87,6 +82,7 @@ export const loader = hocLoader(
     const permissions = await getGroupPermissions({ groupId, isSuperUser });
 
     return json({
+      groupId,
       permissions,
       permissionsGrouped: groupPermissionsByModule(permissions),
     });

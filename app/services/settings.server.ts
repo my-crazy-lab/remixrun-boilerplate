@@ -156,10 +156,10 @@ export function createNewUser({
 
 export async function setUserLanguage({
   language,
-  _id,
-}: Pick<Users, 'language' | '_id'>) {
+  userId,
+}: Pick<Users, 'language'> & { userId: string }) {
   await UsersModel.updateOne(
-    { _id },
+    { _id: userId },
     {
       $set: {
         updatedAt: momentTz().toDate(),

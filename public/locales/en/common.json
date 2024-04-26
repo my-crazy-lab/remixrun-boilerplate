@@ -24,7 +24,7 @@
   "NOT_PERMISSION": "You do not have permission to access this page.",
   "PAGE_NOT_FOUND": "Sorry, the page cannot be found",
   "PAGE_NOT_FOUND_DESCRIPTION": "The page you are looking for does not exist!",
-  "SEARCH": "Search",
+  "SEARCH": "Search ...",
   "CREATE_ROLE": "Create role",
   "CREATE_GROUP": "Create group",
   "GROUPS_MANAGEMENT": "Group permission"
