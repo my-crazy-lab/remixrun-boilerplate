@@ -248,6 +248,12 @@ export default function Screen() {
           })}
         </Card>
 
+        <Form method="post">
+          <button name="test" value="Duy bao" type="submit">
+            TEst
+          </button>
+        </Form>
+
         <Card className="p-4 col-span-1">
           <div className="flex flex-col pb-4">
             <Typography variant={'h4'}>{t('USERS')}</Typography>

@@ -156,7 +156,9 @@ export default function Screen() {
         setSearchParams={setSearchParams}
         renderSubComponent={({ row }) => (
           <pre style={{ fontSize: '10px' }}>
-            <code>{JSON.stringify(row.getValue('requestFormData'), null, 2)}</code>
+            <code>
+              {JSON.stringify(row.getValue('requestFormData'), null, 2)}
+            </code>
           </pre>
         )}
         getRowCanExpand={() => true}

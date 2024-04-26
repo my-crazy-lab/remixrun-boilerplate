@@ -15,8 +15,12 @@ const mongoClientBE = createConnection(`${dotenv.MONGO_URI}/${dotenv.DB_NAME}`);
 // eslint-disable-next-line no-console
 console.log(`Connected db backend ${dotenv.MONGO_URI}/${dotenv.DB_NAME}`);
 
-const mongoClientApp = createConnection(`${dotenv.MONGO_URI_APP}/${dotenv.APP_DB_NAME}`);
+const mongoClientApp = createConnection(
+  `${dotenv.MONGO_URI_APP}/${dotenv.APP_DB_NAME}`,
+);
 // eslint-disable-next-line no-console
-console.log(`Connected db backend ${dotenv.MONGO_URI_APP}/${dotenv.APP_DB_NAME}`);
+console.log(
+  `Connected db backend ${dotenv.MONGO_URI_APP}/${dotenv.APP_DB_NAME}`,
+);
 
 export { mongoClientBE, mongoClientApp };

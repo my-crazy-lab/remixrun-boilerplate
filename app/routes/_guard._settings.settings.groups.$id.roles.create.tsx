@@ -66,17 +66,20 @@ interface LoaderData {
   permissionsGrouped: ReturnType<typeof groupPermissionsByModule>;
 }
 
-export const loader = hocLoader(async ({ params, request }: LoaderFunctionArgs) => {
-  const groupId = params.id || '';
+export const loader = hocLoader(
+  async ({ params, request }: LoaderFunctionArgs) => {
+    const groupId = params.id || '';
 
-  const { isSuperUser } = await getUserSession({ headers: request.headers });
-  const permissions = await getGroupPermissions({ groupId, isSuperUser });
+    const { isSuperUser } = await getUserSession({ headers: request.headers });
+    const permissions = await getGroupPermissions({ groupId, isSuperUser });
 
-  return json({
-    permissions,
-    permissionsGrouped: groupPermissionsByModule(permissions),
-  });
-}, PERMISSIONS.WRITE_ROLE);
+    return json({
+      permissions,
+      permissionsGrouped: groupPermissionsByModule(permissions),
+    });
+  },
+  PERMISSIONS.WRITE_ROLE,
+);
 
 interface FormData {
   permissions: { [key: string]: boolean };
