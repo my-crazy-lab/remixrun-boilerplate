@@ -64,9 +64,9 @@
 db.getCollection("permissions").insert(
   {
     "_id" : "manager",
-    "description" : "This is manager, with can access data all cities of each country",
-    "module" : "special",
-    "name" : "MANAGER"
+    "description" : "This is manager, can access data all cities of each country, view action history of Team, and manage member",
+    "module" : "system",
+    "name" : "Permission: Manager"
   }
 )
 
@@ -75,7 +75,7 @@ db.getCollection("roles").insert({
     "permissions" : [
         "manager"
     ],
-    "name":"MANAGER",
+    "name":"Role: Manager",
 })
 ```
 
@@ -84,40 +84,59 @@ db.getCollection("permissions").insert(
   [
     {
       "_id" : "root",
-      "description" : "This is root user, with all power",
-      "module" : "special",
-      "name" : "ROOT"
-    },
-    {
-      "_id" : "write/user-management",
-      "description" : "User management feature: Write",
-      "module" : "special",
-      "name" : "User management feature: Write"
+      "description" : "This is super user, all powers",
+      "module" : "system",
+      "name" : "Super user"
     },
     {
       "_id" : "write/role-management",
       "description" : "Groups management feature: Write roles (create - update - remove)",
-      "module" : "special",
+      "module" : "system",
       "name" : "Groups management feature: Write roles (create - update)"
     },
     {
       "_id" : "read/role-management",
       "description" : "Groups management feature: Read roles",
-      "module" : "special",
+      "module" : "system",
       "name" : "Groups management feature: Read roles"
     },
     {
       "_id" : "write/group-management",
       "description" : "Groups management feature: Write children groups (create - update - remove)",
-      "module" : "special",
+      "module" : "system",
       "name" : "Groups management feature: Write children groups (create - update - remove)"
     },
     {
       "_id" : "read/group-management",
       "description" : "Groups management feature: Read children groups",
-      "module" : "special",
+      "module" : "system",
       "name" : "Groups management feature: Read children groups"
     },
+    // will remove soon
+    {
+      "_id" : "a-1",
+      "description" : "Testing: a 1",
+      "module" : "a",
+      "name" : "Testing: a 1"
+    },
+    {
+      "_id" : "a-2",
+      "description" : "Testing: a 2",
+      "module" : "a",
+      "name" : "Testing: a 2"
+    },
+    {
+      "_id" : "b-1",
+      "description" : "Testing: b 1",
+      "module" : "b",
+      "name" : "Testing: b 1"
+    },
+     {
+      "_id" : "b-2",
+      "description" : "Testing: b 2",
+      "module" : "b",
+      "name" : "Testing: b 2"
+    }
   ]
 )
 
@@ -126,12 +145,12 @@ db.getCollection("roles").insert({
     "permissions" : [
         "root"
     ],
-    "name":"ROOT",
+    "name":"Role: Super user",
 })
 
 db.getCollection("groups").insert({
     "_id": "group-superuser",
-    "name" : "Group root",
+    "name" : "Group: Super user",
     "roleIds" : [
         "root"
     ],
