@@ -5,10 +5,9 @@ const ActionsHistorySchema = new Schema(
   {
     actorId: {
       $type: String,
-      required: true,
     },
-    action: { $type: String, required: true },
-    requestFormData: { $type: Schema.Types.Mixed, required: true },
+    action: { $type: String },
+    requestFormData: { $type: Schema.Types.Mixed },
     createdAt: { $type: Date, required: true },
   },
   { typeKey: '$type', collection: 'actionHistory' },

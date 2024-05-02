@@ -23,7 +23,7 @@ interface LoaderData {
   userProfile: ReturnValueIgnorePromise<typeof getUserProfile>;
 }
 
-export default function Header(userProfile: LoaderData) {
+export default function Header(userProfile: any) {
   const { t } = useTranslation(['common']);
 
   return (

@@ -26,6 +26,42 @@ export async function verifyManager(userId: string) {
   return Boolean(permissions.includes(PERMISSIONS.MANAGER));
 }
 
+export async function getUserPermissionsIgnoreRoot(userId: string) {
+  const groups = await GroupsModel.aggregate([
+    {
+      $match: {
+        userIds: userId,
+        status: statusOriginal.ACTIVE,
+      },
+    },
+    // roleAssignedIds store permissions of group
+    {
+      $lookup: {
+        from: 'roles',
+        localField: 'roleAssignedIds',
+        foreignField: '_id',
+        as: 'roles',
+      },
+    },
+    {
+      $unwind: {
+        path: '$roles',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]).exec();
+  const permissions = convertRolesToPermissions(
+    groups.map(group => group.roles),
+  );
+
+  if (permissions.includes(PERMISSIONS.ROOT)) {
+    const allPermissions = await getAllPermissionsIgnoreRoot();
+    return allPermissions.map(p => p._id);
+  }
+
+  return permissions;
+}
+
 export async function getUserPermissions(userId: string) {
   const groups = await GroupsModel.aggregate([
     {
@@ -50,7 +86,6 @@ export async function getUserPermissions(userId: string) {
       },
     },
   ]).exec();
-
   const permissions = convertRolesToPermissions(
     groups.map(group => group.roles),
   );
@@ -202,7 +237,7 @@ export async function getGroupPermissions({
 }) {
   // with super user, show all permissions in create/update roles
   if (isSuperUser) {
-    return getAllPermissions();
+    return getAllPermissionsIgnoreRoot();
   }
 
   const group = await GroupsModel.findOne({
@@ -252,6 +287,14 @@ export async function getGroupsOfUser<T extends Projection = Projection>({
     },
     {
       $lookup: {
+        from: 'groups',
+        localField: '_id',
+        foreignField: 'genealogy',
+        as: 'children',
+      },
+    },
+    {
+      $lookup: {
         from: 'users',
         localField: 'userIds',
         foreignField: '_id',
@@ -296,9 +339,11 @@ export async function createRole({
   return createdRole;
 }
 
-export function getAllPermissions() {
-  // permissions ROOT is private
+export function getAllPermissionsIgnoreRoot() {
   return PermissionsModel.find({ _id: { $ne: PERMISSIONS.ROOT } }).lean();
+}
+export function getAllPermissions() {
+  return PermissionsModel.find({}).lean();
 }
 
 export async function getGroupsByUserId(userId: string) {
@@ -587,10 +632,10 @@ export async function deleteGroup({ groupId }: { groupId: string }) {
 }
 
 export async function isParentOfGroup({
-  userId,
+  parentId,
   groupId,
 }: {
-  userId: string;
+  parentId: string;
   groupId: string;
 }) {
   const groupChecking = await GroupsModel.findOne({
@@ -604,6 +649,7 @@ export async function isParentOfGroup({
   const groupParent = await GroupsModel.find({
     _id: { $in: groupChecking.genealogy },
     status: statusOriginal.ACTIVE,
+    userIds: parentId,
   }).lean();
 
   return Boolean(groupParent.length);
@@ -780,5 +826,6 @@ export async function getGroupDetail<T = Projection>({
   if (!groupOfUser?.[0]) {
     throw new Response(null, res403);
   }
+
   return groupOfUser[0] as T;
 }

@@ -17,7 +17,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     headers: request.headers,
   });
   const isParent = await isParentOfGroup({
-    userId,
+    parentId: userId,
     groupId,
   });
 

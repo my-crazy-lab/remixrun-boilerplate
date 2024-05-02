@@ -167,7 +167,7 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
 
 export const action = hocAction(
   async ({ request }, { setInformationActionHistory }) => {
-    const formData = await request.formData();
+    const formData = await request.clone().formData();
     const userDeleted = formData.get('userDeleted')?.toString() || '';
 
     if (userDeleted) {
@@ -188,6 +188,7 @@ export const action = hocAction(
         isoCode,
         cities,
       });
+
       setInformationActionHistory({
         action: ACTION_NAME.CREATE_USER,
         dataRelated: { userId: newUser?._id },
@@ -270,7 +271,7 @@ export default function Screen() {
     const formData = new FormData();
 
     formData.append('email', data.email);
-    formData.append('cities', JSON.stringify(data.cities.map(c => c.value)));
+    formData.append('cities', JSON.stringify(data.cities?.map(c => c.value)));
     formData.append('username', data.username);
 
     submit(formData, { method: 'post' });
@@ -342,7 +343,7 @@ export default function Screen() {
                           selected={value}
                           setSelected={onChange}
                           isDisplayAllOptions
-                          options={loaderData.cities.map(e => ({
+                          options={loaderData.cities?.map(e => ({
                             label: e,
                             value: e,
                           }))}

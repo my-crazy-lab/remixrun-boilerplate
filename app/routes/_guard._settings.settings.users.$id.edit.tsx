@@ -33,7 +33,7 @@ interface LoaderData {
 
 export const action = hocAction(
   async ({ request, params }, { setInformationActionHistory }) => {
-    const formData = await request.formData();
+    const formData = await request.clone().formData();
 
     const username = formData.get('username')?.toString() || '';
     const email = formData.get('email')?.toString() || '';
@@ -81,7 +81,7 @@ export default function Screen() {
   const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
       email: loaderData.user.email,
-      cities: loaderData.user.cities.map(city => ({
+      cities: loaderData.user.cities?.map(city => ({
         value: city,
         label: city,
       })),
@@ -93,7 +93,7 @@ export default function Screen() {
     const formData = new FormData();
 
     formData.append('email', data.email);
-    formData.append('cities', JSON.stringify(data.cities.map(c => c.value)));
+    formData.append('cities', JSON.stringify(data.cities?.map(c => c.value)));
     formData.append('username', data.username);
 
     submit(formData, { method: 'post' });
@@ -150,7 +150,7 @@ export default function Screen() {
                       selected={value}
                       setSelected={onChange}
                       isDisplayAllOptions
-                      options={loaderData.cities.map(e => ({
+                      options={loaderData.cities?.map(e => ({
                         label: e,
                         value: e,
                       }))}

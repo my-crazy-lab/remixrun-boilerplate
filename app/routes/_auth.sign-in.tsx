@@ -18,7 +18,7 @@ interface ActionData {
 
 export const action = hocAction(
   async ({ request }, { setInformationActionHistory }) => {
-    const formData = await request.formData();
+    const formData = await request.clone().formData();
     const { username, password } = Object.fromEntries(formData);
 
     const { verificationToken, userId } = await verifyAndSendCode({
@@ -27,8 +27,7 @@ export const action = hocAction(
     });
     setInformationActionHistory({
       action: ACTION_NAME.LOGIN,
-      actorId: userId,
-      ignoreFormData: true,
+      dataRelated: { userId },
     });
     return redirect(`${ROUTE_NAME.VERIFICATION_CODE}/${verificationToken}`);
   },

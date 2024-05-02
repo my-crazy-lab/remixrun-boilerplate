@@ -36,7 +36,7 @@ import { type GroupDetail } from '~/types/LoaderData';
 
 export const action = hocAction(
   async ({ request, params }, { setInformationActionHistory }) => {
-    const formData = await request.formData();
+    const formData = await request.clone().formData();
 
     const roleIdDeleted = formData.get('roleDeleted')?.toString();
     const groupIdDeleted = formData.get('groupDeleted')?.toString();

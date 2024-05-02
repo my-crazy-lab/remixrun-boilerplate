@@ -38,7 +38,7 @@
   "PERSONAL_DETAILS_TEXT_HELPER": "To change your personal detail, edit and save from here",
   "AUTHORIZATION": "Authorization",
   "PERSONAL_DETAILS": "Personal Details",
-  "NO_USER_GROUP_HERE": "No user group here",
+  "NO_USER_GROUP_HERE": "This group not have children group",
   "EDIT": "Edit",
   "DELETE": "Delete"
 }

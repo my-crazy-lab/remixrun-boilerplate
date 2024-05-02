@@ -9,12 +9,15 @@ import { Link, useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
+import { type Groups } from '~/types';
 
 interface LoaderData {
   groups: Array<{
     _id: string;
     name: string;
     description: string;
+    userIds: Array<string>;
+    children: Array<Groups>;
   }>;
 }
 
@@ -27,6 +30,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     projection: {
       name: 1,
       description: 1,
+      userIds: 1,
+      children: 1,
     },
   });
 
@@ -69,7 +74,7 @@ export default function Screen() {
                         {t('Children group')}
                       </Typography>
                       <Typography className="text-primary" variant="h4">
-                        2
+                        {group.children?.length}
                       </Typography>
                     </div>
                   </div>
@@ -85,7 +90,7 @@ export default function Screen() {
                       <Typography
                         className="text-secondary-foreground"
                         variant="h3">
-                        2
+                        {group.userIds?.length}
                       </Typography>
                     </div>
                   </div>

@@ -29,7 +29,7 @@ import { type ReturnValueIgnorePromise } from '~/types';
 
 export const action = hocAction(
   async ({ request, params }, { setInformationActionHistory }) => {
-    const formData = await request.formData();
+    const formData = await request.clone().clone().formData();
 
     const name = formData.get('name')?.toString() || '';
     const description = formData.get('description')?.toString() || '';

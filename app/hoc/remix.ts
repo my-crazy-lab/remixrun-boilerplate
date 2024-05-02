@@ -4,11 +4,11 @@ import {
   type LoaderFunctionArgs,
   json,
 } from '@remix-run/node';
-import { ERROR } from '~/constants/common';
+import { ACTION_NAME, ERROR } from '~/constants/common';
 import { newRecordCommonField } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
-import { getUserPermissions } from '~/services/role-base-access-control.server';
+import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
 import { type CommonFunction, type MustBeAny } from '~/types';
 
 /**
@@ -42,7 +42,7 @@ export function hocAction(
       const userId = await getUserId({ request: args.request });
 
       if (permission) {
-        const userPermissions = await getUserPermissions(userId);
+        const userPermissions = await getUserPermissionsIgnoreRoot(userId);
 
         if (typeof permission === 'string') {
           if (!userPermissions.includes(permission)) {
@@ -63,51 +63,48 @@ export function hocAction(
         }
       }
 
-      const formData = await args.request.clone().formData();
-      const requestFormData = Object.fromEntries(formData);
-
       const newActionHistory = new ActionsHistoryModel({
         ...newRecordCommonField(),
       });
-      if (userId) newActionHistory.actorId = userId;
-
       const { get, set } = closureControllerDeeply<{
         action: string;
         dataRelated?: MustBeAny;
         actorId?: string;
-        ignoreFormData?: boolean;
       }>({ action: '' });
+
       const actionResult = await callback(args, {
         setInformationActionHistory: set,
       });
 
-      const {
-        action,
-        dataRelated,
-        actorId: actorIdPassed,
-        ignoreFormData,
-      } = get();
+      const { action, dataRelated } = get();
 
-      // Just save action history when had action name
-      if (action) {
+      // case login: special
+      // must have dataRelated
+      if (action === ACTION_NAME.LOGIN) {
         newActionHistory.action = action;
-        if (actorIdPassed) newActionHistory.actorId = actorIdPassed;
+        newActionHistory.actorId = dataRelated.userId;
+
+        await newActionHistory.save();
+      } else if (action) {
+        const formData = await args.request.clone().formData();
+        const requestFormData = Object.fromEntries(formData);
+
+        newActionHistory.actorId = userId;
+        newActionHistory.action = action;
 
         // case insert data
-        if (dataRelated) {
-          newActionHistory.requestFormData = {
-            ...(ignoreFormData ? {} : requestFormData),
-            ...dataRelated,
-          };
-        } else {
-          newActionHistory.requestFormData = requestFormData;
-        }
+        newActionHistory.requestFormData = {
+          ...(requestFormData ? requestFormData : {}),
+          ...(dataRelated ? dataRelated : {}),
+        };
 
         await newActionHistory.save();
       }
 
       return actionResult;
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('DEBUGGER: ', error);
       if (error instanceof Error) {
         return json({ error: error.message });
       }
@@ -124,7 +121,7 @@ export function hocLoader(
 ) {
   async function loader(args: LoaderFunctionArgs) {
     const userId = await getUserId({ request: args.request });
-    const userPermissions = await getUserPermissions(userId);
+    const userPermissions = await getUserPermissionsIgnoreRoot(userId);
     if (!userPermissions.includes(permission)) {
       throw new Response(null, res403);
     }

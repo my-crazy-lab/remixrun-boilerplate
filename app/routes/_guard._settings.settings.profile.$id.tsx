@@ -92,7 +92,7 @@ export default function Screen() {
                 {t('CITIES')}
               </Typography>
               <div className="gap-2 grid grid-cols-4">
-                {loaderData.userProfile?.cities.map((city, index) => {
+                {loaderData.userProfile?.cities?.map((city, index) => {
                   return (
                     <Badge
                       className="text-center block rounded-md py-2 font-normal text-blue bg-blue-50"

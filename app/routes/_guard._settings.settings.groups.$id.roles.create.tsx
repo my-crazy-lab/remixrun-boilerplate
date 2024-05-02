@@ -46,7 +46,7 @@ export const action = hocAction(
   ) => {
     const groupId = params.id || '';
 
-    const formData = await request.formData();
+    const formData = await request.clone().formData();
 
     const name = formData.get('name')?.toString() || '';
     const description = formData.get('description')?.toString() || '';

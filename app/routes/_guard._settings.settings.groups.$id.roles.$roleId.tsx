@@ -19,7 +19,7 @@ export const loader = hocLoader(
     const userId = await getUserId({ request });
 
     const isParent = await isParentOfGroup({
-      userId,
+      parentId: userId,
       groupId,
     });
     const userInGroup = await verifyUserInGroup({ userId, groupId });
