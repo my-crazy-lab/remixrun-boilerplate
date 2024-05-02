@@ -157,6 +157,7 @@ db.getCollection("roles").insert({
         "root"
     ],
     "name":"Role: Super user",
+    "status": "ACTIVE"
 })
 
 db.getCollection("groups").insert({
@@ -169,6 +170,7 @@ db.getCollection("groups").insert({
         "root",
     ],
     "genealogy": [],
+    "status": "ACTIVE",
     "hierarchy" : NumberInt(1)
 })
 ```
