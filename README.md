@@ -59,6 +59,17 @@
 2. Mongodb
 
 ### Add hierarchy 1:
+```
+db.getCollection("users").insert(
+  {
+    "_id" : "root",
+    "isoCode": "VN",
+    "username" : "Super user",
+    "email" : "leminh.nguyen@btaskee.com",
+    "status" : "ACTIVE"
+  }
+)
+```
 
 ```
 db.getCollection("permissions").insert(
