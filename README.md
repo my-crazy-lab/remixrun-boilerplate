@@ -162,7 +162,7 @@ db.getCollection("roles").insert({
 db.getCollection("groups").insert({
     "_id": "group-superuser",
     "name" : "Group: Super user",
-    "roleIds" : [
+    "roleAssignedIds" : [
         "root"
     ],
     "userIds" : [
