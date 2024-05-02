@@ -4,8 +4,8 @@ import { type Users } from '~/types';
 import { momentTz } from '~/utils/common';
 import { type PipelineStage } from '~/utils/db.server';
 
-import { hashPassword } from './auth.server';
 import { newRecordCommonField, statusOriginal } from './constants.server';
+import { getGroupsByUserId } from './role-base-access-control.server';
 
 interface ISearch {
   $match: {
@@ -18,8 +18,10 @@ interface ISearch {
 
 export async function getTotalActionsHistory({
   searchText,
+  userId,
 }: {
   searchText: string;
+  userId: string;
 }) {
   const $search: ISearch = { $match: {} };
 
@@ -29,8 +31,10 @@ export async function getTotalActionsHistory({
       $options: 'i',
     };
   }
+  const userIds = await getGroupsByUserId(userId);
 
   const result = await ActionsHistoryModel.aggregate([
+    { $match: { actorId: { $in: userIds } } },
     {
       $lookup: {
         from: 'users',
@@ -57,13 +61,16 @@ export async function getActionsHistory({
   limit,
   projection,
   searchText,
+  userId,
 }: {
   searchText: string;
   skip: PipelineStage.Skip['$skip'];
   limit: PipelineStage.Limit['$limit'];
   projection: PipelineStage.Project['$project'];
+  userId: string;
 }) {
   const $search: ISearch = { $match: {} };
+  const userIds = await getGroupsByUserId(userId);
 
   if (searchText) {
     $search.$match['user.username'] = {
@@ -73,6 +80,7 @@ export async function getActionsHistory({
   }
 
   const actionsHistory = await ActionsHistoryModel.aggregate([
+    { $match: { actorId: { $in: userIds } } },
     {
       $lookup: {
         from: 'users',
@@ -97,22 +105,32 @@ export async function getActionsHistory({
   return actionsHistory;
 }
 
-export async function getTotalUsers() {
-  const total = await UsersModel.countDocuments();
-  return total;
+export async function getTotalUsers(userId: string) {
+  const userIds = await getGroupsByUserId(userId);
+
+  const users = await UsersModel.find(
+    { status: statusOriginal.ACTIVE, _id: { $in: userIds } },
+    {},
+  ).lean<Users[]>();
+
+  return users.length;
 }
 
 export async function getUsers({
   skip,
   limit,
   projection,
+  userId,
 }: {
   skip: PipelineStage.Skip['$skip'];
   limit: PipelineStage.Limit['$limit'];
   projection: PipelineStage.Project['$project'];
+  userId: string;
 }) {
+  const userIds = await getGroupsByUserId(userId);
+
   const users = await UsersModel.find(
-    { status: statusOriginal.ACTIVE },
+    { status: statusOriginal.ACTIVE, _id: { $in: userIds } },
     {},
     {
       sort: {
@@ -135,21 +153,15 @@ export function getUserProfile(_id: string) {
 
 export function createNewUser({
   username,
-  password,
   email,
   cities,
   isoCode,
-}: Pick<Users, 'username' | 'email' | 'cities' | 'isoCode'> & {
-  password: string;
-}) {
-  const passwordHashed = hashPassword(password);
-
+}: Pick<Users, 'username' | 'email' | 'cities' | 'isoCode'>) {
   return UsersModel.create({
     ...newRecordCommonField(),
     username,
     email,
     cities,
-    services: { password: { bcrypt: passwordHashed } },
     isoCode,
   });
 }

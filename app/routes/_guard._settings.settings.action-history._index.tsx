@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hocLoader } from '~/hoc/remix';
+import { getUserSession } from '~/services/helpers.server';
 import {
   getActionsHistory,
   getTotalActionsHistory,
@@ -98,38 +99,39 @@ const columns: ColumnDef<IActionsHistory>[] = [
   },
 ];
 
-export const loader = hocLoader(
-  async ({ params, request }: LoaderFunctionArgs) => {
-    const url = new URL(request.url);
-    const searchText = url.searchParams.get('username') || '';
-    const total = await getTotalActionsHistory({
-      searchText,
-    });
+export const loader = hocLoader(async ({ request }: LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const searchText = url.searchParams.get('username') || '';
+  const { userId } = await getUserSession({ headers: request.headers });
 
-    const { limit, skip } = getSkipAndLimit(
-      getPageSizeAndPageIndex({
-        total,
-        pageSize: Number(url.searchParams.get('pageSize')) || 0,
-        pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
-      }),
-    );
+  const total = await getTotalActionsHistory({
+    searchText,
+    userId,
+  });
 
-    const actionsHistory = await getActionsHistory({
-      searchText: url.searchParams.get('username') || '',
-      skip,
-      limit,
-      projection: {
-        username: '$user.username',
-        action: 1,
-        requestFormData: 1,
-        createdAt: 1,
-      },
-    });
+  const { limit, skip } = getSkipAndLimit(
+    getPageSizeAndPageIndex({
+      total,
+      pageSize: Number(url.searchParams.get('pageSize')) || 0,
+      pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
+    }),
+  );
 
-    return json({ actionsHistory, total });
-  },
-  PERMISSIONS.READ_ACTION_HISTORY,
-);
+  const actionsHistory = await getActionsHistory({
+    searchText: url.searchParams.get('username') || '',
+    skip,
+    limit,
+    projection: {
+      username: '$user.username',
+      action: 1,
+      requestFormData: 1,
+      createdAt: 1,
+    },
+    userId,
+  });
+
+  return json({ actionsHistory, total });
+}, PERMISSIONS.MANAGER);
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);

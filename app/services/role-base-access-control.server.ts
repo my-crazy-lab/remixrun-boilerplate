@@ -117,6 +117,16 @@ export async function updateGroups({
   );
 }
 
+export async function getUsersByGroupId(groupIds: string[]) {
+  const groups = await GroupsModel.find({
+    status: statusOriginal.ACTIVE,
+    genealogy: { $in: groupIds },
+  }).lean();
+
+  // remove duplicate user id
+  return [...new Set(...groups.map(group => group.userIds))];
+}
+
 export async function getRoleDetail(roleId: string) {
   const roles = await RolesModel.findOne({
     _id: roleId,
@@ -289,6 +299,13 @@ export async function createRole({
 export function getAllPermissions() {
   // permissions ROOT is private
   return PermissionsModel.find({ _id: { $ne: PERMISSIONS.ROOT } }).lean();
+}
+
+export async function getGroupsByUserId(userId: string) {
+  const groupIdsOfUser = await GroupsModel.find({
+    userIds: { $in: userId },
+  }).lean();
+  return getUsersByGroupId(groupIdsOfUser.map(e => e._id));
 }
 
 export async function updateUser({

@@ -1,5 +1,4 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
-import { PasswordInput } from '@/components/btaskee/PasswordInput';
 import BTaskeeTable from '@/components/btaskee/TableBase';
 import Typography from '@/components/btaskee/Typography';
 import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-table-column-header';
@@ -86,7 +85,7 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
   {
     accessorKey: 'username',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="UserName" />
+      <DataTableColumnHeader column={column} title="Username" />
     ),
     cell: ({ row }) => (
       <div className="w-[80px]">{row.getValue('username')}</div>
@@ -108,6 +107,8 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     accessorKey: 'cities',
@@ -130,6 +131,8 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         </div>
       );
     },
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     accessorKey: 'actions',
@@ -175,14 +178,12 @@ export const action = hocAction(
     } else {
       const username = formData.get('username')?.toString() || '';
       const email = formData.get('email')?.toString() || '';
-      const password = formData.get('password')?.toString() || '';
       const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
 
       const { isoCode } = await getUserSession({ headers: request.headers });
 
       const newUser = await createNewUser({
         username,
-        password,
         email,
         isoCode,
         cities,
@@ -195,7 +196,7 @@ export const action = hocAction(
 
     return null;
   },
-  PERMISSIONS.WRITE_USER,
+  PERMISSIONS.MANAGER,
 );
 
 interface LoaderData {
@@ -206,23 +207,22 @@ interface LoaderData {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  const total = await getTotalUsers();
-
+  
+  const { userId, isoCode } = await getUserSession({ headers: request.headers });
+  const total = await getTotalUsers(userId);
   const { limit, skip } = getSkipAndLimit(
     getPageSizeAndPageIndex({
       total,
       pageSize: Number(url.searchParams.get('pageSize')) || 0,
       pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
     }),
-  );
+    );
 
   const users = await getUsers({
     skip,
     limit,
-    projection: { _id: 1, cities: 1, username: 1, email: 1 },
+    projection: { _id: 1, cities: 1, username: 1, email: 1 },userId
   });
-
-  const { isoCode } = await getUserSession({ headers: request.headers });
 
   const cities = await getCities(isoCode);
   return json({ users, cities, total });
@@ -230,7 +230,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 interface FormData {
   email: string;
-  password: string;
   cities: Array<OptionType>;
   username: string;
 }
@@ -251,7 +250,6 @@ export default function Screen() {
   const { register, control, reset, handleSubmit } = useForm<FormData>({
     defaultValues: {
       email: '',
-      password: '',
       cities: [],
       username: '',
     },
@@ -269,7 +267,6 @@ export default function Screen() {
     const formData = new FormData();
 
     formData.append('email', data.email);
-    formData.append('password', data.password);
     formData.append('cities', JSON.stringify(data.cities.map(c => c.value)));
     formData.append('username', data.username);
 
@@ -292,7 +289,7 @@ export default function Screen() {
             }
             setOpen(open);
           }}>
-          {globalData.permissions?.includes(PERMISSIONS.WRITE_USER) ? (
+          {globalData.permissions?.includes(PERMISSIONS.MANAGER) ? (
             <DialogTrigger asChild>
               <Button className="gap-2" variant="default">
                 <Plus />
@@ -329,19 +326,6 @@ export default function Screen() {
                     type="email"
                     className="col-span-3"
                     placeholder={t('EMAIL')}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="password" className="text-right">
-                    {t('PASSWORD')}
-                  </Label>
-                  <PasswordInput
-                    {...register('password' as const, {
-                      required: true,
-                    })}
-                    autoComplete="off"
-                    className="col-span-3"
-                    placeholder={t('PASSWORD')}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">

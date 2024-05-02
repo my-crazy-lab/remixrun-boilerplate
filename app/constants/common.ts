@@ -1,12 +1,10 @@
 export const PERMISSIONS = {
   ROOT: 'root',
   MANAGER: 'manager',
-  WRITE_USER: 'write/user-management',
   WRITE_ROLE: 'write/role-management',
   READ_ROLE: 'read/role-management',
   WRITE_GROUP: 'write/group-management',
   READ_GROUP: 'read/group-management',
-  READ_ACTION_HISTORY: 'read/action-history',
 };
 
 export const ACTION_NAME = {

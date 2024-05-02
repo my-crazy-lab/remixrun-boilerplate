@@ -51,7 +51,7 @@ export const action = hocAction(
 
     return redirect('/settings/users');
   },
-  PERMISSIONS.WRITE_USER,
+  PERMISSIONS.MANAGER,
 );
 
 export const loader = hocLoader(
@@ -63,7 +63,7 @@ export const loader = hocLoader(
 
     return json({ cities, user });
   },
-  PERMISSIONS.WRITE_USER,
+  PERMISSIONS.MANAGER,
 );
 
 export default function Screen() {
