@@ -86,7 +86,8 @@ db.getCollection("roles").insert({
     "permissions" : [
         "manager"
     ],
-    "name":"Role: Manager",
+    "name": "Role: Manager",
+    "status": "ACTIVE"
 })
 ```
 
