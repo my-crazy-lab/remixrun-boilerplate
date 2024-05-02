@@ -207,8 +207,10 @@ interface LoaderData {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  
-  const { userId, isoCode } = await getUserSession({ headers: request.headers });
+
+  const { userId, isoCode } = await getUserSession({
+    headers: request.headers,
+  });
   const total = await getTotalUsers(userId);
   const { limit, skip } = getSkipAndLimit(
     getPageSizeAndPageIndex({
@@ -216,12 +218,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       pageSize: Number(url.searchParams.get('pageSize')) || 0,
       pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
     }),
-    );
+  );
 
   const users = await getUsers({
     skip,
     limit,
-    projection: { _id: 1, cities: 1, username: 1, email: 1 },userId
+    projection: { _id: 1, cities: 1, username: 1, email: 1 },
+    userId,
   });
 
   const cities = await getCities(isoCode);

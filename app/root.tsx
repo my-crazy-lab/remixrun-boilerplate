@@ -1,3 +1,4 @@
+import { AlertDialogProvider } from '@/components/btaskee/AlertDialogProvider';
 import { Grid } from '@/components/btaskee/Grid';
 import { Toaster } from '@/components/btaskee/ToasterBase';
 import Typography from '@/components/btaskee/Typography';
@@ -25,7 +26,6 @@ import i18next from '~/i18next.server';
 
 import styles from './tailwind.css';
 import type { MustBeAny } from './types';
-import { AlertDialogProvider } from '@/components/btaskee/AlertDialogProvider';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const locale = await i18next.getLocale(request);
