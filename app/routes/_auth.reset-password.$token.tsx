@@ -7,7 +7,7 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Form, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import { ACTION_NAME, ERROR } from '~/constants/common';
+import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hocAction } from '~/hoc/remix';
 import { changePassword, isResetPassExpired } from '~/services/auth.server';
@@ -32,10 +32,9 @@ export const action = hocAction(
       throw new Error(ERROR.PASSWORD_NOT_MATCH);
     }
 
-    await changePassword({ newPassword, token: params.token || '' });
-
-    setInformationActionHistory({
-      action: ACTION_NAME.CHANGE_PASSWORD,
+    await changePassword({
+      newPassword,
+      token: params.token || '',
     });
 
     return redirect(ROUTE_NAME.SIGN_IN);

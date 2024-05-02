@@ -21,12 +21,13 @@ export const action = hocAction(
     const formData = await request.formData();
     const { username, password } = Object.fromEntries(formData);
 
-    const verificationToken = await verifyAndSendCode({
+    const { verificationToken, userId } = await verifyAndSendCode({
       username: username.toString(),
       password: password.toString(),
     });
     setInformationActionHistory({
       action: ACTION_NAME.LOGIN,
+      actorId: userId,
     });
     return redirect(`${ROUTE_NAME.VERIFICATION_CODE}/${verificationToken}`);
   },

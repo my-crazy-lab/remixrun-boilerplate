@@ -68,22 +68,24 @@ export function hocAction(
 
       const newActionHistory = new ActionsHistoryModel({
         ...newRecordCommonField(),
-        actorId: userId,
       });
+      if (userId) newActionHistory.actorId = userId;
 
       const { get, set } = closureControllerDeeply<{
         action: string;
         dataRelated?: MustBeAny;
+        actorId?: string;
       }>({ action: '' });
       const actionResult = await callback(args, {
         setInformationActionHistory: set,
       });
 
-      const { action, dataRelated } = get();
+      const { action, dataRelated, actorId: actorIdPassed } = get();
 
       // Just save action history when had action name
       if (action) {
         newActionHistory.action = action;
+        if (actorIdPassed) newActionHistory.actorId = actorIdPassed;
 
         // case insert data
         if (dataRelated) {

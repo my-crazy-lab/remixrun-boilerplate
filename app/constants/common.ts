@@ -15,8 +15,6 @@ export const ACTION_NAME = {
   CREATE_ROLE: 'Create role',
   UPDATE_ROLE: 'Update role',
   CREATE_USER: 'Create user',
-  RESET_PASSWORD: 'Reset password (Send token to email)',
-  CHANGE_PASSWORD: 'Change password',
   LOGIN: 'Login',
   REMOVE_ROLE: 'Remove role',
   REMOVE_GROUP: 'Remove group',

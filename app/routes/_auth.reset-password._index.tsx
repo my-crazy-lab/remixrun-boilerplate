@@ -8,7 +8,6 @@ import { toast } from '@/components/ui/use-toast';
 import { json } from '@remix-run/node';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
-import { ACTION_NAME } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
 import { resetPassword } from '~/services/auth.server';
 
@@ -25,9 +24,6 @@ export const action = hocAction(
 
     if (email && typeof email === 'string') {
       await resetPassword(email);
-      setInformationActionHistory({
-        action: ACTION_NAME.RESET_PASSWORD,
-      });
 
       return json({ isSent: true });
     } else {

@@ -61,8 +61,8 @@ export async function verifyAndSendCode({
 
   if (!verified) throw new Error('INCORRECT_ACCOUNT');
 
-  const verificationCode = await sendVerificationCode(user.email);
-  return verificationCode;
+  const verificationToken = await sendVerificationCode(user.email);
+  return { verificationToken, userId: user._id };
 }
 
 export async function sendVerificationCode(email: string) {
@@ -230,6 +230,7 @@ export async function changePassword({
   if (!account?._id) {
     return redirect(ROUTE_NAME.RESET_PASSWORD);
   }
+  return account._id;
 }
 
 // Tell the Authenticator to use the form strategy
