@@ -28,6 +28,7 @@ export const action = hocAction(
     setInformationActionHistory({
       action: ACTION_NAME.LOGIN,
       actorId: userId,
+      ignoreFormData: true,
     });
     return redirect(`${ROUTE_NAME.VERIFICATION_CODE}/${verificationToken}`);
   },

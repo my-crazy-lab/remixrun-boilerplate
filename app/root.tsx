@@ -25,6 +25,7 @@ import i18next from '~/i18next.server';
 
 import styles from './tailwind.css';
 import type { MustBeAny } from './types';
+import { AlertDialogProvider } from '@/components/btaskee/AlertDialogProvider';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const locale = await i18next.getLocale(request);
@@ -142,8 +143,10 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
-        <Outlet />
+      <body className="font-sans">
+        <AlertDialogProvider>
+          <Outlet />
+        </AlertDialogProvider>
         <ScrollRestoration />
         <Scripts />
         <Toaster />

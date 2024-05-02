@@ -75,12 +75,18 @@ export function hocAction(
         action: string;
         dataRelated?: MustBeAny;
         actorId?: string;
+        ignoreFormData?: boolean;
       }>({ action: '' });
       const actionResult = await callback(args, {
         setInformationActionHistory: set,
       });
 
-      const { action, dataRelated, actorId: actorIdPassed } = get();
+      const {
+        action,
+        dataRelated,
+        actorId: actorIdPassed,
+        ignoreFormData,
+      } = get();
 
       // Just save action history when had action name
       if (action) {
@@ -90,7 +96,7 @@ export function hocAction(
         // case insert data
         if (dataRelated) {
           newActionHistory.requestFormData = {
-            ...requestFormData,
+            ...(ignoreFormData ? {} : requestFormData),
             ...dataRelated,
           };
         } else {
