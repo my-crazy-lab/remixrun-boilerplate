@@ -41,5 +41,6 @@
   "NO_USER_GROUP_HERE": "Nhóm này chưa tạo nhóm con.",
   "EDIT": "Chỉnh sửa",
   "DELETE": "Xoá",
-  "LOGOUT": "Đăng xuất"
+  "LOGOUT": "Đăng xuất",
+  "CREATE_USER_SUCCESSFUL": "Tạo tài khoản thành công"
 }

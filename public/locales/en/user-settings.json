@@ -40,5 +40,6 @@
   "PERSONAL_DETAILS": "Personal Details",
   "NO_USER_GROUP_HERE": "This group not have children group",
   "EDIT": "Edit",
-  "DELETE": "Delete"
+  "DELETE": "Delete",
+  "CREATE_USER_SUCCESSFUL": "Create user successful"
 }

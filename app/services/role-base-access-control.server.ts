@@ -158,8 +158,13 @@ export async function getUsersByGroupId(groupIds: string[]) {
     genealogy: { $in: groupIds },
   }).lean();
 
+  let userIds: Array<string> = [];
+  groups.forEach(group => {
+    userIds = [...userIds, ...group.userIds];
+  });
+
   // remove duplicate user id
-  return [...new Set(...groups.map(group => group.userIds))];
+  return [...new Set(userIds)];
 }
 
 export async function getRoleDetail(roleId: string) {
@@ -235,16 +240,17 @@ export async function getGroupPermissions({
   groupId: string;
   isSuperUser: boolean;
 }) {
-  // with super user, show all permissions in create/update roles
-  if (isSuperUser) {
-    return getAllPermissionsIgnoreRoot();
-  }
-
   const group = await GroupsModel.findOne({
     _id: groupId,
     status: statusOriginal.ACTIVE,
   }).lean();
   if (!group) return [];
+
+  // with super user, show all permissions in create/update roles
+  // just apply when super user is standing group's root
+  if (isSuperUser && !group.genealogy?.length) {
+    return getAllPermissionsIgnoreRoot();
+  }
 
   const roles = await RolesModel.find({
     _id: { $in: group.roleAssignedIds },
@@ -291,6 +297,41 @@ export async function getGroupsOfUser<T extends Projection = Projection>({
         localField: '_id',
         foreignField: 'genealogy',
         as: 'children',
+      },
+    },
+    {
+      $addFields: {
+        children: {
+          $filter: {
+            input: {
+              $map: {
+                input: '$children',
+                as: 'child',
+                in: {
+                  $mergeObjects: [
+                    '$$child',
+                    {
+                      lastGenealogy: {
+                        $arrayElemAt: ['$$child.genealogy', -1],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            as: 'child',
+            cond: {
+              $and: [
+                {
+                  $eq: ['$$child.status', statusOriginal.ACTIVE],
+                },
+                {
+                  $eq: ['$$child.lastGenealogy', '$_id'],
+                },
+              ],
+            },
+          },
+        },
       },
     },
     {
@@ -346,7 +387,7 @@ export function getAllPermissions() {
   return PermissionsModel.find({}).lean();
 }
 
-export async function getGroupsByUserId(userId: string) {
+export async function getUsersInGroupsByUserId(userId: string) {
   const groupIdsOfUser = await GroupsModel.find({
     userIds: { $in: userId },
   }).lean();
@@ -516,6 +557,19 @@ export async function deleteRole({
             },
             $pull: {
               roleIds: roleId,
+            },
+          },
+        );
+
+        // update children group assigned role removed
+        await GroupsModel.updateMany(
+          { roleAssignedIds: roleId, status: statusOriginal.ACTIVE },
+          {
+            $set: {
+              updatedAt,
+            },
+            $pull: {
+              roleAssignedIds: roleId,
             },
           },
         );

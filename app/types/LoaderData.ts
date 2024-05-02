@@ -15,6 +15,7 @@ export interface GroupDetail {
       _id: string;
       name?: string;
       description?: string;
+      userIds?: Array<string>;
     }>;
     name: string;
     description: string;

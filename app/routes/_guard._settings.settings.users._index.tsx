@@ -41,6 +41,7 @@ import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
+import i18next from '~/i18next.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
 import { deleteUser } from '~/services/role-base-access-control.server';
 import {
@@ -195,7 +196,9 @@ export const action = hocAction(
       });
     }
 
-    return null;
+    const t = await i18next.getFixedT(request, 'user-settings');
+
+    return json({ message: t('CREATE_USER_SUCCESSFUL') });
   },
   PERMISSIONS.MANAGER,
 );
@@ -241,9 +244,13 @@ interface FormData {
 export default function Screen() {
   const actionData = useActionData<{
     error?: string;
+    message?: string;
   }>();
   if (actionData?.error) {
     toast({ description: actionData.error });
+  }
+  if (actionData?.message) {
+    toast({ variant: 'success', description: actionData.message });
   }
 
   const { t } = useTranslation(['user-settings']);

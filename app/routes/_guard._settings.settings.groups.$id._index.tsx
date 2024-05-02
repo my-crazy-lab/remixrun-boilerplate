@@ -161,7 +161,7 @@ export default function Screen() {
                               {t('CHILDREN_GROUP')}
                             </Typography>
                             <Typography className="text-primary" variant="h4">
-                              2
+                              2xxx
                             </Typography>
                           </div>
                         </div>
@@ -176,7 +176,7 @@ export default function Screen() {
                             <Typography
                               className="text-secondary-foreground"
                               variant="h3">
-                              2
+                              {child.userIds?.length}
                             </Typography>
                           </div>
                         </div>
