@@ -61,11 +61,12 @@ function SelectSearchAsync<T extends CommonFunction>({
         <Button
           variant="outline"
           role="combobox"
-          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
-            }`}>
+          className={`w-full justify-between ${
+            selected.length > 1 ? 'h-full' : 'h-10'
+          }`}>
           {selected.length
             ? options.find(option => selected?.[0]?.value === option.value)
-              ?.label
+                ?.label
             : placeholder}
           <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>

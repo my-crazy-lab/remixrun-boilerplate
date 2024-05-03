@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { toast } from '@/components/ui/use-toast';
 import { ThickArrowLeftIcon } from '@radix-ui/react-icons';
-import { json, redirect, type LoaderFunctionArgs } from '@remix-run/node';
+import { type LoaderFunctionArgs, json, redirect } from '@remix-run/node';
 import {
   useActionData,
   useLoaderData,

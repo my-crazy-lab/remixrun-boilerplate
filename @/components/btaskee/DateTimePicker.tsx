@@ -84,7 +84,6 @@ const DateTimePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
           </Popover>
         )}
       />
-
     );
   },
 );
