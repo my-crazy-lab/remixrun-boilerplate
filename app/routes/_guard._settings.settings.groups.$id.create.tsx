@@ -49,6 +49,7 @@ export const action = hocAction(
       dataRelated: { groupId: group._id },
     });
 
+    // TODO add toast and redirect
     return redirect(`/settings/groups/${params.id}`);
   },
   PERMISSIONS.WRITE_GROUP,

@@ -64,6 +64,7 @@ export const action = hocAction(
       dataRelated: { roleId: role._id },
     });
 
+    // TODO add toast and redirect
     return redirect(`/settings/groups/${params.id}`);
   },
   PERMISSIONS.WRITE_ROLE,

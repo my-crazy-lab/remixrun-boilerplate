@@ -50,6 +50,7 @@ export const action = hocAction(
       action: ACTION_NAME.UPDATE_USER,
     });
 
+    // TODO add toast and redirect
     return redirect('/settings/users');
   },
   PERMISSIONS.MANAGER,

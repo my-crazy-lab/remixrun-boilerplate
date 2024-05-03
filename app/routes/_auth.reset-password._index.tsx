@@ -17,7 +17,7 @@ interface ActionData {
 }
 
 export const action = hocAction(
-  async ({ request }, { setInformationActionHistory }) => {
+  async ({ request }) => {
     const formData = await request.formData();
 
     const { email } = Object.fromEntries(formData);

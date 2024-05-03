@@ -92,6 +92,7 @@ export const action = hocAction(
       action: ACTION_NAME.UPDATE_ROLE,
     });
 
+    // TODO add toast and redirect
     return redirect(`${ROUTE_NAME.GROUP_SETTING}/${params.id}`);
   },
   PERMISSIONS.WRITE_ROLE,

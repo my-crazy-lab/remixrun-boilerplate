@@ -16,6 +16,7 @@ import { toast } from '@/components/ui/use-toast';
 import TabGroupIcon from '@/images/tab-group.svg';
 import UsersIcon from '@/images/user-group.svg';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
+import { json } from '@remix-run/node';
 import {
   Form,
   Link,
@@ -42,18 +43,25 @@ export const action = hocAction(
     const groupIdDeleted = formData.get('groupDeleted')?.toString();
 
     if (roleIdDeleted) {
-      await deleteRole({ roleId: roleIdDeleted, groupId: params.id || '' });
+      const roleName = await deleteRole({
+        roleId: roleIdDeleted,
+        groupId: params.id || '',
+      });
       setInformationActionHistory({
         action: ACTION_NAME.REMOVE_ROLE,
         dataRelated: {
           groupId: params.id,
         },
       });
+
+      return json({ success: `Remove ${roleName} successful` });
     } else if (groupIdDeleted) {
-      await deleteGroup({ groupId: groupIdDeleted });
+      const groupName = await deleteGroup({ groupId: groupIdDeleted });
       setInformationActionHistory({
         action: ACTION_NAME.REMOVE_GROUP,
       });
+
+      return json({ success: `Remove ${groupName} successful` });
     }
     return null;
   },
@@ -65,9 +73,13 @@ export default function Screen() {
 
   const actionData = useActionData<{
     error?: string;
+    success?: string;
   }>();
   if (actionData?.error) {
     toast({ title: 'SERVER_ERROR', description: actionData.error });
+  }
+  if (actionData?.success) {
+    toast({ variant: 'success', description: actionData.success });
   }
 
   const params = useParams();

@@ -605,6 +605,7 @@ export async function deleteRole({
   roleId: string;
   groupId: string;
 }) {
+  let roleNameDeleted = '';
   const updatedAt = momentTz().toDate();
 
   const permissionsRemoved =
@@ -612,7 +613,10 @@ export async function deleteRole({
       groupId,
       updateOrRemoveCallback: async () => {
         // remove role by id
-        await RolesModel.deleteOne({ _id: roleId });
+        const roleDeleted = await RolesModel.findOneAndDelete({
+          _id: roleId,
+        }).lean<Roles>();
+        roleNameDeleted = roleDeleted?.name || '';
 
         // update group created role removed
         await GroupsModel.updateOne(
@@ -660,6 +664,8 @@ export async function deleteRole({
       },
     );
   }
+
+  return roleNameDeleted;
 }
 
 export async function updateRole({
@@ -750,6 +756,8 @@ export async function deleteGroup({ groupId }: { groupId: string }) {
       },
     },
   );
+
+  return group?.name || '';
 }
 
 export async function isParentOfGroup({
