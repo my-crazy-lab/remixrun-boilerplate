@@ -31,7 +31,7 @@ const UsersSchema = new Schema(
     },
     language: {
       $type: String,
-      require: true
+      require: true,
     },
     services: {
       password: {

@@ -14,6 +14,10 @@ const envSchema = z.object({
     .enum(['development', 'production', 'test'])
     .default('development'),
   MAX_AGE_SESSION: z.number(),
+  STORAGE_ACCESS_KEY: z.string().trim().min(1),
+  STORAGE_SECRET: z.string().trim().min(1),
+  STORAGE_REGION: z.string().trim().min(1),
+  STORAGE_BUCKET: z.string().trim().min(1),
 });
 
 const envServer = envSchema.safeParse({
@@ -27,6 +31,10 @@ const envServer = envSchema.safeParse({
   MAIL_SERVER_ADDRESS: process.env.MAIL_SERVER_ADDRESS,
   ORIGINAL_DOMAIN: process.env.ORIGINAL_DOMAIN,
   MAX_AGE_SESSION: Number(process.env.MAX_AGE_SESSION),
+  STORAGE_ACCESS_KEY: process.env.STORAGE_ACCESS_KEY,
+  STORAGE_SECRET: process.env.STORAGE_SECRET,
+  STORAGE_REGION: process.env.STORAGE_REGION,
+  STORAGE_BUCKET: process.env.STORAGE_BUCKET,
 });
 
 if (!envServer.success) {

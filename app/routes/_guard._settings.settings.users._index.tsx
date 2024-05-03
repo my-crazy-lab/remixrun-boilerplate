@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MultiSelect, type OptionType } from '@/components/ui/multi-select';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { toast } from '@/components/ui/use-toast';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import { type LoaderFunctionArgs, json } from '@remix-run/node';
@@ -49,7 +49,7 @@ import {
   getTotalUsers,
   getUsers,
 } from '~/services/settings.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { OptionType, ReturnValueIgnorePromise } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {

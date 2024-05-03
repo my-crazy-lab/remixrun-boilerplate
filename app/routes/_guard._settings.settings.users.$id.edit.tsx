@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MultiSelect, type OptionType } from '@/components/ui/multi-select';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { toast } from '@/components/ui/use-toast';
 import { ThickArrowLeftIcon } from '@radix-ui/react-icons';
 import { type LoaderFunctionArgs, json, redirect } from '@remix-run/node';
@@ -18,7 +18,7 @@ import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
 import { getUserByUserId, updateUser } from '~/services/auth.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
-import { type Users } from '~/types';
+import { type OptionType, type Users } from '~/types';
 
 interface FormData {
   email: string;
@@ -26,6 +26,7 @@ interface FormData {
   cities: Array<OptionType>;
   username: string;
 }
+
 interface LoaderData {
   cities: Array<string>;
   user: Users;

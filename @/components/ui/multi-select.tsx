@@ -12,19 +12,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import * as React from 'react';
 import type { SetURLSearchParams } from 'react-router-dom';
-import { type CommonFunction } from '~/types';
-
-import { Skeleton } from './skeleton';
-
-export type OptionType = {
-  label: string;
-  value: string;
-};
+import { type CommonFunction, OptionType } from '~/types';
 
 interface MultiSelectAsyncProps<T> {
   options: OptionType[];
