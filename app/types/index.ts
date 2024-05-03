@@ -2,6 +2,11 @@ import { type LucideIcon } from 'lucide-react';
 import type { TActionPermissionModule } from '~/constants/common';
 import { type Document } from '~/utils/db.server';
 
+export type OptionType = {
+  label: string;
+  value: string;
+};
+
 export interface AuthenticatorSessionData
   extends Pick<
     Users,

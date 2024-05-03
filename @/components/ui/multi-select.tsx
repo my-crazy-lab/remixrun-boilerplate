@@ -12,19 +12,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import * as React from 'react';
 import type { SetURLSearchParams } from 'react-router-dom';
-import { type CommonFunction } from '~/types';
-
-import { Skeleton } from './skeleton';
-
-export type OptionType = {
-  label: string;
-  value: string;
-};
+import { OptionType, type CommonFunction } from '~/types';
 
 interface MultiSelectAsyncProps<T> {
   options: OptionType[];
@@ -71,9 +65,8 @@ export function MultiSelectAsync<T extends CommonFunction>({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${
-            selected.length > 1 ? 'h-full' : 'h-10'
-          }`}
+          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
+            }`}
           onClick={() => setOpen(!open)}>
           <div className="flex gap-1 flex-wrap">
             {selected.map(item => (
@@ -201,9 +194,8 @@ export function MultiSelect<T extends CommonFunction>({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={`w-full justify-between ${
-            selected.length > 1 ? 'h-full' : 'h-10'
-          }`}
+          className={`w-full justify-between ${selected.length > 1 ? 'h-full' : 'h-10'
+            }`}
           onClick={() => setOpen(!open)}>
           <div className="flex gap-1 flex-wrap">
             {selected.map(item => (

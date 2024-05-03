@@ -21,10 +21,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MultiSelect, type OptionType } from '@/components/ui/multi-select';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { toast } from '@/components/ui/use-toast';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { type LoaderFunctionArgs, json } from '@remix-run/node';
+import { json, type LoaderFunctionArgs } from '@remix-run/node';
 import {
   Form,
   Link,
@@ -49,7 +49,7 @@ import {
   getTotalUsers,
   getUsers,
 } from '~/services/settings.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { OptionType, ReturnValueIgnorePromise } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
@@ -121,13 +121,13 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
             {// TODO fix typing for react hook form
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            row.getValue('cities')?.map((e, index) => (
-              <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
-                {e}
-              </Badge>
-            ))}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              row.getValue('cities')?.map((e, index) => (
+                <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
+                  {e}
+                </Badge>
+              ))}
           </span>
         </div>
       );
