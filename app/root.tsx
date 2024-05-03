@@ -44,9 +44,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (name === 'changeLanguage' && typeof language === 'string') {
       const userId = await getUserId({ request });
       await setUserLanguage({ language, userId });
+
+      return redirect(`${redirectPath}`);
     }
 
-    return redirect(`${redirectPath}`);
+    return null;
   } catch (error) {
     if (error instanceof Error) {
       return json({ error: error.message });

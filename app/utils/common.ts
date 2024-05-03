@@ -42,7 +42,7 @@ export function convertRolesToPermissions(roles: Roles[]) {
   const initialValue: Roles['permissions'] = [];
   const setOfPermissions = new Set(
     roles.reduce(
-      (acc, role) => [...acc, ...(role?.permissions || [])],
+      (acc, role) => [...acc, ...(role?.permissions || initialValue)],
       initialValue,
     ),
   );

@@ -138,11 +138,26 @@ export async function updateGroups({
 }: Pick<Groups, 'name' | 'description' | 'userIds' | 'roleAssignedIds'> & {
   groupId: string;
 }) {
+  const updatedAt = momentTz().toDate();
+
+  const previousPermissions = await getPermissionsCreatedByGroupId({ groupId });
+
+  const newRolesAssigned = await RolesModel.find({
+    _id: { $in: roleAssignedIds },
+  }).lean<Roles[]>();
+
+  const permissionsAfterUpdateRole =
+    convertRolesToPermissions(newRolesAssigned);
+
+  const permissionsRemoved = previousPermissions.filter(
+    permission => !permissionsAfterUpdateRole.includes(permission),
+  );
+
   await GroupsModel.updateOne(
     { _id: groupId },
     {
       $set: {
-        updatedAt: momentTz().toDate(),
+        updatedAt,
         name,
         description,
         userIds,
@@ -150,6 +165,61 @@ export async function updateGroups({
       },
     },
   );
+
+  // update roleIds
+  const roleIdsOfGroupWillBeUpdated = await GroupsModel.aggregate([
+    {
+      $match: { _id: groupId },
+    },
+    {
+      $lookup: {
+        from: 'roles',
+        localField: 'roleIds',
+        foreignField: '_id',
+        as: 'roles',
+      },
+    },
+    {
+      $unwind: {
+        path: '$roles',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $match: { 'roles.permissions': { $in: permissionsRemoved } },
+    },
+  ]).exec();
+  await RolesModel.updateMany(
+    {
+      _id: {
+        $in: roleIdsOfGroupWillBeUpdated?.map(e => e?.roles?._id || '') || [],
+      },
+    },
+    {
+      $set: {
+        updatedAt,
+      },
+      $pullAll: { permissions: permissionsRemoved },
+    },
+  );
+
+  if (permissionsRemoved.length) {
+    const rolesWillBeUpdated =
+      await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
+        groupId,
+        permissionsRemoved,
+      });
+
+    await RolesModel.updateMany(
+      { _id: { $in: rolesWillBeUpdated } },
+      {
+        $set: {
+          updatedAt,
+        },
+        $pullAll: { permissions: permissionsRemoved },
+      },
+    );
+  }
 }
 
 export async function getUsersByGroupId(groupIds: string[]) {
@@ -475,7 +545,11 @@ async function getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
   >([
     {
       $match: {
-        genealogy: groupId,
+        $or: [
+          {
+            genealogy: groupId,
+          },
+        ],
         status: statusOriginal.ACTIVE,
       },
     },
@@ -538,15 +612,7 @@ export async function deleteRole({
       groupId,
       updateOrRemoveCallback: async () => {
         // remove role by id
-        await RolesModel.updateOne(
-          { _id: roleId, status: statusOriginal.ACTIVE },
-          {
-            $set: {
-              updatedAt,
-              status: statusOriginal.REMOVED,
-            },
-          },
-        );
+        await RolesModel.deleteOne({ _id: roleId });
 
         // update group created role removed
         await GroupsModel.updateOne(
@@ -576,22 +642,24 @@ export async function deleteRole({
       },
     });
 
-  const rolesWillBeUpdated =
-    await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
-      groupId,
-      permissionsRemoved,
-    });
+  if (permissionsRemoved.length) {
+    const rolesWillBeUpdated =
+      await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
+        groupId,
+        permissionsRemoved,
+      });
 
-  // remove permissions of roles were born from list permissions deleted
-  await RolesModel.updateMany(
-    { _id: { $in: rolesWillBeUpdated } },
-    {
-      $set: {
-        updatedAt,
+    // remove permissions of roles were born from list permissions deleted
+    await RolesModel.updateMany(
+      { _id: { $in: rolesWillBeUpdated } },
+      {
+        $set: {
+          updatedAt,
+        },
+        $pullAll: { permissions: permissionsRemoved },
       },
-      $pullAll: { permissions: permissionsRemoved },
-    },
-  );
+    );
+  }
 }
 
 export async function updateRole({
@@ -626,49 +694,48 @@ export async function updateRole({
       },
     });
 
-  const rolesWillBeUpdated =
-    await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
-      groupId,
-      permissionsRemoved,
-    });
+  if (permissionsRemoved.length) {
+    const rolesWillBeUpdated =
+      await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
+        groupId,
+        permissionsRemoved,
+      });
 
-  // remove permissions of roles were born from list permissions deleted
-  await RolesModel.updateMany(
-    { _id: { $in: rolesWillBeUpdated } },
-    {
-      $set: {
-        updatedAt,
+    // remove permissions of roles were born from list permissions deleted
+    await RolesModel.updateMany(
+      { _id: { $in: rolesWillBeUpdated } },
+      {
+        $set: {
+          updatedAt,
+        },
+        $pullAll: { permissions: permissionsRemoved },
       },
-      $pullAll: { permissions: permissionsRemoved },
-    },
-  );
+    );
+  }
 }
 
 export async function deleteGroup({ groupId }: { groupId: string }) {
   const updatedAt = momentTz().toDate();
 
-  // get group and parent of it
+  // get group and children of it
   // declare together
-  const groups = await GroupsModel.find({
+  const groupsChildren = await GroupsModel.find({
     status: statusOriginal.ACTIVE,
-    $or: [{ _id: groupId }, { genealogy: groupId }],
+    $or: [{ genealogy: groupId }],
   }).lean();
+  const group = await GroupsModel.findOne({
+    status: statusOriginal.ACTIVE,
+    _id: groupId,
+  }).lean<Groups>();
 
   // get role's ids will be deleted
-  const rolesWillBeDeleted = removeDuplicatedItem(
-    groups.map(e => [...e.roleIds, ...e.roleAssignedIds]),
-  );
+  const rolesWillBeDeleted = removeDuplicatedItem([
+    group?.roleIds || [], // don't remove roles of parent, just remove in children
+    ...groupsChildren.map(e => [...e.roleIds, ...e.roleAssignedIds]),
+  ]);
 
   // remove roles
-  await RolesModel.updateMany(
-    { _id: { $in: rolesWillBeDeleted }, status: statusOriginal.ACTIVE },
-    {
-      $set: {
-        updatedAt,
-        status: statusOriginal.REMOVED,
-      },
-    },
-  );
+  await RolesModel.deleteMany({ _id: { $in: rolesWillBeDeleted } });
 
   // remove group and children group
   await GroupsModel.updateMany(
