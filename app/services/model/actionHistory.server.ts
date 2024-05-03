@@ -3,6 +3,10 @@ import { mongoClientBE } from '~/utils/db.server';
 
 const ActionsHistorySchema = new Schema(
   {
+    _id: {
+      $type: String,
+      required: true,
+    },
     actorId: {
       $type: String,
     },

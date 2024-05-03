@@ -28,9 +28,9 @@ export interface NavItem {
 
 export interface ActionsHistory {
   _id: string;
-  userId: string;
+  actorId: string;
   action: string;
-  data: Document;
+  requestFormData: MustBeAny;
   createdAt: Date;
 }
 
