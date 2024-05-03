@@ -1,4 +1,3 @@
-import { toast } from '@/components/ui/use-toast';
 import { redirect } from '@remix-run/node';
 import bcrypt from 'bcrypt';
 import { Authenticator } from 'remix-auth';
@@ -241,9 +240,6 @@ authenticator.use(
   new FormStrategy(async ({ form }) => {
     const code = form.get('code')?.toString();
     if (!code) {
-      toast({
-        description: 'LOGIN_FAILURE',
-      });
       throw new Error('Login failure');
     }
     const user = await verifyCode(code);

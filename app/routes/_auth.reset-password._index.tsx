@@ -16,21 +16,19 @@ interface ActionData {
   error?: string;
 }
 
-export const action = hocAction(
-  async ({ request }) => {
-    const formData = await request.formData();
+export const action = hocAction(async ({ request }) => {
+  const formData = await request.formData();
 
-    const { email } = Object.fromEntries(formData);
+  const { email } = Object.fromEntries(formData);
 
-    if (email && typeof email === 'string') {
-      await resetPassword(email);
+  if (email && typeof email === 'string') {
+    await resetPassword(email);
 
-      return json({ isSent: true });
-    } else {
-      throw new Error('Email incorrect');
-    }
-  },
-);
+    return json({ isSent: true });
+  } else {
+    throw new Error('Email incorrect');
+  }
+});
 
 export async function loader() {
   return null;
