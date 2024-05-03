@@ -21,14 +21,14 @@ export type AlertAction =
   | {
       type: 'confirm';
       title: string;
-      body?: string;
+      body?: string | React.ReactNode;
       cancelButton?: string;
       actionButton?: string;
     }
   | {
       type: 'prompt';
       title: string;
-      body?: string;
+      body?: string | React.ReactNode;
       cancelButton?: string;
       actionButton?: string;
       defaultValue?: string;
@@ -42,7 +42,7 @@ export type AlertAction =
 interface AlertDialogState {
   open: boolean;
   title: string;
-  body: string;
+  body: string | React.ReactNode;
   type: 'alert' | 'confirm' | 'prompt';
   cancelButton: string;
   actionButton: string;
