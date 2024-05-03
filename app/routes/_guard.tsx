@@ -1,4 +1,4 @@
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
 import { useRef } from 'react';
 import ROUTE_NAME from '~/constants/route';
