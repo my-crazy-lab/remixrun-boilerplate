@@ -3,7 +3,7 @@ import { verifyAndSendCode } from '~/services/auth.server';
 import { dotenv } from '~/services/dotenv.server';
 import * as EmailService from '~/services/mail.server';
 import { type Users } from '~/types';
-import { mongodb } from '~/utils/db.server';
+import { mongoClientBE } from '~/utils/db.server';
 
 jest.mock('~/services/mail.server', () => ({
   __esModule: true,
@@ -24,13 +24,17 @@ describe('Authentication', () => {
           bcrypt: 'testing',
         },
       },
+      isoCode: 'VN',
+      language: 'vi',
     };
     beforeEach(async () => {
-      await mongodb.collection<Users>('users').insertOne(mockUser);
+      await mongoClientBE.collection<Users>('users').insertOne(mockUser);
     });
 
     afterEach(async () => {
-      await mongodb.collection<Users>('users').deleteOne({ _id: mockUser._id });
+      await mongoClientBE
+        .collection<Users>('users')
+        .deleteOne({ _id: mockUser._id });
     });
 
     it('Should compare password, generate verify code and send this code into email with nodemailer successfully', async () => {

@@ -15,6 +15,7 @@ export interface AuthenticatorSessionData
   userId: string;
   isSuperUser: boolean;
   isManager: boolean;
+  language: string;
 }
 
 export interface NavItem {
