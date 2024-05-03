@@ -29,6 +29,9 @@ const GroupsSchema = new Schema(
     genealogy: {
       $type: [String],
     },
+    nearestChildren: {
+      $type: [String],
+    },
     hierarchy: {
       $type: Number,
       required: true,

@@ -118,7 +118,7 @@ export async function createGroup({
   // root group (hierarchy 1) not have genealogy field
   const genealogy = [...(parentGroup.genealogy || []), parentId];
 
-  return GroupsModel.create({
+  const groupCreated = await GroupsModel.create({
     ...newRecordCommonField(),
     name,
     description,
@@ -127,6 +127,17 @@ export async function createGroup({
     genealogy,
     hierarchy: parentGroup.hierarchy + 1, // increase hierarchy
   });
+
+  // update parent group
+  await GroupsModel.updateOne(
+    { _id: parentId },
+    {
+      $set: { updateAt: momentTz().toDate() },
+      $push: { nearestChildren: groupCreated._id },
+    },
+  );
+
+  return groupCreated;
 }
 
 export async function updateGroups({
@@ -364,44 +375,9 @@ export async function getGroupsOfUser<T extends Projection = Projection>({
     {
       $lookup: {
         from: 'groups',
-        localField: '_id',
-        foreignField: 'genealogy',
+        localField: 'nearestChildren',
+        foreignField: '_id',
         as: 'children',
-      },
-    },
-    {
-      $addFields: {
-        children: {
-          $filter: {
-            input: {
-              $map: {
-                input: '$children',
-                as: 'child',
-                in: {
-                  $mergeObjects: [
-                    '$$child',
-                    {
-                      lastGenealogy: {
-                        $arrayElemAt: ['$$child.genealogy', -1],
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-            as: 'child',
-            cond: {
-              $and: [
-                {
-                  $eq: ['$$child.status', statusOriginal.ACTIVE],
-                },
-                {
-                  $eq: ['$$child.lastGenealogy', '$_id'],
-                },
-              ],
-            },
-          },
-        },
       },
     },
     {
@@ -824,44 +800,9 @@ export async function getGroupDetail<T = Projection>({
     {
       $lookup: {
         from: 'groups',
-        localField: '_id',
-        foreignField: 'genealogy',
+        localField: 'nearestChildren',
+        foreignField: '_id',
         as: 'children',
-      },
-    },
-    {
-      $addFields: {
-        children: {
-          $filter: {
-            input: {
-              $map: {
-                input: '$children',
-                as: 'child',
-                in: {
-                  $mergeObjects: [
-                    '$$child',
-                    {
-                      lastGenealogy: {
-                        $arrayElemAt: ['$$child.genealogy', -1],
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-            as: 'child',
-            cond: {
-              $and: [
-                {
-                  $eq: ['$$child.lastGenealogy', groupId],
-                },
-                {
-                  $eq: ['$$child.status', statusOriginal.ACTIVE],
-                },
-              ],
-            },
-          },
-        },
       },
     },
   ];
@@ -885,7 +826,9 @@ export async function getGroupDetail<T = Projection>({
       lookupRolesAssigned,
       lookupUsers,
       {
-        $project: projection,
+        $project: {
+          ...projection,
+        },
       },
     ]).exec();
 

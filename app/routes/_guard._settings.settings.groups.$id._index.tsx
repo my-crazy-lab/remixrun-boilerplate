@@ -173,7 +173,7 @@ export default function Screen() {
                               {t('CHILDREN_GROUP')}
                             </Typography>
                             <Typography className="text-primary" variant="h4">
-                              2xxx
+                              {child.nearestChildren?.length}
                             </Typography>
                           </div>
                         </div>
