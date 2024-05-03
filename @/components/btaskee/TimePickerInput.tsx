@@ -63,8 +63,10 @@ const TimePickerInput = React.forwardRef<
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Tab') return;
       e.preventDefault();
+
       if (e.key === 'ArrowRight') onRightFocus?.();
       if (e.key === 'ArrowLeft') onLeftFocus?.();
+
       if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
         const step = e.key === 'ArrowUp' ? 1 : -1;
         const newValue = getArrowByType(calculatedValue, step, picker);
@@ -72,6 +74,7 @@ const TimePickerInput = React.forwardRef<
         const tempDate = new Date(date);
         setDate(setDateByType(tempDate, newValue, picker));
       }
+
       if (e.key >= '0' && e.key <= '9') {
         const newValue = !flag
           ? '0' + e.key
