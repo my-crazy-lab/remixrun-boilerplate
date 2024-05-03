@@ -10,7 +10,7 @@ import { authenticator } from '~/services/auth.server';
 import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
 import { getUserProfile } from '~/services/settings.server';
-import type { Users }  from '~/types';
+import type { Users } from '~/types';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request, {
@@ -47,7 +47,7 @@ export default function Screen() {
 
   return (
     <div className="hidden flex-col md:flex max-w-[1392px] m-auto">
-      <Header userProfile={userProfile}/>
+      <Header userProfile={userProfile} />
       <div className="flex-1 space-y-4 p-8 pt-6">
         <GlobalContext.Provider value={storeRef.current}>
           <Outlet />

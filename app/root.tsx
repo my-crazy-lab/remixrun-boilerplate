@@ -5,9 +5,12 @@ import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import AccessDenied from '@/images/403.svg';
 import NotFound from '@/images/404.svg';
-import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
-import type { ClientLoaderFunctionArgs } from '@remix-run/react';
+import type {
+  ActionFunctionArgs,
+  LinksFunction,
+  LoaderFunctionArgs,
+} from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import {
   Links,
   LiveReload,
@@ -22,32 +25,40 @@ import {
 import { HomeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useChangeLanguage } from 'remix-i18next/react';
-import i18next from '~/i18next.server';
 
+import { ERROR } from './constants/common';
+import { getUserId, getUserSession } from './services/helpers.server';
+import { setUserLanguage } from './services/settings.server';
 import styles from './tailwind.css';
 import type { MustBeAny } from './types';
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const locale = await i18next.getLocale(request);
-  return json({ locale });
+export const action = async ({ request }: ActionFunctionArgs) => {
+  try {
+    const formData = await request.clone().formData();
+    const {
+      language,
+      name,
+      redirect: redirectPath,
+    } = Object.fromEntries(formData);
+
+    if (name === 'changeLanguage' && typeof language === 'string') {
+      const userId = await getUserId({ request });
+      await setUserLanguage({ language, userId });
+    }
+
+    return redirect(`${redirectPath}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      return json({ error: error.message });
+    }
+    return json({ error: ERROR.UNKNOWN_ERROR });
+  }
 };
 
-interface DataCache {
-  locale?: string;
-}
-const clientCache: DataCache = {};
-
-export async function clientLoader({ serverLoader }: ClientLoaderFunctionArgs) {
-  if (clientCache.locale) {
-    return { locale: clientCache.locale };
-  }
-
-  const dataServerLoader = await serverLoader<DataCache>();
-  clientCache.locale = dataServerLoader?.locale;
-
-  return { locale: clientCache.locale };
-}
-clientLoader.hydrate = true;
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const { language } = await getUserSession({ headers: request.headers });
+  return json({ locale: language });
+};
 
 export const links: LinksFunction = () => {
   return [
@@ -131,7 +142,7 @@ export function ErrorBoundary() {
 }
 
 export default function App() {
-  const loaderData = useLoaderData<Required<DataCache>>();
+  const loaderData = useLoaderData<{ locale: string }>();
   useChangeLanguage(loaderData.locale);
 
   return (

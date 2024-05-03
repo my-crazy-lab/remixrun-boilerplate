@@ -3,7 +3,10 @@ import type { TActionPermissionModule } from '~/constants/common';
 import { type Document } from '~/utils/db.server';
 
 export interface AuthenticatorSessionData
-  extends Pick<Users, 'isoCode' | 'cities'> {
+  extends Pick<
+    Users,
+    'isoCode' | 'cities' | 'email' | 'username' | 'language'
+  > {
   userId: string;
   isSuperUser: boolean;
   isManager: boolean;
@@ -47,7 +50,7 @@ export interface Users {
     token: string;
     expired: Date;
   };
-  language?: string;
+  language: string;
 }
 
 export type IUserType = 'ACTIVE' | 'INACTIVE';

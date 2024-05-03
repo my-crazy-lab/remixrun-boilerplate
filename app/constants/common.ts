@@ -57,3 +57,5 @@ export const ERROR = {
   PASSWORD_NOT_MATCH: 'PASSWORD_NOT_MATCH',
   PARENT_GROUP_NOT_FOUND: 'PARENT_GROUP_NOT_FOUND',
 };
+
+export const defaultLanguage = 'en';

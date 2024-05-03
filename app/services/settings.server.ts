@@ -6,6 +6,7 @@ import { type PipelineStage } from '~/utils/db.server';
 
 import { newRecordCommonField, statusOriginal } from './constants.server';
 import { getUsersInGroupsByUserId } from './role-base-access-control.server';
+import { defaultLanguage } from '~/constants/common';
 
 interface ISearch {
   $match: {
@@ -166,6 +167,7 @@ export async function createNewUser({
     email,
     cities,
     isoCode,
+    lang: defaultLanguage,
   });
 
   return newUser;

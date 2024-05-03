@@ -13,17 +13,11 @@ import { Form, Link } from '@remix-run/react';
 import { UserCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
-import { getUserProfile } from '~/services/settings.server';
-import { ReturnValueIgnorePromise } from '~/types';
 
 import { Logo } from './BTaskeeLogo';
 import LanguageSelector from './LanguageSelector';
 
-interface LoaderData {
-  userProfile: ReturnValueIgnorePromise<typeof getUserProfile>;
-}
-
-export default function Header(userProfile: any) {
+export default function Header({ userProfile }: any) {
   const { t } = useTranslation(['common']);
 
   return (
@@ -42,7 +36,7 @@ export default function Header(userProfile: any) {
             placeholder={`${t('SEARCH')}`}
             className="md:w-[100px] lg:w-[270px]"
           />
-          <LanguageSelector />
+          <LanguageSelector userLanguage={userProfile?.language} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -57,10 +51,10 @@ export default function Header(userProfile: any) {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {userProfile.userProfile?.username}
+                    {userProfile?.username}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {userProfile.userProfile?.email}
+                    {userProfile?.email}
                   </p>
                 </div>
               </DropdownMenuLabel>

@@ -29,6 +29,10 @@ const UsersSchema = new Schema(
       $type: [String],
       required: true,
     },
+    language: {
+      $type: String,
+      require: true
+    },
     services: {
       password: {
         bcrypt: {

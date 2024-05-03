@@ -17,7 +17,14 @@ export async function getUserSession({
 
   // Make sure if not cookie data, redirect login page
   // Just declare for checking by typescript
-  const defaultReturnValue = { userId: '', isSuperUser: false, isoCode: '' };
+  const defaultReturnValue = {
+    userId: '',
+    isSuperUser: false,
+    isoCode: '',
+    username: '',
+    email: '',
+    language: 'en',
+  };
 
   return authSession.get('user') || defaultReturnValue;
 }

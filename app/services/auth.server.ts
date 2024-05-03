@@ -168,6 +168,9 @@ export async function verifyCode(
     isManager,
     isoCode: user.isoCode,
     cities: user.cities,
+    username: user.username,
+    email: user.email,
+    language: user.language,
   };
 }
 
