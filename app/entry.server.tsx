@@ -14,6 +14,7 @@ import { PassThrough } from 'stream';
 
 import i18n from './i18n';
 import i18next from './i18next.server';
+import { getUserSession } from './services/helpers.server';
 
 const ABORT_DELAY = 5000;
 
@@ -28,7 +29,9 @@ export default async function handleRequest(
     : 'onShellReady';
 
   const instance = createInstance();
-  const lng = await i18next.getLocale(request);
+
+  const { language } = await getUserSession({ headers: request.headers });
+
   const ns = i18next.getRouteNamespaces(remixContext);
 
   await instance
@@ -36,7 +39,7 @@ export default async function handleRequest(
     .use(Backend) // Setup our backend
     .init({
       ...i18n, // spread the configuration
-      lng, // The locale we detected above
+      lng: language, // The locale we detected above
       ns, // The namespaces the routes about to render wants to use
       backend: { loadPath: resolve('./public/locales/{{lng}}/{{ns}}.json') },
     });
