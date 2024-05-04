@@ -1,14 +1,8 @@
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
+import GroupsModel from '~/services/model/groups.server';
 import UsersModel from '~/services/model/users.server';
-import {
-  createNewUser,
-  getActionsHistory,
-  getTotalActionsHistory,
-  getTotalUsers,
-  getUserProfile,
-  getUsers,
-} from '~/services/settings.server';
-import type { ActionsHistory, Users } from '~/types';
+import { createNewUser, getUserProfile } from '~/services/settings.server';
+import type { ActionsHistory, Groups, Users } from '~/types';
 
 describe('Setting page', () => {
   const mockUserId = 'user-1';
@@ -17,59 +11,78 @@ describe('Setting page', () => {
   const mockActionId = 'action-history';
   const mockActionId_2 = 'action-history-2';
 
+  const mockGroupId = 'group-1';
+  const mockGroupId_2 = 'group-2';
+
   const mockUsers: Array<Users> = [
     {
       _id: mockUserId,
-      email: 'test1@gmail.com',
       username: 'Test 1',
-      createdAt: new Date(),
       status: 'ACTIVE',
-      cities: ['Hồ Chí Minh'],
+      email: 'user-1@gmail.com',
       isoCode: 'VN',
-      language: 'en',
+      createdAt: new Date(),
+      cities: ['Hồ Chí Minh', 'Hà Nội'],
+      language: 'vi',
     },
     {
       _id: mockUserId_2,
-      email: 'test2@gmail.com',
       username: 'Test 2',
-      createdAt: new Date(),
       status: 'ACTIVE',
-      cities: ['Hồ Chí Minh', 'HN'],
+      email: 'user-2@gmail.com',
       isoCode: 'VN',
-      language: 'en',
+      createdAt: new Date(),
+      cities: ['Hồ Chí Minh', 'Hà Nội'],
+      language: 'vi',
     },
   ];
 
   const mockActionsHistory: Array<ActionsHistory> = [
     {
       _id: mockActionId,
-      requestFormData: {
-        name: 'mkt',
-        description: 'child rooot',
-        userIds: '["65eac266901400e13f73cebf","R5pRgZqKyhTKRX2N22"]',
-        roleIds: '["root"]',
-      },
       actorId: mockUserId,
       action: 'create',
+      requestFormData: {},
       createdAt: new Date(),
     },
     {
       _id: mockActionId_2,
-      requestFormData: {
-        name: 'mkt',
-        description: 'child rooot',
-        userIds: '["65eac266901400e13f73cebf","R5pRgZqKyhTKRX2N22"]',
-        roleIds: '["root"]',
-      },
-      actorId: mockUserId,
+      actorId: mockUserId_2,
       action: 'create',
+      requestFormData: {},
       createdAt: new Date(),
+    },
+  ];
+
+  const mockGroups: Array<Groups> = [
+    {
+      _id: mockGroupId,
+      name: 'Group 1',
+      userIds: [mockUserId],
+      createdAt: new Date(),
+      description: 'group description',
+      roleAssignedIds: [],
+      hierarchy: 2,
+      status: 'ACTIVE',
+      genealogy: [mockGroupId_2],
+    },
+    {
+      _id: mockGroupId_2,
+      name: 'Group 2',
+      userIds: [mockUserId_2],
+      createdAt: new Date(),
+      description: 'group description',
+      roleAssignedIds: [],
+      hierarchy: 2,
+      status: 'ACTIVE',
+      genealogy: ['group-3'],
     },
   ];
 
   beforeAll(async () => {
     await UsersModel.insertMany(mockUsers);
     await ActionsHistoryModel.insertMany(mockActionsHistory);
+    await GroupsModel.insertMany(mockGroups);
   });
 
   afterAll(async () => {
@@ -83,102 +96,106 @@ describe('Setting page', () => {
         $in: [mockActionId, mockActionId_2],
       },
     });
-  });
-
-  describe.only('getTotalActionHistory', () => {
-    it('should return total action history correctly', async () => {
-      await getTotalActionsHistory({ searchText: '' });
-      expect(0).toEqual(0);
-    });
-
-    it('should return total action history correctly with search text', async () => {
-      await getTotalActionsHistory({ searchText: 'searchText' });
-      expect(0).toEqual(0);
+    await GroupsModel.deleteMany({
+      _id: {
+        $in: [mockGroupId, mockGroupId_2],
+      },
     });
   });
+
+  // describe('getTotalActionsHistory', () => {
+  //   it('should return total action history correctly', async () => {
+  //     const result = await getTotalActionsHistory({
+  //       searchText: '',
+  //       userId: mockUserId,
+  //     });
+  //     expect(result).toEqual(
+  //       mockActionsHistory.filter(action => action.actorId !== mockUserId)
+  //         .length,
+  //     );
+  //   });
+
+  //   it('should return total action history correctly with search text', async () => {
+  //     const mockSearchText =
+  //       mockUsers.find(user => user._id === mockUserId_2)?.username || '';
+
+  //     const result = await getTotalActionsHistory({
+  //       searchText: mockSearchText,
+  //       userId: mockUserId,
+  //     });
+
+  //     expect(result).toEqual(
+  //       mockActionsHistory.filter(action => action.actorId !== mockUserId)
+  //         .length,
+  //     );
+  //   });
+  // });
 
   // describe('getActionsHistory', () => {
-  //   it('should return data action history correctly', async () => {
+  //   it('should return data action history correctly with skip and limit', async () => {
+  //     const skip = 1;
+  //     const limit = 10;
   //     const actionsHistory = await getActionsHistory({
   //       searchText: '',
-  //       skip: 0,
-  //       limit: 4,
+  //       skip,
+  //       limit,
   //       projection: {
   //         username: '$user.username',
   //         action: 1,
   //         data: 1,
   //         createdAt: 1,
   //       },
+  //       userId: mockUserId,
   //     });
-
-  //     expect(actionsHistory).toHaveLength(mockActionsHistory.length);
-  //     mockActionsHistory.forEach((action, index) => {
-  //       expect(actionsHistory[index]._id).toEqual(action._id);
-  //     });
-  //   });
-
-  //   it('should return data action history correctly with search text', async () => {
-  //     const actionsHistory = await getActionsHistory({
-  //       searchText: 'abc',
-  //       skip: 0,
-  //       limit: 4,
-  //       projection: {
-  //         username: '$user.username',
-  //         action: 1,
-  //         data: 1,
-  //         createdAt: 1,
-  //       },
-  //     });
-
-  //     expect(actionsHistory).toHaveLength(0);
+  //     expect(actionsHistory).toHaveLength(
+  //       mockActionsHistory.filter(action => action.actorId !== mockUserId)
+  //         .length,
+  //     );
+  //     expect(actionsHistory[0]).toEqual(
+  //       actionsHistory.find(action => action._id === mockActionId_2),
+  //     );
   //   });
   // });
 
-  // describe('getTotalUsers', () => {
-  //   it('should return total data user correctly', async () => {
-  //     const total = await getTotalUsers();
+  describe('getUserProfile', () => {
+    it('should return data user correctly', async () => {
+      const result = await getUserProfile(mockUserId);
 
-  //     expect(total).toEqual(mockUsers.length);
-  //   });
-  // });
+      expect(result?._id).toEqual(
+        mockUsers.find(user => user._id === mockUserId)?._id,
+      );
+    });
+  });
 
-  // describe('getUsers', () => {
-  //   it('should return data users correctly', async () => {
-  //     const users = await getUsers({});
+  describe('createNewUser', () => {
+    const mockUsername = 'thienduy.cao';
+    afterEach(async () => {
+      await UsersModel.deleteOne({
+        username: mockUsername,
+      });
+    });
 
-  //     expect(users).toHaveLength(mockUsers.length);
-  //     expect(users).toEqual(mockUsers);
-  //   });
-  // });
+    it('should create new user successfully', async () => {
+      const mockParams = {
+        username: mockUsername,
+        email: 'thienduy.cao@btaskee.com',
+        cities: ['Hồ Chí Minh', 'Hà Nội'],
+        isoCode: 'VN',
+        groupIds: [mockGroupId],
+      };
 
-  // describe('getUserProfile', () => {
-  //   it('should return data user correctly', async () => {
-  //     mockUsers.forEach(async user => {
-  //       const userProfile = await getUserProfile(user._id);
-  //       expect(userProfile).toEqual(user);
-  //     });
-  //   });
-  // });
+      const result = await createNewUser(mockParams);
+      const groups = await GroupsModel.find({
+        _id: { $in: mockParams.groupIds },
+      });
 
-  // describe('createNewUser', () => {
-  //   it('should create new user successfully', async () => {
-  //     const mockParams = {
-  //       username: 'rootUser',
-  //       password: '123',
-  //       email: 'root@gmail.com',
-  //       cities: ['HCM', 'HN'],
-  //     };
+      expect(result.username).toEqual(mockParams.username);
+      expect(result.email).toEqual(mockParams.email);
+      expect(result.cities).toEqual(mockParams.cities);
 
-  //     await createNewUser(mockParams);
-  //     const newUser = await mongodb
-  //       .collection('users')
-  //       .findOne({ username: mockParams.username });
-
-  //     expect(newUser?.username).toBe(mockParams.username);
-
-  //     await mongodb
-  //       .collection<Users>('users')
-  //       .deleteOne({ username: mockParams.username });
-  //   });
-  // });
+      groups.forEach(group => {
+        expect(group.userIds).toContain(result._id);
+      });
+    });
+  });
 });

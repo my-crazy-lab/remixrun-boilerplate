@@ -25,7 +25,7 @@ import {
   getRolesByGroupId,
   searchUser,
 } from '~/services/role-base-access-control.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import { type OptionType, type ReturnValueIgnorePromise } from '~/types';
 
 export const action = hocAction(
   async ({ request, params }, { setInformationActionHistory }) => {
@@ -82,8 +82,8 @@ export const handle = {
 interface FormData {
   name: string;
   description: string;
-  userIds: Array<{ label: string; value: string }>;
-  roleIds: Array<{ label: string; value: string }>;
+  userIds: Array<OptionType>;
+  roleIds: Array<OptionType>;
 }
 
 export default function Screen() {

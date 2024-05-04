@@ -18,6 +18,7 @@ const envSchema = z.object({
   STORAGE_SECRET: z.string().trim().min(1),
   STORAGE_REGION: z.string().trim().min(1),
   STORAGE_BUCKET: z.string().trim().min(1),
+  SESSION_SECRET: z.string().trim().min(1),
 });
 
 const envServer = envSchema.safeParse({
@@ -35,6 +36,7 @@ const envServer = envSchema.safeParse({
   STORAGE_SECRET: process.env.STORAGE_SECRET,
   STORAGE_REGION: process.env.STORAGE_REGION,
   STORAGE_BUCKET: process.env.STORAGE_BUCKET,
+  SESSION_SECRET: process.env.SESSION_SECRET,
 });
 
 if (!envServer.success) {
