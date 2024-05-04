@@ -27,5 +27,9 @@
   "SEARCH": "Search ...",
   "CREATE_ROLE": "Create role",
   "CREATE_GROUP": "Create group",
-  "GROUPS_MANAGEMENT": "Group permission"
+  "GROUPS_MANAGEMENT": "Group permission",
+  "UPDATE_USER": "Update user",
+  "ERROR_BY_MAX_FILE_SIZE": "Exceeded image file size limit.",
+  "IMAGE_PREVIEW": "Image preview",
+  "UPLOAD": "Upload"
 }

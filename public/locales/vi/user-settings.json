@@ -42,5 +42,12 @@
   "EDIT": "Chỉnh sửa",
   "DELETE": "Xoá",
   "LOGOUT": "Đăng xuất",
-  "CREATE_USER_SUCCESSFUL": "Tạo tài khoản thành công"
+  "CREATE_USER_SUCCESSFUL": "Tạo tài khoản thành công",
+  "CHANGE_AVATAR": "Đổi ảnh đại diện",
+  "ARE_YOU_SURE_CHANGE_AVATAR": "Bạn có chắc chắn muốn đổi ảnh đại diện?",
+  "CHANGE_AVATAR_SUCCESSFUL": "Đổi ảnh đại diện thành công",
+  "UPDATE_USER": "Cập nhật người dùng",
+  "CHANGE": "Thay đổi",
+  "USER_PROFILE": "Thông tin người dùng",
+  "AVATAR": "Ảnh đại diện"
 }

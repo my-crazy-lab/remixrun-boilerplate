@@ -1,25 +1,35 @@
+import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import { Grid } from '@/components/btaskee/Grid';
+import { GridItem } from '@/components/btaskee/GridItem';
+import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { toast } from '@/components/ui/use-toast';
-import { ThickArrowLeftIcon } from '@radix-ui/react-icons';
 import { type LoaderFunctionArgs, json, redirect } from '@remix-run/node';
-import {
-  useActionData,
-  useLoaderData,
-  useNavigate,
-  useSubmit,
-} from '@remix-run/react';
+import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
+import ROUTE_NAME from '~/constants/route';
 import { hocAction, hocLoader } from '~/hoc/remix';
 import { getUserByUserId, updateUser } from '~/services/auth.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
 import { type OptionType, type Users } from '~/types';
 
+export const handle = {
+  breadcrumb: (data: { user: Users }) => {
+    const { user } = data;
+
+    return (
+      <BreadcrumbsLink
+        to={`${ROUTE_NAME.USER_SETTING}/${user._id}/edit`}
+        label="UPDATE_USER"
+      />
+    );
+  },
+};
 interface FormData {
   email: string;
   password: string;
@@ -100,74 +110,63 @@ export default function Screen() {
 
     submit(formData, { method: 'post' });
   };
-  const navigate = useNavigate();
 
   return (
     <>
-      <div className="flex-row flex font-bold text-xl items-center px-0 mb-4">
-        <ThickArrowLeftIcon
-          onClick={() => {
-            navigate(-1);
-          }}
-          className="cursor-pointer mr-2 h-5 w-5"
-        />{' '}
-        Update user
+      <div className="flex flex-col p-4 rounded-lg bg-secondary">
+        <Typography variant="h3">{t('UPDATE_USER')}</Typography>
+        <Breadcrumbs />
       </div>
-      <Card className="p-4">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="gap-4 pb-4 grid sm:w-2/3">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="username" className="text-right">
-                {t('USERNAME')}
-              </Label>
-              <Input
-                {...register('username' as const, {
-                  required: true,
-                })}
-                className="col-span-3"
-                placeholder={t('USERNAME')}
+
+      <form className="mt-4" onSubmit={handleSubmit(onSubmit)}>
+        <Grid className="gap-4">
+          <GridItem>
+            <Label htmlFor="username">{t('USERNAME')}</Label>
+            <Input
+              {...register('username' as const, {
+                required: true,
+              })}
+              className="col-span-3"
+              placeholder={t('USERNAME')}
+            />
+          </GridItem>
+          <GridItem>
+            <Label htmlFor="email">{t('EMAIL')}</Label>
+            <Input
+              {...register('email' as const, {
+                required: true,
+              })}
+              type="email"
+              className="col-span-3"
+              placeholder={t('EMAIL')}
+            />
+          </GridItem>
+          <GridItem>
+            <Label>{t('CITIES')}</Label>
+            <div className="col-span-3">
+              <Controller
+                control={control}
+                name="cities"
+                render={({ field: { onChange, value } }) => (
+                  <MultiSelect
+                    selected={value}
+                    setSelected={onChange}
+                    isDisplayAllOptions
+                    options={loaderData.cities?.map(e => ({
+                      label: e,
+                      value: e,
+                    }))}
+                    className="w-[360px]"
+                  />
+                )}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                {t('EMAIL')}
-              </Label>
-              <Input
-                {...register('email' as const, {
-                  required: true,
-                })}
-                type="email"
-                className="col-span-3"
-                placeholder={t('EMAIL')}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">{t('CITIES')}</Label>
-              <div className="col-span-3">
-                <Controller
-                  control={control}
-                  name="cities"
-                  render={({ field: { onChange, value } }) => (
-                    <MultiSelect
-                      selected={value}
-                      setSelected={onChange}
-                      isDisplayAllOptions
-                      options={loaderData.cities?.map(e => ({
-                        label: e,
-                        value: e,
-                      }))}
-                      className="w-[360px]"
-                    />
-                  )}
-                />
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="py-0">
-            <Button type="submit">{t('SAVE_CHANGES')}</Button>
-          </CardFooter>
-        </form>
-      </Card>
+          </GridItem>
+        </Grid>
+        <div className="justify-end flex mt-6">
+          <Button type="submit">{t('SAVE_CHANGES')}</Button>
+        </div>
+      </form>
     </>
   );
 }

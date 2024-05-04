@@ -2,8 +2,7 @@ import bcrypt from 'bcrypt';
 import { verifyAndSendCode } from '~/services/auth.server';
 import { dotenv } from '~/services/dotenv.server';
 import * as EmailService from '~/services/mail.server';
-import { type Users } from '~/types';
-import { mongoClientBE } from '~/utils/db.server';
+import UsersModel from '~/services/model/users.server';
 
 jest.mock('~/services/mail.server', () => ({
   __esModule: true,
@@ -28,13 +27,11 @@ describe('Authentication', () => {
       language: 'vi',
     };
     beforeEach(async () => {
-      await mongoClientBE.collection<Users>('users').insertOne(mockUser);
+      await UsersModel.create(mockUser);
     });
 
     afterEach(async () => {
-      await mongoClientBE
-        .collection<Users>('users')
-        .deleteOne({ _id: mockUser._id });
+      await UsersModel.deleteOne({ _id: mockUser._id });
     });
 
     it('Should compare password, generate verify code and send this code into email with nodemailer successfully', async () => {

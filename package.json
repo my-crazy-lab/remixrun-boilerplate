@@ -94,7 +94,8 @@
     "vaul": "^0.9.0",
     "zod": "^3.22.4",
     "zustand": "^4.5.2",
-    "styled-components": "^6.1.8"
+    "styled-components": "^6.1.8",
+    "aws-sdk": "2.1612.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.3",

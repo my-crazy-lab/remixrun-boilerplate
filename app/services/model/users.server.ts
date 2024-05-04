@@ -33,6 +33,9 @@ const UsersSchema = new Schema(
       $type: String,
       require: true,
     },
+    avatarUrl: {
+      $type: String,
+    },
     services: {
       password: {
         bcrypt: {
