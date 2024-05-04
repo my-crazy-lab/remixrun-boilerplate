@@ -9,7 +9,7 @@ import { newRecordCommonField } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
 import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
-import { type CommonFunction, type MustBeAny } from '~/types';
+import type { MustBeAny } from '~/types';
 
 /**
  *
@@ -116,17 +116,38 @@ export function hocAction(
 }
 
 export function hocLoader(
-  callback: CommonFunction<LoaderFunctionArgs>,
-  permission: string,
+  callback: (
+    args: LoaderFunctionArgs,
+    { permissionsPassed }?: { permissionsPassed: Array<string> },
+  ) => MustBeAny,
+  permission: string | Array<string>,
 ) {
   async function loader(args: LoaderFunctionArgs) {
     const userId = await getUserId({ request: args.request });
     const userPermissions = await getUserPermissionsIgnoreRoot(userId);
-    if (!userPermissions.includes(permission)) {
+
+    if (
+      typeof permission === 'string' &&
+      !userPermissions.includes(permission)
+    ) {
       throw new Response(null, res403);
     }
 
-    return callback(args);
+    if (Array.isArray(permission)) {
+      const permissionsPassed: Array<string> = [];
+      permission.forEach(p => {
+        if (userPermissions.includes(p)) {
+          permissionsPassed.push(p);
+        }
+      });
+      if (!permissionsPassed.length) {
+        throw new Response(null, res403);
+      }
+
+      return callback(args, { permissionsPassed: permissionsPassed });
+    }
+
+    return callback(args, { permissionsPassed: [permission] });
   }
 
   return loader;
