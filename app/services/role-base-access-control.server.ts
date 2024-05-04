@@ -8,7 +8,7 @@ import GroupsModel from '~/services/model/groups.server';
 import PermissionsModel from '~/services/model/permissions.server';
 import RolesModel from '~/services/model/roles.servers';
 import UsersModel from '~/services/model/users.server';
-import { type Groups, type Roles, type Users } from '~/types';
+import type { Groups, Roles, Users } from '~/types';
 import {
   convertRolesToPermissions,
   momentTz,
@@ -925,5 +925,5 @@ export async function getAllChildrenGroupOfUser(userId: string) {
     },
   ]).exec();
 
-  return groups.map(group => group.children)
+  return groups.map(group => group.children);
 }
