@@ -901,3 +901,29 @@ export async function getGroupDetail<T = Projection>({
 
   return groupOfUser[0] as T;
 }
+
+export async function getAllChildrenGroupOfUser(userId: string) {
+  const groups = await GroupsModel.aggregate([
+    {
+      $match: {
+        userIds: userId,
+      },
+    },
+    {
+      $lookup: {
+        from: 'groups',
+        localField: '_id',
+        foreignField: 'genealogy',
+        as: 'children',
+      },
+    },
+    {
+      $unwind: {
+        path: '$children',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]).exec();
+
+  return groups.map(group => group.children)
+}

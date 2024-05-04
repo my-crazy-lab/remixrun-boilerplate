@@ -43,13 +43,16 @@ import { hocAction } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import i18next from '~/i18next.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
-import { deleteUser } from '~/services/role-base-access-control.server';
+import {
+  deleteUser,
+  getAllChildrenGroupOfUser,
+} from '~/services/role-base-access-control.server';
 import {
   createNewUser,
   getTotalUsers,
   getUsers,
 } from '~/services/settings.server';
-import type { OptionType, ReturnValueIgnorePromise } from '~/types';
+import type { Groups, OptionType, ReturnValueIgnorePromise } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
@@ -180,6 +183,8 @@ export const action = hocAction(
       const username = formData.get('username')?.toString() || '';
       const email = formData.get('email')?.toString() || '';
       const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
+      const groupIds =
+        JSON.parse(formData.get('groupIds')?.toString() || '') || [];
 
       const { isoCode } = await getUserSession({ headers: request.headers });
 
@@ -188,6 +193,7 @@ export const action = hocAction(
         email,
         isoCode,
         cities,
+        groupIds,
       });
 
       setInformationActionHistory({
@@ -207,6 +213,7 @@ interface LoaderData {
   users: ReturnValueIgnorePromise<typeof getUsers>;
   total: number;
   cities: Array<string>;
+  groups: Pick<Groups, 'name' | '_id'>[];
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -215,6 +222,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { userId, isoCode } = await getUserSession({
     headers: request.headers,
   });
+
   const total = await getTotalUsers(userId);
   const { limit, skip } = getSkipAndLimit(
     getPageSizeAndPageIndex({
@@ -230,15 +238,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     projection: { _id: 1, cities: 1, username: 1, email: 1 },
     userId,
   });
-
+  const groups = await getAllChildrenGroupOfUser(userId);
   const cities = await getCities(isoCode);
-  return json({ users, cities, total });
+
+  return json({ users, cities, total, groups });
 };
 
 interface FormData {
   email: string;
   cities: Array<OptionType>;
   username: string;
+  groupIds: Array<OptionType>;
 }
 
 export default function Screen() {
@@ -263,6 +273,7 @@ export default function Screen() {
       email: '',
       cities: [],
       username: '',
+      groupIds: [],
     },
   });
 
@@ -280,6 +291,10 @@ export default function Screen() {
     formData.append('email', data.email);
     formData.append('cities', JSON.stringify(data.cities?.map(c => c.value)));
     formData.append('username', data.username);
+    formData.append(
+      'groupIds',
+      JSON.stringify(data.groupIds?.map(c => c.value)),
+    );
 
     submit(formData, { method: 'post' });
     onCloseAndReset();
@@ -353,6 +368,27 @@ export default function Screen() {
                           options={loaderData.cities?.map(e => ({
                             label: e,
                             value: e,
+                          }))}
+                          className="w-[360px]"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">{t('GROUPS')}</Label>
+                  <div className="col-span-3">
+                    <Controller
+                      control={control}
+                      name="groupIds"
+                      render={({ field: { onChange, value } }) => (
+                        <MultiSelect
+                          selected={value}
+                          setSelected={onChange}
+                          isDisplayAllOptions
+                          options={loaderData.groups?.map(e => ({
+                            label: e.name,
+                            value: e._id,
                           }))}
                           className="w-[360px]"
                         />

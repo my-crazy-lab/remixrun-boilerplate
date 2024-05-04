@@ -153,7 +153,8 @@ export async function verifyCode(
         'verification.expired': momentTz().toDate(),
       },
     },
-  );
+  ).lean<Users>();
+
   if (!user?._id) {
     throw new Error('CODE_INCORRECT_OR_EXPIRED');
   }

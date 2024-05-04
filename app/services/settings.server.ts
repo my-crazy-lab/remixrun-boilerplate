@@ -6,6 +6,7 @@ import { momentTz } from '~/utils/common';
 import { type PipelineStage } from '~/utils/db.server';
 
 import { newRecordCommonField, statusOriginal } from './constants.server';
+import GroupsModel from './model/groups.server';
 import { getUsersInGroupsByUserId } from './role-base-access-control.server';
 
 interface ISearch {
@@ -157,9 +158,9 @@ export async function createNewUser({
   email,
   cities,
   isoCode,
-  groupId,
+  groupIds,
 }: Pick<Users, 'username' | 'email' | 'cities' | 'isoCode'> & {
-  groupId?: string;
+  groupIds: Array<string>;
 }) {
   const newUser = await UsersModel.create({
     ...newRecordCommonField(),
@@ -169,6 +170,15 @@ export async function createNewUser({
     isoCode,
     lang: defaultLanguage,
   });
+
+  await GroupsModel.updateMany(
+    {
+      _id: { $in: groupIds },
+    },
+    {
+      $push: { userIds: newUser._id },
+    },
+  );
 
   return newUser;
 }
