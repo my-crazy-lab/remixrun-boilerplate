@@ -18,6 +18,7 @@ interface ISearch {
   };
 }
 
+// TODO: Fix query @Minhlee - Rules is get data history of children user in group. Not get history by all (children + itself)
 export async function getTotalActionsHistory({
   searchText,
   userId,
