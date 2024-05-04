@@ -118,7 +118,7 @@ export function hocAction(
 export function hocLoader(
   callback: (
     args: LoaderFunctionArgs,
-    { permissionsPassed }?: { permissionsPassed: Array<string> },
+    { permissionsPassed }: { permissionsPassed: Array<string> },
   ) => MustBeAny,
   permission: string | Array<string>,
 ) {
