@@ -1,7 +1,7 @@
 import { defaultLanguage } from '~/constants/common';
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
 import UsersModel from '~/services/model/users.server';
-import { type Users } from '~/types';
+import { type ActionsHistory, type Users } from '~/types';
 import { momentTz } from '~/utils/common';
 import { type PipelineStage } from '~/utils/db.server';
 
@@ -18,13 +18,12 @@ interface ISearch {
   };
 }
 
-// TODO: Fix query @Minhlee - Rules is get data history of children user in group. Not get history by all (children + itself)
-export async function getTotalActionsHistory({
+export async function getTotalActionsHistoryManageByManagerId({
   searchText,
-  userId,
+  managerId,
 }: {
   searchText: string;
-  userId: string;
+  managerId: string;
 }) {
   const $search: ISearch = { $match: {} };
 
@@ -34,10 +33,14 @@ export async function getTotalActionsHistory({
       $options: 'i',
     };
   }
-  const userIds = await getUsersInGroupsByUserId(userId);
+  const userIdsManaged = await getUsersInGroupsByUserId(managerId);
 
-  const result = await ActionsHistoryModel.aggregate([
-    { $match: { actorId: { $in: userIds } } },
+  const result = await ActionsHistoryModel.aggregate<{ total: number }>([
+    {
+      $match: {
+        $or: [{ actorId: { $in: userIdsManaged } }, { actorId: managerId }],
+      },
+    },
     {
       $lookup: {
         from: 'users',
@@ -54,26 +57,26 @@ export async function getTotalActionsHistory({
     },
     $search,
     { $count: 'total' },
-  ]);
+  ]).exec();
 
-  return result.length > 0 ? result[0].total : 0;
+  return result.length > 0 ? result?.[0].total : 0;
 }
 
-export async function getActionsHistory({
+export async function getActionsHistoryManagedByManagerId({
   skip,
   limit,
   projection,
   searchText,
-  userId,
+  managerId,
 }: {
   searchText: string;
   skip: PipelineStage.Skip['$skip'];
   limit: PipelineStage.Limit['$limit'];
   projection: PipelineStage.Project['$project'];
-  userId: string;
+  managerId: string;
 }) {
   const $search: ISearch = { $match: {} };
-  const userIds = await getUsersInGroupsByUserId(userId);
+  const userIdsManaged = await getUsersInGroupsByUserId(managerId);
 
   if (searchText) {
     $search.$match['user.username'] = {
@@ -82,8 +85,12 @@ export async function getActionsHistory({
     };
   }
 
-  const actionsHistory = await ActionsHistoryModel.aggregate([
-    { $match: { actorId: { $in: userIds } } },
+  const actionsHistory = await ActionsHistoryModel.aggregate<ActionsHistory>([
+    {
+      $match: {
+        $or: [{ actorId: { $in: userIdsManaged } }, { actorId: managerId }],
+      },
+    },
     {
       $lookup: {
         from: 'users',
@@ -98,18 +105,18 @@ export async function getActionsHistory({
         preserveNullAndEmptyArrays: true,
       },
     },
+    $search,
     { $sort: { createdAt: -1 } },
     { $project: { ...projection } },
-    $search,
     { $skip: skip },
     { $limit: limit },
-  ]);
+  ]).exec();
 
   return actionsHistory;
 }
 
-export async function getTotalUsers(userId: string) {
-  const userIds = await getUsersInGroupsByUserId(userId);
+export async function getTotalUsersManagedByManagerId(managerId: string) {
+  const userIds = await getUsersInGroupsByUserId(managerId);
 
   const users = await UsersModel.find(
     { status: statusOriginal.ACTIVE, _id: { $in: userIds } },
@@ -119,18 +126,18 @@ export async function getTotalUsers(userId: string) {
   return users.length;
 }
 
-export async function getUsers({
+export async function getUsersManagedByManagerId({
   skip,
   limit,
   projection,
-  userId,
+  managerId,
 }: {
   skip: PipelineStage.Skip['$skip'];
   limit: PipelineStage.Limit['$limit'];
   projection: PipelineStage.Project['$project'];
-  userId: string;
+  managerId: string;
 }) {
-  const userIds = await getUsersInGroupsByUserId(userId);
+  const userIds = await getUsersInGroupsByUserId(managerId);
 
   const users = await UsersModel.find(
     { status: statusOriginal.ACTIVE, _id: { $in: userIds } },

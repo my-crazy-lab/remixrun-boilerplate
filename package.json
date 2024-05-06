@@ -8,7 +8,7 @@
     "dev": "remix dev -c \"node server.mjs\"",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve build",
-    "typecheck": "tsc",
+    "type:check": "tsc",
     "prettier": "prettier --write .",
     "cspell": "cspell --config .spellcheckerrc.json \"**\"",
     "deploy": "cross-env NODE_ENV=production node server.mjs",

@@ -14,8 +14,8 @@ import ROUTE_NAME from '~/constants/route';
 import { hocLoader } from '~/hoc/remix';
 import { getUserSession } from '~/services/helpers.server';
 import {
-  getActionsHistory,
-  getTotalActionsHistory,
+  getActionsHistoryManagedByManagerId,
+  getTotalActionsHistoryManageByManagerId,
 } from '~/services/settings.server';
 import { type ActionsHistory } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
@@ -27,17 +27,10 @@ export const handle = {
       label="ACTIONS_HISTORY"
     />
   ),
+  i18n: 'user-settings',
 };
 
-interface IActionsHistory {
-  _id: string;
-  userId: string;
-  action: string;
-  requestFormData: unknown;
-  createdAt: Date;
-}
-
-const columns: ColumnDef<IActionsHistory>[] = [
+const columns: ColumnDef<ActionsHistory>[] = [
   {
     accessorKey: 'username',
     header: ({ column }) => (
@@ -99,14 +92,16 @@ const columns: ColumnDef<IActionsHistory>[] = [
   },
 ];
 
-export const loader = hocLoader(async ({ request }: LoaderFunctionArgs) => {
+const callbackLoader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const searchText = url.searchParams.get('username') || '';
-  const { userId } = await getUserSession({ headers: request.headers });
+  const { userId: managerId } = await getUserSession({
+    headers: request.headers,
+  });
 
-  const total = await getTotalActionsHistory({
+  const total = await getTotalActionsHistoryManageByManagerId({
     searchText,
-    userId,
+    managerId,
   });
 
   const { limit, skip } = getSkipAndLimit(
@@ -117,7 +112,7 @@ export const loader = hocLoader(async ({ request }: LoaderFunctionArgs) => {
     }),
   );
 
-  const actionsHistory = await getActionsHistory({
+  const actionsHistory = await getActionsHistoryManagedByManagerId({
     searchText: url.searchParams.get('username') || '',
     skip,
     limit,
@@ -127,19 +122,18 @@ export const loader = hocLoader(async ({ request }: LoaderFunctionArgs) => {
       requestFormData: 1,
       createdAt: 1,
     },
-    userId,
+    managerId,
   });
 
   return json({ actionsHistory, total });
-}, PERMISSIONS.MANAGER);
+};
+
+export const loader = hocLoader(callbackLoader, PERMISSIONS.MANAGER);
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
   const [searchParams, setSearchParams] = useSearchParams();
-  const { total, actionsHistory } = useLoaderData<{
-    total: number;
-    actionsHistory: ActionsHistory[];
-  }>();
+  const { total, actionsHistory } = useLoaderData<typeof callbackLoader>();
 
   return (
     <>
@@ -148,14 +142,11 @@ export default function Screen() {
         <Breadcrumbs />
       </div>
       <BTaskeeTable
-        total={total || 0}
-        // TODO fix typing for Table
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        data={actionsHistory || []}
+        total={total}
         columns={columns}
+        data={actionsHistory}
         pagination={getPageSizeAndPageIndex({
-          total: total || 0,
+          total,
           pageSize: Number(searchParams.get('pageSize') || 0),
           pageIndex: Number(searchParams.get('pageIndex') || 0),
         })}

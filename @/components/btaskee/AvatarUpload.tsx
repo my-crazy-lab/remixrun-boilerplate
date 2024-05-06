@@ -17,14 +17,12 @@ interface ImageUploadProps {
 const AvatarUpload = ({
   onFileChange,
   description,
-  avatarUrl,
+  avatarUrl = '',
   maxContentLength,
 }: ImageUploadProps) => {
   const { t } = useTranslation('common');
 
-  const [imagePreview, setImagePreview] = React.useState<
-    string | ArrayBuffer | null
-  >('');
+  const [imagePreview, setImagePreview] = React.useState<string>('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleButtonClick = useCallback(() => {
@@ -47,7 +45,10 @@ const AvatarUpload = ({
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(reader.result);
+      if (typeof reader.result === 'string') {
+        setImagePreview(reader.result);
+      }
+
       onFileChange({ file: fileUploaded }); // call the callback to notify the parent
     };
     reader.readAsDataURL(fileUploaded);

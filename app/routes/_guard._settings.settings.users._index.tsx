@@ -50,8 +50,8 @@ import {
 import { commitSession, getSession } from '~/services/session.server';
 import {
   createNewUser,
-  getTotalUsers,
-  getUsers,
+  getTotalUsersManagedByManagerId,
+  getUsersManagedByManagerId,
 } from '~/services/settings.server';
 import type { Groups, OptionType, ReturnValueIgnorePromise } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
@@ -124,10 +124,7 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
-            {// TODO fix typing for react hook form
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            row.getValue('cities')?.map((e, index) => (
+            {row.original.cities?.map((e, index) => (
               <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
                 {e}
               </Badge>
@@ -211,7 +208,7 @@ export const action = hocAction(
 );
 
 interface LoaderData {
-  users: ReturnValueIgnorePromise<typeof getUsers>;
+  users: ReturnValueIgnorePromise<typeof getUsersManagedByManagerId>;
   total: number;
   cities: Array<string>;
   groups: Pick<Groups, 'name' | '_id'>[];
@@ -221,33 +218,33 @@ interface LoaderData {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
 
-  const { userId, isoCode } = await getUserSession({
+  const { userId: managerId, isoCode } = await getUserSession({
     headers: request.headers,
   });
 
-  const total = await getTotalUsers(userId);
+  const totalUsers = await getTotalUsersManagedByManagerId(managerId);
   const { limit, skip } = getSkipAndLimit(
     getPageSizeAndPageIndex({
-      total,
+      total: totalUsers,
       pageSize: Number(url.searchParams.get('pageSize')) || 0,
       pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
     }),
   );
 
-  const users = await getUsers({
+  const users = await getUsersManagedByManagerId({
     skip,
     limit,
     projection: { _id: 1, cities: 1, username: 1, email: 1 },
-    userId,
+    managerId,
   });
-  const groups = await getAllChildrenGroupOfUser(userId);
+  const groups = await getAllChildrenGroupOfUser(managerId);
   const cities = await getCities(isoCode);
 
   const session = await getSession(request.headers.get('Cookie'));
   const message = session.get('flashMessage');
 
   return json(
-    { users, cities, total, groups, message },
+    { users, cities, total: totalUsers, groups, message },
     {
       headers: {
         'Set-Cookie': await commitSession(session),
@@ -427,13 +424,8 @@ export default function Screen() {
       </div>
 
       <BTaskeeTable
-        total={loaderData?.total || 0}
-        // TODO fix typing for Table
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        data={loaderData?.users || []}
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
+        total={loaderData.total}
+        data={loaderData.users}
         columns={columns}
         pagination={getPageSizeAndPageIndex({
           total: loaderData?.total || 0,
