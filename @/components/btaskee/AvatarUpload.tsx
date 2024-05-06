@@ -1,52 +1,98 @@
+import Typography from '@/components/btaskee/Typography';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import type { InputProps } from '@/components/ui/input';
-import { Input } from '@/components/ui/input';
-import { toBase64 } from '@/lib/utils';
-import { UploadCloud, User2Icon } from 'lucide-react';
-import { useRef } from 'react';
+import { toast } from '@/components/ui/use-toast';
+import DefaultImage from '@/images/default-image.svg';
+import { UploadIcon } from '@radix-ui/react-icons';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
-type AvatarUploadProps = {
-  value?: string;
-  onChange?: (value?: string) => void;
-};
+interface ImageUploadProps {
+  onFileChange: (args: { file: File }) => void;
+  description?: string;
+  avatarUrl?: string;
+  maxContentLength: number;
+}
 
-export function AvatarUpload({ value, onChange }: AvatarUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+const AvatarUpload = ({
+  onFileChange,
+  description,
+  avatarUrl,
+  maxContentLength,
+}: ImageUploadProps) => {
+  const { t } = useTranslation('common');
 
-  const handleChange: InputProps['onChange'] = async e => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const base64 = await toBase64(file);
-      onChange?.(base64);
+  const [imagePreview, setImagePreview] = React.useState<
+    string | ArrayBuffer | null
+  >('');
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
+  }, [fileInputRef]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // Upload from device to browser
+    const fileUploaded = event.target.files?.[0];
+
+    if (!fileUploaded) return;
+    if (fileUploaded.size > maxContentLength) {
+      toast({
+        description: t('ERROR_BY_MAX_FILE_SIZE'),
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+      onFileChange({ file: fileUploaded }); // call the callback to notify the parent
+    };
+    reader.readAsDataURL(fileUploaded);
   };
 
   return (
-    <div className="w-40 h-40 text-center flex flex-col justify-center mt-10">
-      <Avatar className="w-full h-full">
-        <AvatarImage src={value} className="object-cover" />
-        <AvatarFallback className="bg-secondary">
-          <User2Icon className="w-16 h-16" />
+    <div className=" items-center flex flex-col py-6 px-12 max-h-[448px] gap-4">
+      {imagePreview && (
+        <Typography affects="removePMargin" variant="p">
+          {t('IMAGE_PREVIEW')}
+        </Typography>
+      )}
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      <Avatar className="w-full h-full justify-center">
+        <AvatarImage
+          src={imagePreview || avatarUrl}
+          className="object-cover w-40 h-40 rounded-full"
+        />
+        <AvatarFallback className="object-cover w-40 h-40 rounded-full">
+          <img src={DefaultImage} alt="Default Avatar" />
         </AvatarFallback>
       </Avatar>
+      <Typography
+        className="text-center text-gray-400"
+        variant="p"
+        affects="removePMargin">
+        {description}
+      </Typography>
       <Button
-        variant="default"
-        className="p-2 gap-2 mt-4"
-        onClick={e => {
-          e.preventDefault();
-          inputRef.current?.click();
-        }}>
-        <UploadCloud className="w-4 h-4" />
-        Upload
+        color="primary"
+        className="items-center flex gap-2 rounded-md bg-white border-[1px] border-primary text-primary"
+        variant="outline"
+        type="button"
+        onClick={handleButtonClick}>
+        <UploadIcon className="h-4 w-4" />
+        {t('UPLOAD')}
       </Button>
-      <Input
-        ref={inputRef}
-        type="file"
-        className="hidden"
-        onChange={handleChange}
-        accept="image/*"
-      />
     </div>
   );
-}
+};
+
+export default AvatarUpload;

@@ -18,6 +18,7 @@ interface ISearch {
   };
 }
 
+// TODO: Fix query @Minhlee - Rules is get data history of children user in group. Not get history by all (children + itself)
 export async function getTotalActionsHistory({
   searchText,
   userId,
@@ -193,6 +194,21 @@ export async function setUserLanguage({
       $set: {
         updatedAt: momentTz().toDate(),
         language,
+      },
+    },
+  );
+}
+
+export async function changeUserAvatar({
+  avatarUrl,
+  userId,
+}: Pick<Users, 'avatarUrl'> & { userId: string }) {
+  await UsersModel.updateOne(
+    { _id: userId },
+    {
+      $set: {
+        updatedAt: momentTz().toDate(),
+        avatarUrl,
       },
     },
   );

@@ -41,5 +41,12 @@
   "NO_USER_GROUP_HERE": "This group not have children group",
   "EDIT": "Edit",
   "DELETE": "Delete",
-  "CREATE_USER_SUCCESSFUL": "Create user successful"
+  "CREATE_USER_SUCCESSFUL": "Create user successful",
+  "CHANGE_AVATAR": "Change avatar",
+  "ARE_YOU_SURE_CHANGE_AVATAR": "Are you sure you want to change your avatar?",
+  "CHANGE_AVATAR_SUCCESSFUL": "Change avatar successful",
+  "UPDATE_USER": "Update user",
+  "CHANGE": "Change",
+  "USER_PROFILE": "Profile",
+  "AVATAR": "Avatar"
 }

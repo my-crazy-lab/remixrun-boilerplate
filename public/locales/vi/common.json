@@ -29,5 +29,9 @@
   "LOGOUT": "Đăng xuất",
   "CREATE_ROLE": "Tạo vai trò",
   "CREATE_GROUP": "Tạo nhóm",
-  "GROUPS_MANAGEMENT": "Phân quyền nhóm"
+  "GROUPS_MANAGEMENT": "Phân quyền nhóm",
+  "UPDATE_USER": "Cập nhật người dùng",
+  "ERROR_BY_MAX_FILE_SIZE": "Vượt quá giới hạn dung lượng ảnh",
+  "IMAGE_PREVIEW": "Ảnh xem trước",
+  "UPLOAD": "Tải ảnh lên"
 }

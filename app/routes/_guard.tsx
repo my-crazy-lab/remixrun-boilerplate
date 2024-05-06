@@ -1,5 +1,5 @@
 import { Logo } from '@/components/btaskee/BTaskeeLogo';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -36,6 +36,7 @@ import { GlobalContext, createGlobalStore } from '~/hooks/useGlobalStore';
 import { authenticator } from '~/services/auth.server';
 import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
+import { getUserProfile } from '~/services/settings.server';
 import { type Users } from '~/types';
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -44,6 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   });
   const session = await getSession(request.headers.get('cookie'));
   const userPermissions = await getUserPermissionsIgnoreRoot(user.userId);
+  const userProfile = await getUserProfile(user.userId);
 
   // get flash session
   session.get('flashMessage');
@@ -51,6 +53,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return json(
     {
       user: { ...user, permissions: userPermissions },
+      userProfile,
     },
     {
       headers: {
@@ -61,8 +64,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function Screen() {
-  const { user } = useLoaderData<{
+  const { user, userProfile } = useLoaderData<{
     user: Users & { permissions: Array<string> };
+    userProfile: Users;
   }>();
 
   const storeRef = useRef<GlobalStore>();
@@ -103,10 +107,12 @@ export default function Screen() {
           <div className="ml-auto flex items-center space-x-4">
             <Input
               type="search"
-              placeholder={`${t('SEARCH')}`}
+              placeholder={t('SEARCH')}
               className="md:w-[100px] lg:w-[270px]"
             />
-            <Select defaultValue={user.language} onValueChange={onSubmit}>
+            <Select
+              defaultValue={userProfile.language}
+              onValueChange={onSubmit}>
               <SelectTrigger className="h-10 w-[180px]">
                 <SelectValue />
               </SelectTrigger>
@@ -119,6 +125,7 @@ export default function Screen() {
               <DropdownMenuTrigger asChild>
                 <Button className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-10 w-10">
+                    <AvatarImage src={userProfile?.avatarUrl} />
                     <AvatarFallback>
                       <UserCircle />
                     </AvatarFallback>
@@ -129,10 +136,10 @@ export default function Screen() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user?.username}
+                      {userProfile?.username}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email}
+                      {userProfile?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>

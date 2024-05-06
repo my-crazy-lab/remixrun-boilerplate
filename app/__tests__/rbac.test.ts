@@ -29,6 +29,12 @@
 //   type Users,
 // } from '~/types';
 // import { mongodb } from '~/utils/db.server';
+import { PERMISSIONS } from '~/constants/common';
+import GroupsModel from '~/services/model/groups.server';
+import RolesModel from '~/services/model/roles.servers';
+import UsersModel from '~/services/model/users.server';
+import { getUserPermissions } from '~/services/role-base-access-control.server';
+import { Groups, Roles, Users } from '~/types';
 
 // function mockResponseThrowError() {
 //   const errorText = 'response return error message';
@@ -67,6 +73,83 @@
 //   },
 //   newRecordCommonField: () => mockRecordCommonField,
 // }));
+describe('role base access control', () => {
+  const mockUserId = 'user-1';
+  const mockGroupId = 'group-1';
+  const mockGroupId_2 = 'group-2';
+  const mockRoleId = PERMISSIONS.ROOT;
+  const mockRoleId_2 = 'role-2';
+  const mockPermission = [PERMISSIONS.ROOT];
+  const mockPermission_2 = ['permission2', 'permission3'];
+
+  const mockUsers: Array<Users> = [
+    {
+      _id: mockUserId,
+      username: 'Test 1',
+      status: 'ACTIVE',
+      email: 'user-1@gmail.com',
+      isoCode: 'VN',
+      createdAt: new Date(),
+      cities: ['Hồ Chí Minh', 'Hà Nội'],
+      language: 'vi',
+    },
+  ];
+
+  const mockGroups: Array<Groups> = [
+    {
+      _id: mockGroupId,
+      name: 'Group 1',
+      userIds: [mockUserId],
+      createdAt: new Date(),
+      description: 'group description',
+      roleAssignedIds: mockPermission,
+      hierarchy: 2,
+      status: 'ACTIVE',
+      genealogy: [mockGroupId_2],
+    },
+  ];
+
+  const mockRoles: Array<Roles> = [
+    {
+      _id: mockRoleId, // Root roles
+      name: 'root',
+      description: 'root description',
+      permissions: mockPermission,
+      slug: 'a',
+      createdAt: new Date(),
+      status: 'ACTIVE',
+    },
+    {
+      _id: mockRoleId_2,
+      name: 'role 2',
+      description: 'role 2 description',
+      permissions: mockPermission_2,
+      slug: 'b',
+      createdAt: new Date(),
+      status: 'ACTIVE',
+    },
+  ];
+
+  beforeEach(async () => {
+    await GroupsModel.insertMany(mockGroups);
+    await UsersModel.insertMany(mockUsers);
+    await RolesModel.insertMany(mockRoles);
+  });
+
+  afterEach(async () => {
+    await GroupsModel.deleteMany({
+      _id: { $in: [mockGroupId, mockGroupId_2] },
+    });
+    await UsersModel.deleteMany({ _id: mockUserId });
+    await RolesModel.deleteMany({ _id: { $in: [mockRoleId, mockRoleId_2] } });
+  });
+
+  it('should return all permission if the user is a super user', async () => {
+    const permissions = await getUserPermissions(mockUserId);
+
+    expect(permissions).toEqual(mockPermission);
+  });
+});
 
 // describe('Role base access control', () => {
 //   const rootId = 'root';

@@ -1,4 +1,3 @@
-import { type LucideIcon } from 'lucide-react';
 import type { TActionPermissionModule } from '~/constants/common';
 import { type Document } from '~/utils/db.server';
 
@@ -10,19 +9,11 @@ export type OptionType = {
 export interface AuthenticatorSessionData
   extends Pick<
     Users,
-    'isoCode' | 'cities' | 'email' | 'username' | 'language'
+    'isoCode' | 'cities' | 'email' | 'username' | 'language' | 'avatarUrl'
   > {
   userId: string;
   isSuperUser: boolean;
   isManager: boolean;
-}
-
-export interface NavItem {
-  title: string;
-  href: string;
-  icon: LucideIcon;
-  isChildren?: boolean;
-  children?: NavItem[];
 }
 
 export interface ActionsHistory {
@@ -56,6 +47,7 @@ export interface Users {
     expired: Date;
   };
   language: string;
+  avatarUrl?: string;
 }
 
 export type IUserType = 'ACTIVE' | 'INACTIVE';
