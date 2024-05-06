@@ -198,3 +198,18 @@ export async function setUserLanguage({
     },
   );
 }
+
+export async function changeUserAvatar({
+  avatarUrl,
+  userId,
+}: Pick<Users, 'avatarUrl'> & { userId: string }) {
+  await UsersModel.updateOne(
+    { _id: userId },
+    {
+      $set: {
+        updatedAt: momentTz().toDate(),
+        avatarUrl,
+      },
+    },
+  );
+}

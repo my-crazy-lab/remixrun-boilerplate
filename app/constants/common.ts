@@ -18,6 +18,7 @@ export const ACTION_NAME = {
   REMOVE_GROUP: 'Remove group',
   UPDATE_USER: 'Update user',
   DELETE_USER: 'Delete user',
+  UPDATE_USER_AVATAR: 'Update user avatar',
 };
 
 export enum IActionPermissionModule {
