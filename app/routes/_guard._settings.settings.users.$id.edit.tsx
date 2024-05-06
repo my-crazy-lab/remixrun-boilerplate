@@ -18,6 +18,7 @@ import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
 import { getUserByUserId, updateUser } from '~/services/auth.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
+import { commitSession, getSession } from '~/services/session.server';
 import { type OptionType, type Users } from '~/types';
 
 interface FormData {
@@ -40,7 +41,7 @@ export const action = hocAction(
     const email = formData.get('email')?.toString() || '';
     const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
 
-    await updateUser({
+    const user = await updateUser({
       username,
       email,
       cities,
@@ -50,8 +51,14 @@ export const action = hocAction(
       action: ACTION_NAME.UPDATE_USER,
     });
 
-    // TODO add toast and redirect
-    return redirect('/settings/users');
+    const session = await getSession(request.headers.get('cookie'));
+    session.flash('flashMessage', `User ${user?.username} updated`);
+
+    return redirect('/settings/users', {
+      headers: {
+        'Set-Cookie': await commitSession(session),
+      },
+    });
   },
   PERMISSIONS.MANAGER,
 );

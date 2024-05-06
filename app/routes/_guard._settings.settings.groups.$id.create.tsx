@@ -25,11 +25,12 @@ import {
   getRolesByGroupId,
   searchUser,
 } from '~/services/role-base-access-control.server';
+import { commitSession, getSession } from '~/services/session.server';
 import { type OptionType, type ReturnValueIgnorePromise } from '~/types';
 
 export const action = hocAction(
   async ({ request, params }, { setInformationActionHistory }) => {
-    const formData = await request.clone().clone().formData();
+    const formData = await request.clone().formData();
 
     const name = formData.get('name')?.toString() || '';
     const description = formData.get('description')?.toString() || '';
@@ -49,8 +50,16 @@ export const action = hocAction(
       dataRelated: { groupId: group._id },
     });
 
-    // TODO add toast and redirect
-    return redirect(`/settings/groups/${params.id}`);
+    const session = await getSession(request.headers.get('cookie'));
+    session.flash('flashMessage', `Group ${group.name} created`);
+
+    const newSession = await commitSession(session);
+
+    return redirect(`/settings/groups/${params.id}`, {
+      headers: {
+        'Set-Cookie': newSession,
+      },
+    });
   },
   PERMISSIONS.WRITE_GROUP,
 );

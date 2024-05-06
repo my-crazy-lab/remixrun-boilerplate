@@ -35,7 +35,7 @@ import {
 } from '@remix-run/react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
@@ -47,6 +47,7 @@ import {
   deleteUser,
   getAllChildrenGroupOfUser,
 } from '~/services/role-base-access-control.server';
+import { commitSession, getSession } from '~/services/session.server';
 import {
   createNewUser,
   getTotalUsers,
@@ -214,6 +215,7 @@ interface LoaderData {
   total: number;
   cities: Array<string>;
   groups: Pick<Groups, 'name' | '_id'>[];
+  message?: string;
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -241,7 +243,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const groups = await getAllChildrenGroupOfUser(userId);
   const cities = await getCities(isoCode);
 
-  return json({ users, cities, total, groups });
+  const session = await getSession(request.headers.get('Cookie'));
+  const message = session.get('flashMessage');
+
+  return json(
+    { users, cities, total, groups, message },
+    {
+      headers: {
+        'Set-Cookie': await commitSession(session),
+      },
+    },
+  );
 };
 
 interface FormData {
@@ -256,16 +268,25 @@ export default function Screen() {
     error?: string;
     message?: string;
   }>();
-  if (actionData?.error) {
-    toast({ description: actionData.error });
-  }
-  if (actionData?.message) {
-    toast({ variant: 'success', description: actionData.message });
-  }
+  const loaderData = useLoaderData<LoaderData>();
+
+  useEffect(() => {
+    if (loaderData?.message) {
+      toast({ variant: 'success', description: loaderData.message });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ description: actionData.error });
+    }
+    if (actionData?.message) {
+      toast({ variant: 'success', description: actionData.message });
+    }
+  }, [actionData]);
 
   const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
-  const loaderData = useLoaderData<LoaderData>();
   const globalData = useGlobalStore(state => state);
 
   const { register, control, reset, handleSubmit } = useForm<FormData>({

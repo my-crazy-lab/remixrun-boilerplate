@@ -32,6 +32,7 @@ import {
   getRoleDetail,
   updateRole,
 } from '~/services/role-base-access-control.server';
+import { commitSession, getSession } from '~/services/session.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
@@ -81,7 +82,7 @@ export const action = hocAction(
     const permissions =
       JSON.parse(formData.get('permissions')?.toString() || '') || [];
 
-    await updateRole({
+    const roleName = await updateRole({
       name,
       description,
       permissions,
@@ -92,8 +93,16 @@ export const action = hocAction(
       action: ACTION_NAME.UPDATE_ROLE,
     });
 
-    // TODO add toast and redirect
-    return redirect(`${ROUTE_NAME.GROUP_SETTING}/${params.id}`);
+    const session = await getSession(request.headers.get('cookie'));
+    session.flash('flashMessage', `Role ${roleName} updated`);
+
+    const newSession = await commitSession(session);
+
+    return redirect(`${ROUTE_NAME.GROUP_SETTING}/${params.id}`, {
+      headers: {
+        'Set-Cookie': newSession,
+      },
+    });
   },
   PERMISSIONS.WRITE_ROLE,
 );

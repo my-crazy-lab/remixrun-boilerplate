@@ -14,6 +14,7 @@ import {
   useSearchParams,
   useSubmit,
 } from '@remix-run/react';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
@@ -26,6 +27,7 @@ import {
   searchUser,
   updateGroups,
 } from '~/services/role-base-access-control.server';
+import { commitSession, getSession } from '~/services/session.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 
 export const action = hocAction(
@@ -38,7 +40,7 @@ export const action = hocAction(
     const roleAssignedIds =
       JSON.parse(formData.get('roleIds')?.toString() || '') || [];
 
-    await updateGroups({
+    const group = await updateGroups({
       name,
       description,
       userIds,
@@ -49,8 +51,16 @@ export const action = hocAction(
       action: ACTION_NAME.UPDATE_GROUP,
     });
 
-    // TODO add toast and redirect
-    return redirect(`/settings/groups/${params.id}`);
+    const session = await getSession(request.headers.get('cookie'));
+    session.flash('flashMessage', `Group ${group?.name} updated`);
+
+    const newSession = await commitSession(session);
+
+    return redirect(`/settings/groups/${params.id}`, {
+      headers: {
+        'Set-Cookie': newSession,
+      },
+    });
   },
   PERMISSIONS.WRITE_GROUP,
 );
@@ -148,13 +158,21 @@ export const handle = {
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
+  const loaderData = useLoaderData<{ message?: string }>();
+  useEffect(() => {
+    if (loaderData?.message) {
+      toast({ variant: 'success', description: loaderData.message });
+    }
+  }, []);
 
   const actionData = useActionData<{
     error?: string;
   }>();
-  if (actionData?.error) {
-    toast({ description: actionData.error });
-  }
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ description: actionData.error });
+    }
+  }, [actionData]);
 
   const { group, roles, users } = useLoaderData<LoaderData>();
   const navigation = useNavigation();

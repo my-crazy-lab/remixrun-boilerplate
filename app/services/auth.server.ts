@@ -124,20 +124,20 @@ export async function getUserByUserId({ userId }: { userId: string }) {
   return account;
 }
 
-export async function updateUser({
+export function updateUser({
   username,
   email,
   cities,
   userId,
 }: Pick<Users, 'email' | 'username' | 'cities'> & { userId: string }) {
-  await UsersModel.updateOne(
+  return UsersModel.findOneAndUpdate(
     {
       _id: userId,
     },
     {
       $set: { username, email, cities, updatedAt: momentTz().toDate() },
     },
-  );
+  ).lean<Users>();
 }
 
 export async function verifyCode(

@@ -56,9 +56,7 @@ export const Breadcrumbs = ({
   className,
   ...props
 }: HTMLAttributes<HTMLElement>) => {
-  const matches = (useMatches() as unknown as BreadcrumbMatch[]).filter(
-    ({ handle }) => handle?.breadcrumb,
-  );
+  const matches = useMatches() as unknown as BreadcrumbMatch[];
 
   return (
     <ol
@@ -66,19 +64,21 @@ export const Breadcrumbs = ({
       itemType="https://schema.org/BreadcrumbList"
       className={cn('flex items-center gap-2.5', className)}
       {...props}>
-      {matches.map(({ handle, data }, i) => (
-        <Fragment key={i}>
-          <li
-            className={cn('group contents', i > 0 && 'max-md:hidden')}
-            itemProp="itemListElement"
-            itemScope
-            itemType="https://schema.org/ListItem">
-            {i > 0 && <BreadcrumbsSeparator />}
-            {handle.breadcrumb(data)}
-            <meta itemProp="position" content={`${i + 1}`} />
-          </li>
-        </Fragment>
-      ))}
+      {matches
+        ?.filter(match => match?.handle?.breadcrumb)
+        ?.map((match, i) => (
+          <Fragment key={i}>
+            <li
+              className={cn('group contents', i > 0 && 'max-md:hidden')}
+              itemProp="itemListElement"
+              itemScope
+              itemType="https://schema.org/ListItem">
+              {i > 0 && <BreadcrumbsSeparator />}
+              {match?.handle?.breadcrumb(match?.data)}
+              <meta itemProp="position" content={`${i + 1}`} />
+            </li>
+          </Fragment>
+        ))}
     </ol>
   );
 };

@@ -45,6 +45,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get('cookie'));
   const userPermissions = await getUserPermissionsIgnoreRoot(user.userId);
 
+  // get flash session
+  session.get('flashMessage');
+
   return json(
     {
       user: { ...user, permissions: userPermissions },

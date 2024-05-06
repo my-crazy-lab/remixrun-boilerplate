@@ -25,6 +25,7 @@ import {
   createRole,
   getGroupPermissions,
 } from '~/services/role-base-access-control.server';
+import { commitSession, getSession } from '~/services/session.server';
 import { type ReturnValueIgnorePromise } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
@@ -64,8 +65,16 @@ export const action = hocAction(
       dataRelated: { roleId: role._id },
     });
 
-    // TODO add toast and redirect
-    return redirect(`/settings/groups/${params.id}`);
+    const session = await getSession(request.headers.get('cookie'));
+    session.flash('flashMessage', `Role ${role?.name} created`);
+
+    const newSession = await commitSession(session);
+
+    return redirect(`/settings/groups/${params.id}`, {
+      headers: {
+        'Set-Cookie': newSession,
+      },
+    });
   },
   PERMISSIONS.WRITE_ROLE,
 );
@@ -119,7 +128,7 @@ export default function Screen() {
     const formData = new FormData();
     const permissions: string[] = [];
 
-    Object.entries(data.permissions).forEach(item => {
+    Object.entries(data.permissions || []).forEach(item => {
       if (item[1]) {
         permissions.push(item[0]);
       }

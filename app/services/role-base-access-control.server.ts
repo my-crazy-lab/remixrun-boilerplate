@@ -164,7 +164,7 @@ export async function updateGroups({
     permission => !permissionsAfterUpdateRole.includes(permission),
   );
 
-  await GroupsModel.updateOne(
+  const group = await GroupsModel.findOneAndUpdate(
     { _id: groupId },
     {
       $set: {
@@ -175,7 +175,8 @@ export async function updateGroups({
         roleAssignedIds,
       },
     },
-  );
+    { new: true },
+  ).lean<Groups>();
 
   // update roleIds
   const roleIdsOfGroupWillBeUpdated = await GroupsModel.aggregate([
@@ -231,6 +232,8 @@ export async function updateGroups({
       },
     );
   }
+
+  return group;
 }
 
 export async function getUsersByGroupId(groupIds: string[]) {
@@ -655,13 +658,14 @@ export async function updateRole({
   groupId: string;
 }) {
   const updatedAt = momentTz().toDate();
+  let roleName = '';
 
   const permissionsRemoved =
     await getPermissionsRemovedAfterUpdateOrRemoveRoles({
       groupId,
       updateOrRemoveCallback: async () => {
         // update role by id
-        await RolesModel.updateOne(
+        const role = await RolesModel.findOneAndUpdate(
           { _id: roleId },
           {
             $set: {
@@ -672,7 +676,9 @@ export async function updateRole({
               description,
             },
           },
-        );
+          { new: true },
+        ).lean<Roles>();
+        roleName = role?.name || '';
       },
     });
 
@@ -694,6 +700,8 @@ export async function updateRole({
       },
     );
   }
+
+  return roleName;
 }
 
 export async function deleteGroup({ groupId }: { groupId: string }) {

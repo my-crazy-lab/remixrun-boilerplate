@@ -16,15 +16,17 @@ import { toast } from '@/components/ui/use-toast';
 import TabGroupIcon from '@/images/tab-group.svg';
 import UsersIcon from '@/images/user-group.svg';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { json } from '@remix-run/node';
+import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import {
   Form,
   Link,
   useActionData,
+  useLoaderData,
   useOutletContext,
   useParams,
 } from '@remix-run/react';
 import { Plus } from 'lucide-react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction } from '~/hoc/remix';
@@ -33,6 +35,7 @@ import {
   deleteGroup,
   deleteRole,
 } from '~/services/role-base-access-control.server';
+import { getSession } from '~/services/session.server';
 import { type GroupDetail } from '~/types/LoaderData';
 
 export const action = hocAction(
@@ -68,6 +71,13 @@ export const action = hocAction(
   PERMISSIONS.WRITE_GROUP,
 );
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const session = await getSession(request.headers.get('Cookie'));
+  const message = session.get('flashMessage');
+
+  return json({ message });
+};
+
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
 
@@ -75,22 +85,32 @@ export default function Screen() {
     error?: string;
     success?: string;
   }>();
-  if (actionData?.error) {
-    toast({ title: 'SERVER_ERROR', description: actionData.error });
-  }
-  if (actionData?.success) {
-    toast({ variant: 'success', description: actionData.success });
-  }
+  const outletData = useOutletContext<GroupDetail>();
+
+  const loaderData = useLoaderData<{ message?: string }>();
+  useEffect(() => {
+    if (loaderData?.message) {
+      toast({ variant: 'success', description: loaderData.message });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ title: 'SERVER_ERROR', description: actionData.error });
+    }
+    if (actionData?.success) {
+      toast({ variant: 'success', description: actionData.success });
+    }
+  }, [actionData]);
 
   const params = useParams();
   const globalData = useGlobalStore(state => state);
-  const loaderData = useOutletContext<GroupDetail>();
 
   return (
     <>
       <div className="flex justify-between items-center bg-secondary p-4 rounded-md">
         <div className="grid space-y-2">
-          <Typography variant="h3">{loaderData.group?.name}</Typography>
+          <Typography variant="h3">{outletData.group?.name}</Typography>
           <Breadcrumbs />
         </div>
         {globalData.permissions?.includes(PERMISSIONS.WRITE_GROUP) ? (
@@ -107,8 +127,8 @@ export default function Screen() {
           {t('Children group')}
         </Typography>
         <div className="grid grid-cols-3 gap-8">
-          {loaderData.group?.children?.length
-            ? loaderData.group.children.map((child, index: number) => {
+          {outletData.group?.children?.length
+            ? outletData.group.children.map((child, index: number) => {
                 return (
                   <Card key={index} className="bg-gray-100">
                     <CardHeader className="p-4">
@@ -226,7 +246,7 @@ export default function Screen() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            {loaderData.group?.roles?.map(role => {
+            {outletData.group?.roles?.map(role => {
               return (
                 <Button
                   key={role._id}
@@ -289,7 +309,7 @@ export default function Screen() {
           </div>
           <Separator />
           <div className="grid grid-cols-1 gap-2">
-            {loaderData.group?.users?.map(user => {
+            {outletData.group?.users?.map(user => {
               return (
                 <Link key={user._id} to={`/settings/profile/${user._id}`}>
                   <div className="mt-4 flex items-center gap-4">

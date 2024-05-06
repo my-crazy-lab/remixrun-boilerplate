@@ -24,4 +24,5 @@ export interface GroupDetail {
     description: string;
     nearestChildren: Array<Groups>;
   };
+  message?: string;
 }
