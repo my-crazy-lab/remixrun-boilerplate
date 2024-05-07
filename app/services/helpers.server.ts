@@ -41,7 +41,7 @@ export async function getCities(isoCode: string) {
     )
     .lean();
 
-  return workingPlaces?.cities?.map(city => city.name);
+  return workingPlaces?.cities?.map(city => city.name) || [];
 }
 
 export async function getCitiesByUserId({

@@ -21,7 +21,6 @@ export const action = hocAction(
     const formData = await request.formData();
     const { newPassword, reEnterPassword } = Object.fromEntries(formData);
 
-    // TODO move logic validation to client with React hook form
     if (
       typeof newPassword !== 'string' ||
       typeof reEnterPassword !== 'string'

@@ -2,7 +2,7 @@ import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import BTaskeeTable from '@/components/btaskee/TableBase';
 import Typography from '@/components/btaskee/Typography';
 import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-table-column-header';
-import type { LoaderFunctionArgs } from '@remix-run/node';
+import type { LoaderFunctionArgs, SerializeFrom } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData, useSearchParams } from '@remix-run/react';
 import { type ColumnDef } from '@tanstack/react-table';
@@ -30,7 +30,43 @@ export const handle = {
   i18n: 'user-settings',
 };
 
-const columns: ColumnDef<ActionsHistory>[] = [
+const callbackLoader = async ({ request }: LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const searchText = url.searchParams.get('username') || '';
+  const { userId: managerId } = await getUserSession({
+    headers: request.headers,
+  });
+
+  const total = await getTotalActionsHistoryManageByManagerId({
+    searchText,
+    managerId,
+  });
+
+  const { limit, skip } = getSkipAndLimit(
+    getPageSizeAndPageIndex({
+      total,
+      pageSize: Number(url.searchParams.get('pageSize')) || 0,
+      pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
+    }),
+  );
+
+  const actionsHistory = await getActionsHistoryManagedByManagerId({
+    searchText: url.searchParams.get('username') || '',
+    skip,
+    limit,
+    projection: {
+      username: '$user.username',
+      action: 1,
+      requestFormData: 1,
+      createdAt: 1,
+    },
+    managerId,
+  });
+
+  return json({ actionsHistory, total });
+};
+
+const columns: ColumnDef<SerializeFrom<ActionsHistory>>[] = [
   {
     accessorKey: 'username',
     header: ({ column }) => (
@@ -91,42 +127,6 @@ const columns: ColumnDef<ActionsHistory>[] = [
     enableHiding: false,
   },
 ];
-
-const callbackLoader = async ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
-  const searchText = url.searchParams.get('username') || '';
-  const { userId: managerId } = await getUserSession({
-    headers: request.headers,
-  });
-
-  const total = await getTotalActionsHistoryManageByManagerId({
-    searchText,
-    managerId,
-  });
-
-  const { limit, skip } = getSkipAndLimit(
-    getPageSizeAndPageIndex({
-      total,
-      pageSize: Number(url.searchParams.get('pageSize')) || 0,
-      pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
-    }),
-  );
-
-  const actionsHistory = await getActionsHistoryManagedByManagerId({
-    searchText: url.searchParams.get('username') || '',
-    skip,
-    limit,
-    projection: {
-      username: '$user.username',
-      action: 1,
-      requestFormData: 1,
-      createdAt: 1,
-    },
-    managerId,
-  });
-
-  return json({ actionsHistory, total });
-};
 
 export const loader = hocLoader(callbackLoader, PERMISSIONS.MANAGER);
 

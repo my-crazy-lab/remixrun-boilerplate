@@ -24,7 +24,11 @@ import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { toast } from '@/components/ui/use-toast';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import { type LoaderFunctionArgs, json } from '@remix-run/node';
+import {
+  type LoaderFunctionArgs,
+  type SerializeFrom,
+  json,
+} from '@remix-run/node';
 import {
   Form,
   Link,
@@ -53,7 +57,7 @@ import {
   getTotalUsersManagedByManagerId,
   getUsersManagedByManagerId,
 } from '~/services/settings.server';
-import type { Groups, OptionType, ReturnValueIgnorePromise } from '~/types';
+import type { OptionType, Users } from '~/types';
 import { getPageSizeAndPageIndex, getSkipAndLimit } from '~/utils/helpers';
 
 export const handle = {
@@ -62,7 +66,85 @@ export const handle = {
   ),
 };
 
-const columns: ColumnDef<LoaderData['users'][0]>[] = [
+export const action = hocAction(
+  async ({ request }, { setInformationActionHistory }) => {
+    const formData = await request.clone().formData();
+    const userDeleted = formData.get('userDeleted')?.toString() || '';
+
+    if (userDeleted) {
+      await deleteUser(userDeleted);
+      setInformationActionHistory({
+        action: ACTION_NAME.DELETE_USER,
+      });
+    } else {
+      const username = formData.get('username')?.toString() || '';
+      const email = formData.get('email')?.toString() || '';
+      const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
+      const groupIds =
+        JSON.parse(formData.get('groupIds')?.toString() || '') || [];
+
+      const { isoCode } = await getUserSession({ headers: request.headers });
+
+      const newUser = await createNewUser({
+        username,
+        email,
+        isoCode,
+        cities,
+        groupIds,
+      });
+
+      setInformationActionHistory({
+        action: ACTION_NAME.CREATE_USER,
+        dataRelated: { userId: newUser?._id },
+      });
+    }
+
+    const t = await i18next.getFixedT(request, 'user-settings');
+
+    return json({ message: t('CREATE_USER_SUCCESSFUL') });
+  },
+  PERMISSIONS.MANAGER,
+);
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const url = new URL(request.url);
+
+  const { userId: managerId, isoCode } = await getUserSession({
+    headers: request.headers,
+  });
+
+  const totalUsers = await getTotalUsersManagedByManagerId(managerId);
+  const { limit, skip } = getSkipAndLimit(
+    getPageSizeAndPageIndex({
+      total: totalUsers,
+      pageSize: Number(url.searchParams.get('pageSize')) || 0,
+      pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
+    }),
+  );
+
+  const users = await getUsersManagedByManagerId({
+    skip,
+    limit,
+    projection: { _id: 1, cities: 1, username: 1, email: 1 },
+    managerId,
+  });
+  const groups = await getAllChildrenGroupOfUser(managerId);
+  const cities = await getCities(isoCode);
+
+  const session = await getSession(request.headers.get('Cookie'));
+  const message = session.get('flashMessage');
+
+  return json(
+    { users, cities, total: totalUsers, groups, message },
+    {
+      headers: {
+        'Set-Cookie': await commitSession(session),
+      },
+    },
+  );
+};
+
+const columns: ColumnDef<SerializeFrom<Users>>[] = [
   {
     accessorKey: '_id',
     header: ({ table }) => (
@@ -167,92 +249,6 @@ const columns: ColumnDef<LoaderData['users'][0]>[] = [
   },
 ];
 
-export const action = hocAction(
-  async ({ request }, { setInformationActionHistory }) => {
-    const formData = await request.clone().formData();
-    const userDeleted = formData.get('userDeleted')?.toString() || '';
-
-    if (userDeleted) {
-      await deleteUser(userDeleted);
-      setInformationActionHistory({
-        action: ACTION_NAME.DELETE_USER,
-      });
-    } else {
-      const username = formData.get('username')?.toString() || '';
-      const email = formData.get('email')?.toString() || '';
-      const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
-      const groupIds =
-        JSON.parse(formData.get('groupIds')?.toString() || '') || [];
-
-      const { isoCode } = await getUserSession({ headers: request.headers });
-
-      const newUser = await createNewUser({
-        username,
-        email,
-        isoCode,
-        cities,
-        groupIds,
-      });
-
-      setInformationActionHistory({
-        action: ACTION_NAME.CREATE_USER,
-        dataRelated: { userId: newUser?._id },
-      });
-    }
-
-    const t = await i18next.getFixedT(request, 'user-settings');
-
-    return json({ message: t('CREATE_USER_SUCCESSFUL') });
-  },
-  PERMISSIONS.MANAGER,
-);
-
-interface LoaderData {
-  users: ReturnValueIgnorePromise<typeof getUsersManagedByManagerId>;
-  total: number;
-  cities: Array<string>;
-  groups: Pick<Groups, 'name' | '_id'>[];
-  message?: string;
-}
-
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
-
-  const { userId: managerId, isoCode } = await getUserSession({
-    headers: request.headers,
-  });
-
-  const totalUsers = await getTotalUsersManagedByManagerId(managerId);
-  const { limit, skip } = getSkipAndLimit(
-    getPageSizeAndPageIndex({
-      total: totalUsers,
-      pageSize: Number(url.searchParams.get('pageSize')) || 0,
-      pageIndex: Number(url.searchParams.get('pageIndex')) || 0,
-    }),
-  );
-
-  const users = await getUsersManagedByManagerId({
-    skip,
-    limit,
-    projection: { _id: 1, cities: 1, username: 1, email: 1 },
-    managerId,
-  });
-  const groups = await getAllChildrenGroupOfUser(managerId);
-  const cities = await getCities(isoCode);
-
-  const session = await getSession(request.headers.get('Cookie'));
-  const message = session.get('flashMessage');
-
-  return json(
-    { users, cities, total: totalUsers, groups, message },
-    {
-      headers: {
-        'Set-Cookie': await commitSession(session),
-      },
-    },
-  );
-};
-
 interface FormData {
   email: string;
   cities: Array<OptionType>;
@@ -265,7 +261,7 @@ export default function Screen() {
     error?: string;
     message?: string;
   }>();
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<typeof loader>();
 
   useEffect(() => {
     if (loaderData?.message) {

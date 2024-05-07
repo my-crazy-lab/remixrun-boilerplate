@@ -721,7 +721,7 @@ export async function deleteGroup({ groupId }: { groupId: string }) {
   // get role's ids will be deleted
   const rolesWillBeDeleted = removeDuplicatedItem([
     group?.roleIds || [], // don't remove roles of parent, just remove in children
-    ...groupsChildren.map(e => [...e.roleIds, ...e.roleAssignedIds]),
+    ...groupsChildren.map(e => [...(e?.roleIds || []), ...e.roleAssignedIds]),
   ]);
 
   // remove roles
