@@ -1,7 +1,8 @@
 import { Schema } from 'mongoose';
+import type { ActionsHistory } from '~/types';
 import { mongoClientBE } from '~/utils/db.server';
 
-const ActionsHistorySchema = new Schema(
+const ActionsHistorySchema = new Schema<ActionsHistory>(
   {
     _id: {
       $type: String,

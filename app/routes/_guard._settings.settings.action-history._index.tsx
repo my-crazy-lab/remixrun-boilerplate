@@ -143,8 +143,8 @@ export default function Screen() {
       </div>
       <BTaskeeTable
         total={total}
-        columns={columns}
         data={actionsHistory}
+        columns={columns}
         pagination={getPageSizeAndPageIndex({
           total,
           pageSize: Number(searchParams.get('pageSize') || 0),

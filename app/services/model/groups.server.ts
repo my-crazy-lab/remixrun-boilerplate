@@ -1,7 +1,8 @@
 import { Schema } from 'mongoose';
+import type { Groups } from '~/types';
 import { mongoClientBE } from '~/utils/db.server';
 
-const GroupsSchema = new Schema(
+const GroupsSchema = new Schema<Groups>(
   {
     _id: {
       $type: String,

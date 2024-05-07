@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose';
 import { mongoClientApp } from '~/utils/db.server';
 
+export const workingPlacesName = 'workingPlaces';
 const WorkingPlacesSchema = new Schema(
   {
     _id: { $type: String, required: true },
@@ -14,7 +15,7 @@ const WorkingPlacesSchema = new Schema(
       },
     ],
   },
-  { typeKey: '$type', collection: 'workingPlaces' },
+  { typeKey: '$type', collection: workingPlacesName },
 );
 
 const WorkingPlacesModel = mongoClientApp.model(
