@@ -1,6 +1,8 @@
 import getLodash from 'lodash/get';
 import type { MustBeAny } from '~/types';
 
+import { dotenv } from './dotenv.server';
+
 const throwError = (error: MustBeAny) => {
   throw new Error(
     getLodash(
@@ -20,11 +22,11 @@ const throwError = (error: MustBeAny) => {
 };
 
 const fetchAPI = async (url: string, params: MustBeAny, isoCode: string) => {
-  const data = await fetch(`http://localhost:8080/api/${url}`, {
+  const data = await fetch(`${dotenv.GO_REST_API_URI}/${url}`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      accessKey: 'dumpkey',
+      accessKey: dotenv.ACCESS_KEY,
     },
     // body data type must match "Content-Type" header
     body: JSON.stringify({ ...params, isoCode }),

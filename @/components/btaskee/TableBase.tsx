@@ -117,8 +117,7 @@ const BTaskeeTable = <TData, TValue>({
             {table.getCoreRowModel().rows?.length ? (
               table.getCoreRowModel().rows.map(row => (
                 <Fragment key={row.id}>
-                  <TableRow
-                    data-state={row.getIsSelected() && 'selected'}>
+                  <TableRow data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map(cell => (
                       <TableCell key={cell.id}>
                         {flexRender(

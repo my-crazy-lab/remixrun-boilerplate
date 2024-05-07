@@ -34,7 +34,7 @@ import GroupsModel from '~/services/model/groups.server';
 import RolesModel from '~/services/model/roles.servers';
 import UsersModel from '~/services/model/users.server';
 import { getUserPermissions } from '~/services/role-base-access-control.server';
-import { Groups, Roles, Users } from '~/types';
+import type { Groups, Roles, Users } from '~/types';
 
 // function mockResponseThrowError() {
 //   const errorText = 'response return error message';

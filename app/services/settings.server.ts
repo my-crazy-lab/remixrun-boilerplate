@@ -111,7 +111,7 @@ export async function getActionsHistoryManagedByManagerId({
     { $skip: skip },
     { $limit: limit },
   ]).exec();
-  console.log(actionsHistory[0].createdAt, typeof actionsHistory[0].createdAt);
+
   return actionsHistory;
 }
 
