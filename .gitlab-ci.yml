@@ -1,7 +1,6 @@
 stages:
   - code convention 
   - test
-  - deploy
 
 cache:
   paths:
@@ -55,7 +54,7 @@ Unit testing:
         coverage_format: cobertura
         path: coverage/coverage.txt
 
-Deployment:
+.Deployment:
   stage: deploy
   script:
     - npm run build 
