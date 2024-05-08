@@ -30,17 +30,17 @@ before_script:
   - npm install
 
 Typescript checker:
-  stage: code standard
+  stage: code convention
   script:
     - npm run typecheck
 
 Linter:
-  stage: code standard
+  stage: code convention
   script:
     - npm run lint
 
 Spell checker:
-  stage: code standard
+  stage: code convention
   script:
     - npm run cspell
 
