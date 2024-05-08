@@ -14,30 +14,21 @@ import _ from 'lodash';
 import { PERMISSIONS } from '~/constants/common';
 import { hocLoader } from '~/hoc/remix';
 import { getRoleDetail } from '~/services/role-base-access-control.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { LoaderTypeWithError } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
-interface LoaderData {
-  role: ReturnValueIgnorePromise<typeof getRoleDetail> & {
-    actionPermissions: ReturnType<typeof groupPermissionsByModule>;
-  };
-}
-
-export const loader = hocLoader(
-  async ({ params, request }: LoaderFunctionArgs) => {
-    const role = await getRoleDetail(params.roleId || '');
-    return json({
-      role: {
-        ...role,
-        actionPermissions: groupPermissionsByModule(role.actionPermissions),
-      },
-    });
-  },
-  PERMISSIONS.READ_ROLE,
-);
+export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
+  const role = await getRoleDetail(params.roleId || '');
+  return json({
+    role: {
+      ...role,
+      actionPermissions: groupPermissionsByModule(role.actionPermissions),
+    },
+  });
+}, PERMISSIONS.READ_ROLE);
 
 export default function RolesDetail() {
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
 
   return (
     <>

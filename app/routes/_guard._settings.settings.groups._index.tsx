@@ -11,21 +11,16 @@ import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
 import { type Groups } from '~/types';
 
-interface LoaderData {
-  groups: Array<{
-    _id: string;
-    name: string;
-    description: string;
-    userIds: Array<string>;
-    children: Array<Groups>;
-  }>;
+interface LoaderGroups
+  extends Pick<Groups, '_id' | 'name' | 'description' | 'userIds'> {
+  children: Array<string>;
 }
 
 // Don't need permission Read
 // Users added to groups obviously know how many groups they have
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
-  const groups = await getGroupsOfUser<LoaderData['groups']>({
+  const groups = await getGroupsOfUser<LoaderGroups>({
     userId,
     projection: {
       name: 1,
@@ -39,8 +34,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
-  const loaderData = useLoaderData<LoaderData>();
+  const { t } = useTranslation('user-settings');
+  const loaderData = useLoaderData<typeof loader>();
 
   return (
     <div className="h-full flex-1 flex-col space-y-8 flex">

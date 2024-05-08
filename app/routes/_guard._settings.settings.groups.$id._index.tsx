@@ -36,6 +36,7 @@ import {
   deleteRole,
 } from '~/services/role-base-access-control.server';
 import { getSession } from '~/services/session.server';
+import type { ActionTypeWithError } from '~/types';
 import { type GroupDetail } from '~/types/LoaderData';
 
 export const action = hocAction(
@@ -73,24 +74,23 @@ export const action = hocAction(
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request.headers.get('Cookie'));
-  const message = session.get('flashMessage');
 
-  return json({ message });
+  // session return not type
+  const flashMessage = session.get('flashMessage') as string;
+
+  return json({ flashMessage });
 };
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
 
-  const actionData = useActionData<{
-    error?: string;
-    success?: string;
-  }>();
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
   const outletData = useOutletContext<GroupDetail>();
 
-  const loaderData = useLoaderData<{ message?: string }>();
+  const loaderData = useLoaderData<typeof loader>();
   useEffect(() => {
-    if (loaderData?.message) {
-      toast({ variant: 'success', description: loaderData.message });
+    if (loaderData?.flashMessage) {
+      toast({ variant: 'success', description: loaderData.flashMessage });
     }
   }, []);
 

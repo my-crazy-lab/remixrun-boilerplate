@@ -9,7 +9,7 @@ import {
   isParentOfGroup,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
-import { type Roles } from '~/types';
+import type { LoaderTypeWithError, Roles } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const loader = hocLoader(
@@ -55,6 +55,7 @@ export const handle = {
 };
 
 export default function Screen() {
-  const loaderData = useLoaderData();
+  const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
+
   return <Outlet context={loaderData} />;
 }

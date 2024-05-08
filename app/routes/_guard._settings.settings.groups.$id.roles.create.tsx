@@ -26,7 +26,7 @@ import {
   getGroupPermissions,
 } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { ActionTypeWithError, LoaderTypeWithError } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
@@ -38,6 +38,7 @@ export const handle = {
       />
     );
   },
+  i18n: 'user-settings',
 };
 
 export const action = hocAction(
@@ -79,11 +80,6 @@ export const action = hocAction(
   PERMISSIONS.WRITE_ROLE,
 );
 
-interface LoaderData {
-  permissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
-  permissionsGrouped: ReturnType<typeof groupPermissionsByModule>;
-}
-
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
@@ -105,16 +101,15 @@ interface FormData {
   name: string;
   description: string;
 }
+
 export default function Screen() {
-  const actionData = useActionData<{
-    error?: string;
-  }>();
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
   if (actionData?.error) {
     toast({ description: actionData.error });
   }
 
-  const { t } = useTranslation(['user-settings']);
-  const loaderData = useLoaderData<LoaderData>();
+  const { t } = useTranslation('user-settings');
+  const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
 
   const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {

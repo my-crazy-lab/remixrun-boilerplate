@@ -26,36 +26,29 @@ import { HomeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useChangeLanguage } from 'remix-i18next/react';
 
-import { ERROR } from './constants/common';
+import { hocAction } from './hoc/remix';
 import { getUserId, getUserSession } from './services/helpers.server';
 import { setUserLanguage } from './services/settings.server';
 import styles from './tailwind.css';
 import type { MustBeAny } from './types';
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-  try {
-    const formData = await request.clone().formData();
-    const {
-      language,
-      name,
-      redirect: redirectPath,
-    } = Object.fromEntries(formData);
+export const action = hocAction(async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.clone().formData();
+  const {
+    language,
+    name,
+    redirect: redirectPath,
+  } = Object.fromEntries(formData);
 
-    if (name === 'changeLanguage' && typeof language === 'string') {
-      const userId = await getUserId({ request });
-      await setUserLanguage({ language, userId });
+  if (name === 'changeLanguage' && typeof language === 'string') {
+    const userId = await getUserId({ request });
+    await setUserLanguage({ language, userId });
 
-      return redirect(`${redirectPath}`);
-    }
-
-    return null;
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
+    return redirect(`${redirectPath}`);
   }
-};
+
+  return null;
+});
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { language } = await getUserSession({ headers: request.headers });
@@ -76,6 +69,7 @@ export const handle = { i18n: 'common' };
 export function ErrorBoundary() {
   const navigate = useNavigate();
   const { t } = useTranslation(['common']);
+
   const error: MustBeAny = useRouteError();
 
   function renderContentBasedOnErrorStatus(status: number) {
@@ -144,11 +138,11 @@ export function ErrorBoundary() {
 }
 
 export default function App() {
-  const loaderData = useLoaderData<{ locale: string }>();
-  useChangeLanguage(loaderData.locale);
+  const loaderData = useLoaderData<typeof loader>();
+  useChangeLanguage(loaderData?.locale);
 
   return (
-    <html lang={loaderData.locale}>
+    <html lang={loaderData?.locale}>
       <head>
         <title>bTaskee</title>
         <meta charSet="utf-8" />

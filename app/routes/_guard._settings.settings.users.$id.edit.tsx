@@ -9,6 +9,7 @@ import { MultiSelect } from '@/components/ui/multi-select';
 import { toast } from '@/components/ui/use-toast';
 import { type LoaderFunctionArgs, json, redirect } from '@remix-run/node';
 import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
@@ -17,7 +18,12 @@ import { hocAction, hocLoader } from '~/hoc/remix';
 import { getUserByUserId, updateUser } from '~/services/auth.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
 import { commitSession, getSession } from '~/services/session.server';
-import { type OptionType, type Users } from '~/types';
+import type {
+  ActionTypeWithError,
+  LoaderTypeWithError,
+  OptionType,
+  Users,
+} from '~/types';
 
 export const handle = {
   breadcrumb: (data: { user: Users }) => {
@@ -36,11 +42,6 @@ interface FormData {
   password: string;
   cities: Array<OptionType>;
   username: string;
-}
-
-interface LoaderData {
-  cities: Array<string>;
-  user: Users;
 }
 
 export const action = hocAction(
@@ -80,31 +81,36 @@ export const loader = hocLoader(
     const cities = await getCities(isoCode);
     const user = await getUserByUserId({ userId: params.id || '' });
 
+    if (!user || !user?.email) {
+      throw new Error('USER_NOT_FOUND');
+    }
+
     return json({ cities, user });
   },
   PERMISSIONS.MANAGER,
 );
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
 
-  const actionData = useActionData<{
-    error?: string;
-  }>();
-  if (actionData?.error) {
-    toast({ description: actionData.error });
-  }
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ description: actionData.error });
+    }
+  }, [actionData]);
 
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
+
   const submit = useSubmit();
   const { register, control, handleSubmit } = useForm<FormData>({
     defaultValues: {
-      email: loaderData.user.email,
-      cities: loaderData.user.cities?.map(city => ({
+      email: loaderData?.user?.email,
+      cities: loaderData?.user?.cities?.map(city => ({
         value: city,
         label: city,
       })),
-      username: loaderData.user.username,
+      username: loaderData?.user?.username,
     },
   });
 

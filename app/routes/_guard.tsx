@@ -37,7 +37,6 @@ import { authenticator } from '~/services/auth.server';
 import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
 import { getUserProfile } from '~/services/settings.server';
-import { type Users } from '~/types';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await authenticator.isAuthenticated(request, {
@@ -64,10 +63,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function Screen() {
-  const { user, userProfile } = useLoaderData<{
-    user: Users & { permissions: Array<string> };
-    userProfile: Users;
-  }>();
+  const { user, userProfile } = useLoaderData<typeof loader>();
 
   const storeRef = useRef<GlobalStore>();
   if (!storeRef.current) {
@@ -111,7 +107,7 @@ export default function Screen() {
               className="md:w-[100px] lg:w-[270px]"
             />
             <Select
-              defaultValue={userProfile.language}
+              defaultValue={userProfile?.language}
               onValueChange={onSubmit}>
               <SelectTrigger className="h-10 w-[180px]">
                 <SelectValue />

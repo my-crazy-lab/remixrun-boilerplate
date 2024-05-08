@@ -28,7 +28,13 @@ import {
   updateGroups,
 } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type {
+  ActionTypeWithError,
+  Groups,
+  LoaderTypeWithError,
+  Roles,
+  Users,
+} from '~/types';
 
 export const action = hocAction(
   async ({ request, params }, { setInformationActionHistory }) => {
@@ -65,35 +71,6 @@ export const action = hocAction(
   PERMISSIONS.WRITE_GROUP,
 );
 
-interface LoaderData {
-  group: ReturnValueIgnorePromise<
-    typeof getGroupDetail<{
-      _id: string;
-      roleAssigned: Array<{
-        _id: string;
-        name: string;
-        description: string;
-      }>;
-      users: Array<{
-        _id: string;
-        email: string;
-        username: string;
-      }>;
-      children: Array<{
-        _id: string;
-        name?: string;
-        description?: string;
-      }>;
-      name: string;
-      description: string;
-      parent: string;
-      hierarchy: number;
-    }>
-  >;
-  users: ReturnValueIgnorePromise<typeof searchUser>;
-  roles: ReturnValueIgnorePromise<typeof getRolesByGroupId>;
-}
-
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
@@ -114,16 +91,17 @@ export const loader = hocLoader(
     });
 
     const group = await hoc404(async () =>
-      getGroupDetail<LoaderData['group']>({
+      getGroupDetail<
+        Pick<Groups, 'name' | 'description'> & {
+          users: Users[];
+          roleAssigned: Roles[];
+        }
+      >({
         projection: {
-          roleAssigned: 1,
-          users: 1,
-          children: 1,
-          parent: 1,
-          hierarchy: 1,
           name: 1,
           description: 1,
-          parents: 1,
+          roleAssigned: 1,
+          users: 1,
         },
         userId,
         groupId: childId,
@@ -154,27 +132,22 @@ export const handle = {
   breadcrumb: () => (
     <BreadcrumbsLink to="/settings/groups" label="EDIT_GROUP" />
   ),
+  i18n: 'user-settings',
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
-  const loaderData = useLoaderData<{ message?: string }>();
-  useEffect(() => {
-    if (loaderData?.message) {
-      toast({ variant: 'success', description: loaderData.message });
-    }
-  }, []);
+  const { t } = useTranslation('user-settings');
 
-  const actionData = useActionData<{
-    error?: string;
-  }>();
+  const { group, roles, users } =
+    useLoaderData<LoaderTypeWithError<typeof loader>>();
+
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
   useEffect(() => {
     if (actionData?.error) {
       toast({ description: actionData.error });
     }
   }, [actionData]);
 
-  const { group, roles, users } = useLoaderData<LoaderData>();
   const navigation = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();

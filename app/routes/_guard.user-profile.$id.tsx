@@ -11,7 +11,7 @@ import { useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
 import { getUserProfile } from '~/services/settings.server';
-import type { ReturnValueIgnorePromise, Users } from '~/types';
+import type { Users } from '~/types';
 
 export const handle = {
   breadcrumb: (data: { userProfile: Users }) => {
@@ -26,11 +26,7 @@ export const handle = {
   },
 };
 
-interface LoaderData {
-  userProfile: ReturnValueIgnorePromise<typeof getUserProfile>;
-}
-
-export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const userId = params.id || '';
   const userProfile = await getUserProfile(userId);
 
@@ -39,7 +35,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
 
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<typeof loader>();
 
   return (
     <div className="space-y-6">
@@ -59,7 +55,7 @@ export default function Screen() {
                   {t('EMAIL')}
                 </Typography>
                 <Typography variant="h4" affects="small">
-                  {loaderData.userProfile?.email}
+                  {loaderData?.userProfile?.email}
                 </Typography>
               </Grid>
               <Grid>
@@ -67,7 +63,7 @@ export default function Screen() {
                   {t('USERNAME')}
                 </Typography>
                 <Typography variant="h4" affects="small">
-                  {loaderData.userProfile?.username}
+                  {loaderData?.userProfile?.username}
                 </Typography>
               </Grid>
             </CardContent>
@@ -82,7 +78,7 @@ export default function Screen() {
                 {t('CITIES')}
               </Typography>
               <div className="gap-2 grid grid-cols-4">
-                {loaderData.userProfile?.cities?.map((city, index) => {
+                {loaderData?.userProfile?.cities?.map((city, index) => {
                   return (
                     <Badge
                       className="text-center block rounded-md py-2 font-normal text-blue bg-blue-50"
@@ -104,7 +100,7 @@ export default function Screen() {
             <div className="w-40 h-40 text-center mt-10">
               <Avatar className="w-full h-full">
                 <AvatarImage
-                  src={loaderData.userProfile?.avatarUrl}
+                  src={loaderData?.userProfile?.avatarUrl}
                   className="object-cover"
                 />
                 <AvatarFallback className="bg-secondary">

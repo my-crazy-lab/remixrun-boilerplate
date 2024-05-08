@@ -15,6 +15,7 @@ import {
   useSearchParams,
   useSubmit,
 } from '@remix-run/react';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
@@ -26,7 +27,11 @@ import {
   searchUser,
 } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
-import { type OptionType, type ReturnValueIgnorePromise } from '~/types';
+import type {
+  ActionTypeWithError,
+  LoaderTypeWithError,
+  OptionType,
+} from '~/types';
 
 export const action = hocAction(
   async ({ request, params }, { setInformationActionHistory }) => {
@@ -64,11 +69,6 @@ export const action = hocAction(
   PERMISSIONS.WRITE_GROUP,
 );
 
-interface LoaderData {
-  roles: ReturnValueIgnorePromise<typeof getRolesByGroupId>;
-  users: ReturnValueIgnorePromise<typeof searchUser>;
-}
-
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const roles = await getRolesByGroupId(params.id || '');
@@ -96,18 +96,21 @@ interface FormData {
 }
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
 
-  const actionData = useActionData<{
-    error?: string;
-  }>();
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
   if (actionData?.error) {
     toast({ description: actionData.error });
   }
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ title: 'SERVER_ERROR', description: actionData.error });
+    }
+  }, [actionData]);
 
   const navigation = useNavigation();
 
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const { register, control, handleSubmit, formState } = useForm<FormData>({

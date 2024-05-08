@@ -6,15 +6,13 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { redirect } from '@remix-run/node';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hocAction } from '~/hoc/remix';
 import { verifyAndSendCode } from '~/services/auth.server';
-
-interface ActionData {
-  error?: string;
-}
+import type { ActionTypeWithError } from '~/types';
 
 export const action = hocAction(
   async ({ request }, { setInformationActionHistory }) => {
@@ -34,12 +32,14 @@ export const action = hocAction(
 );
 
 export default function Screen() {
-  const { t } = useTranslation(['authentication']);
-  const actionData = useActionData<ActionData>();
+  const { t } = useTranslation('authentication');
 
-  if (actionData?.error) {
-    toast({ description: actionData.error });
-  }
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ description: actionData.error });
+    }
+  }, [actionData]);
 
   const navigation = useNavigation();
 

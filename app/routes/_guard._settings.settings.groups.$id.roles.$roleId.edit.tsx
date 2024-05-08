@@ -33,18 +33,12 @@ import {
   updateRole,
 } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { ActionTypeWithError, LoaderTypeWithError } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
   breadcrumb: () => <BreadcrumbsLink to="/settings/groups" label="EDIT_ROLE" />,
 };
-
-interface LoaderData {
-  role: ReturnValueIgnorePromise<typeof getRoleDetail>;
-  activePermissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
-  allPermissionsAvailable: ReturnType<typeof groupPermissionsByModule>;
-}
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
@@ -110,14 +104,14 @@ export const action = hocAction(
 export default function Screen() {
   const { t } = useTranslation(['user-settings']);
 
-  const actionData = useActionData<{
-    error?: string;
-  }>();
-  if (actionData?.error) {
-    toast({ description: actionData.error });
-  }
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ description: actionData.error });
+    }
+  }, [actionData]);
 
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
 
   const {
     register,

@@ -32,12 +32,9 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     successRedirect: '/',
   });
   const session = await getSession(request.headers.get('cookie'));
-  // const error = session.get(authenticator.sessionErrorKey);
 
   return json(
-    {
-      // error
-    },
+    {},
     {
       headers: {
         'Set-Cookie': await commitSession(session), // You must commit the session whenever you read a flash
@@ -47,7 +44,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export default function Screen() {
-  const { t } = useTranslation(['authentication']);
+  const { t } = useTranslation('authentication');
   const navigation = useNavigation();
 
   return (

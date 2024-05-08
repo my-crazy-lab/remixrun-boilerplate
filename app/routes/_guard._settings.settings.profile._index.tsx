@@ -31,7 +31,7 @@ import ROUTE_NAME from '~/constants/route';
 import { hocAction } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import { changeUserAvatar, getUserProfile } from '~/services/settings.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { ActionTypeWithError } from '~/types';
 import { s3UploadHandler } from '~/utils/s3.server';
 
 const MAXIMUM_CONTENT_LENGTH = 100 * 1024; //100kB
@@ -43,11 +43,8 @@ export const handle = {
   breadcrumb: () => (
     <BreadcrumbsLink to={`${ROUTE_NAME.PROFILE_SETTING}`} label="PROFILE" />
   ),
+  i18n: 'user-settings',
 };
-
-interface LoaderData {
-  userProfile: ReturnValueIgnorePromise<typeof getUserProfile>;
-}
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
@@ -84,12 +81,13 @@ export const action = hocAction(
 export default function Screen() {
   const { t } = useTranslation('user-settings');
 
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<typeof loader>();
+
   const submit = useSubmit();
   const confirm = useConfirm();
   const [fileSelected, setFileSelected] = useState<File | null>(null);
 
-  const actionData = useActionData<{ error?: string; success?: string }>();
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
   if (actionData?.error) {
     toast({ description: actionData.error });
   }

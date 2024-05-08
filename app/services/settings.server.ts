@@ -85,7 +85,11 @@ export async function getActionsHistoryManagedByManagerId({
     };
   }
 
-  const actionsHistory = await ActionsHistoryModel.aggregate<ActionsHistory>([
+  const actionsHistory = await ActionsHistoryModel.aggregate<
+    ActionsHistory & {
+      user: Users;
+    }
+  >([
     {
       $match: {
         $or: [{ actorId: { $in: userIdsManaged } }, { actorId: managerId }],

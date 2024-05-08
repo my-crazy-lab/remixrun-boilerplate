@@ -1,5 +1,9 @@
+import {
+  type ActionFunction,
+  type LoaderFunction,
+  type TypedResponse,
+} from '@remix-run/node';
 import type { TActionPermissionModule } from '~/constants/common';
-import { type Document } from '~/utils/db.server';
 
 export type OptionType = {
   label: string;
@@ -86,16 +90,6 @@ export interface Groups {
   status: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type MustBeAny = any;
-
-export type NonEmptyArray<T> = [T, ...T[]];
-
-export type AddArguments<
-  F extends (...args: MustBeAny[]) => MustBeAny,
-  Args extends MustBeAny[],
-> = (...args: [...Parameters<F>, ...Args]) => ReturnType<F>;
-
 export interface IActionPermission {
   module: TActionPermissionModule;
   actions: Array<{
@@ -107,12 +101,55 @@ export interface IActionPermission {
   }>;
 }
 
-export interface CollectionIdString extends Document {
-  _id: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type MustBeAny = any;
+
+export type NonEmptyArray<T> = [T, ...T[]];
 
 export type ReturnValueIgnorePromise<
   T extends (...args: MustBeAny) => MustBeAny,
 > = ReturnType<T> extends Promise<infer A> ? A : never;
 
 export type CommonFunction<T = MustBeAny, R = MustBeAny> = (arg: T) => R;
+
+export type ActionTypeWithError<T extends ActionFunction> = T extends (
+  args: infer ActionArguments,
+) => Promise<
+  | Promise<infer CallbackReturn>
+  | TypedResponse<{
+      error: string;
+    }>
+>
+  ? CallbackReturn extends TypedResponse<infer JsonArguments>
+    ? (
+        args: ActionArguments,
+      ) => Promise<
+        TypedResponse<
+          [JsonArguments] extends [never]
+            ? { error?: string }
+            : JsonArguments & { error?: string }
+        >
+      >
+    : never
+  : never;
+
+export type LoaderTypeWithError<T extends LoaderFunction> = T extends (
+  args: infer Args,
+) => Promise<
+  | Promise<TypedResponse<infer CallbackReturn>>
+  | TypedResponse<{
+      error: string;
+    }>
+>
+  ? (
+      args: Args,
+    ) => Promise<
+      TypedResponse<
+        [CallbackReturn] extends [never]
+          ? { error?: string }
+          : CallbackReturn extends infer JsonReturn
+            ? JsonReturn & { error?: string }
+            : never
+      >
+    >
+  : never;

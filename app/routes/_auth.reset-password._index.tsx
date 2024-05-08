@@ -7,23 +7,18 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { json } from '@remix-run/node';
 import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hocAction } from '~/hoc/remix';
 import { resetPassword } from '~/services/auth.server';
-
-interface ActionData {
-  isSent?: boolean;
-  error?: string;
-}
+import type { ActionTypeWithError } from '~/types';
 
 export const action = hocAction(async ({ request }) => {
   const formData = await request.formData();
-
   const { email } = Object.fromEntries(formData);
 
   if (email && typeof email === 'string') {
     await resetPassword(email);
-
     return json({ isSent: true });
   } else {
     throw new Error('Email incorrect');
@@ -35,13 +30,15 @@ export async function loader() {
 }
 
 export default function Screen() {
-  const { t } = useTranslation(['authentication']);
+  const { t } = useTranslation('authentication');
   const { state } = useNavigation();
 
-  const actionData = useActionData<ActionData>();
-  if (actionData?.error) {
-    toast({ description: actionData.error });
-  }
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ description: actionData.error });
+    }
+  }, [actionData]);
 
   return (
     <>

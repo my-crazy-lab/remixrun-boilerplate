@@ -58,7 +58,7 @@ export const handle = {
 };
 
 export default function Screen() {
-  const loaderData = useLoaderData<GroupDetail>();
+  const loaderData = useLoaderData<typeof loader>();
 
   return <Outlet context={loaderData} />;
 }

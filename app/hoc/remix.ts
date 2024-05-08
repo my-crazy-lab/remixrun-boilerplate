@@ -5,6 +5,7 @@ import {
   json,
 } from '@remix-run/node';
 import { ACTION_NAME, ERROR } from '~/constants/common';
+import i18next from '~/i18next.server';
 import { newRecordCommonField } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
@@ -30,11 +31,15 @@ export function closureControllerDeeply<T>(defaultValue: T) {
   return { get, set };
 }
 
-export function hocAction(
+type SetInformationActionHistory = (args: {
+  action: string;
+  dataRelated?: MustBeAny;
+}) => void;
+export function hocAction<A>(
   callback: (
     args: ActionFunctionArgs,
-    { setInformationActionHistory }: MustBeAny,
-  ) => MustBeAny,
+    argsHoc: { setInformationActionHistory: SetInformationActionHistory },
+  ) => A,
   permission?: string | Array<string>,
 ) {
   async function action(args: ActionFunctionArgs) {
@@ -103,51 +108,66 @@ export function hocAction(
 
       return actionResult;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('DEBUGGER: ', error);
       if (error instanceof Error) {
         return json({ error: error.message });
       }
-      return json({ error: ERROR.UNKNOWN_ERROR });
+      return json({ error: ERROR.UNKNOWN_ERROR, detail: error });
     }
   }
 
   return action;
 }
 
-export function hocLoader(
+export function hocLoader<A>(
   callback: (
     args: LoaderFunctionArgs,
-    { permissionsPassed }: { permissionsPassed: Array<string> },
-  ) => MustBeAny,
+    argsHoc: { permissionsPassed: Array<string> },
+  ) => A,
   permission: string | Array<string>,
 ) {
   async function loader(args: LoaderFunctionArgs) {
-    const userId = await getUserId({ request: args.request });
-    const userPermissions = await getUserPermissionsIgnoreRoot(userId);
+    try {
+      const userId = await getUserId({ request: args.request });
+      const userPermissions = await getUserPermissionsIgnoreRoot(userId);
 
-    if (
-      typeof permission === 'string' &&
-      !userPermissions.includes(permission)
-    ) {
-      throw new Response(null, res403);
-    }
-
-    if (Array.isArray(permission)) {
-      const permissionsPassed: Array<string> = [];
-      permission.forEach(p => {
-        if (userPermissions.includes(p)) {
-          permissionsPassed.push(p);
-        }
-      });
-      if (!permissionsPassed.length) {
+      if (
+        typeof permission === 'string' &&
+        !userPermissions.includes(permission)
+      ) {
         throw new Response(null, res403);
       }
 
-      return callback(args, { permissionsPassed: permissionsPassed });
-    }
+      if (Array.isArray(permission)) {
+        const permissionsPassed: Array<string> = [];
+        permission.forEach(p => {
+          if (userPermissions.includes(p)) {
+            permissionsPassed.push(p);
+          }
+        });
+        if (!permissionsPassed.length) {
+          throw new Response(null, res403);
+        }
 
-    return callback(args, { permissionsPassed: [permission] });
+        const loaderResult = await callback(args, {
+          permissionsPassed: permissionsPassed,
+        });
+        return loaderResult;
+      }
+
+      const loaderResult = await callback(args, {
+        permissionsPassed: [permission],
+      });
+      return loaderResult;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log('DEBUGGER loader: ', error);
+      if (error instanceof Error) {
+        return json({ error: error.message });
+      }
+      const t = await i18next.getFixedT(args.request, 'user-settings');
+
+      return json({ error: t(ERROR.UNKNOWN_ERROR) });
+    }
   }
 
   return loader;
