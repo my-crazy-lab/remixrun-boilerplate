@@ -49,5 +49,9 @@
   "CHANGE": "Change",
   "USER_PROFILE": "Profile",
   "AVATAR": "Avatar",
-  "THIS_FIELD_IS_REQUIRED": "This field is required"
+  "THIS_FIELD_IS_REQUIRED": "This field is required",
+  "ARE_YOU_SURE_DELETE": "Are you sure you want to delete?",
+  "ARE_YOU_SURE_EDIT_THIS_RECORD": "Are you sure you want to edit this record?",
+  "ARE_YOU_SURE_CREATE_NEW_RECORD": "Are you sure you want to create?",
+  "CREATE": "Create"
 }

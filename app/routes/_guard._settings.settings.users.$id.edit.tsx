@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import { getUserByUserId, updateUser } from '~/services/auth.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
 import { commitSession, getSession } from '~/services/session.server';
@@ -96,6 +97,7 @@ export const loader = hocLoader(
 
 export default function Screen() {
   const { t } = useTranslation('user-settings');
+  const confirm = useConfirm();
 
   const actionData = useActionData<ActionTypeWithError<typeof action>>();
   useEffect(() => {
@@ -118,15 +120,20 @@ export default function Screen() {
     },
   });
 
-  const onSubmit = (data: FormData) => {
+  async function onSubmit(data: FormData) {
     const formData = new FormData();
 
     formData.append('email', data.email);
     formData.append('cities', JSON.stringify(data.cities?.map(c => c.value)));
     formData.append('username', data.username);
 
-    submit(formData, { method: 'post' });
-  };
+    const isConfirm = await confirm({
+      title: t('EDIT'),
+      body: t('ARE_YOU_SURE_EDIT_THIS_RECORD'),
+    });
+
+    if (isConfirm) submit(formData, { method: 'post' });
+  }
 
   return (
     <>

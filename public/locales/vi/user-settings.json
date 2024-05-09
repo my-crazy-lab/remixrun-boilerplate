@@ -50,5 +50,9 @@
   "CHANGE": "Thay đổi",
   "USER_PROFILE": "Thông tin người dùng",
   "AVATAR": "Ảnh đại diện",
-  "THIS_FIELD_IS_REQUIRED": "Trường này là bắt buộc"
+  "THIS_FIELD_IS_REQUIRED": "Trường này là bắt buộc",
+  "ARE_YOU_SURE_DELETE": "Bạn có chắc chắn muốn xoá?",
+  "ARE_YOU_SURE_EDIT_THIS_RECORD": "Bạn có chắc chắn muốn chỉnh sửa?",
+  "ARE_YOU_SURE_CREATE_NEW_RECORD": "Bạn có chắc chắn muốn tạo mới?",
+  "CREATE": "Tạo mới"
 }

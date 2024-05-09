@@ -20,6 +20,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import { getUserSession } from '~/services/helpers.server';
 import {
   getGroupDetail,
@@ -152,6 +153,7 @@ export default function Screen() {
   const navigation = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
+  const confirm = useConfirm();
 
   const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
@@ -168,7 +170,7 @@ export default function Screen() {
     },
   });
 
-  const onSubmit = (data: FormData) => {
+  async function onSubmit(data: FormData) {
     const formData = new FormData();
 
     formData.append('name', data.name);
@@ -182,8 +184,13 @@ export default function Screen() {
       JSON.stringify(data.roleIds.map(role => role.value)),
     );
 
-    submit(formData, { method: 'post' });
-  };
+    const isConfirm = await confirm({
+      title: t('CREATE'),
+      body: t('ARE_YOU_SURE_CREATE_NEW_RECORD'),
+    });
+
+    if (isConfirm) submit(formData, { method: 'post' });
+  }
 
   return (
     <>

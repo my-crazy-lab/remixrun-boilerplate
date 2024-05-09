@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hocAction, hocLoader } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import {
   createGroup,
   getRolesByGroupId,
@@ -122,8 +123,9 @@ export default function Screen() {
     },
   });
   const submit = useSubmit();
+  const confirm = useConfirm();
 
-  const onSubmit = (data: FormData) => {
+  async function onSubmit(data: FormData) {
     const formData = new FormData();
 
     formData.append('name', data.name);
@@ -136,9 +138,13 @@ export default function Screen() {
       'roleIds',
       JSON.stringify(data.roleIds.map(role => role.value)),
     );
+    const isConfirm = await confirm({
+      title: t('CREATE'),
+      body: t('ARE_YOU_SURE_CREATE_NEW_RECORD'),
+    });
 
-    submit(formData, { method: 'post' });
-  };
+    if (isConfirm) submit(formData, { method: 'post' });
+  }
 
   return (
     <>
