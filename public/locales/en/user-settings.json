@@ -48,5 +48,6 @@
   "UPDATE_USER": "Update user",
   "CHANGE": "Change",
   "USER_PROFILE": "Profile",
-  "AVATAR": "Avatar"
+  "AVATAR": "Avatar",
+  "THIS_FIELD_IS_REQUIRED": "This field is required"
 }

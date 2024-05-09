@@ -18,5 +18,6 @@
   "VERIFY": "Xác minh",
   "CREATE_NEW_PASSWORD": "Tạo mật khẩu mới",
   "ENTER_VERIFICATION_CODE": "Nhập mã",
-  "VERIFICATION_CODE_HELPER": "Mở gmail của bạn và nhập mã xác minh"
+  "VERIFICATION_CODE_HELPER": "Mở Email của bạn và nhập mã xác minh.",
+  "CREATE_NEW_PASS_TEXT_HELPER": "Mật khẩu mới của bạn phải khác với mật khẩu đã sử dụng trước đó."
 }

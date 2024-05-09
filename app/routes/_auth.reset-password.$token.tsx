@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import type { LoaderFunctionArgs } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { Form, useActionData, useNavigation } from '@remix-run/react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,9 +14,27 @@ import { hocAction } from '~/hoc/remix';
 import { changePassword, isResetPassExpired } from '~/services/auth.server';
 import { type ActionTypeWithError } from '~/types';
 
+interface FormValidation {
+  newPassword: string;
+  reEnterPassword: string;
+}
+
 export const action = hocAction(async ({ request, params }) => {
   const formData = await request.formData();
   const { newPassword, reEnterPassword } = Object.fromEntries(formData);
+  const errors: Partial<FormValidation> = {};
+
+  if (!newPassword) {
+    errors.newPassword = 'Invalid new password';
+  }
+
+  if (!reEnterPassword) {
+    errors.reEnterPassword = 'Invalid re-enter password';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return json({ errors });
+  }
 
   if (typeof newPassword !== 'string' || typeof reEnterPassword !== 'string') {
     throw new Error(ERROR.UNKNOWN_ERROR);
@@ -56,7 +74,7 @@ export default function Screen() {
       <div className="flex flex-col space-y-1 text-start">
         <Typography variant={'h3'}>{t('CREATE_NEW_PASSWORD')}</Typography>
         <Typography variant="p" affects="removePMargin">
-          Your new password must be different from previous used password.
+          {t('CREATE_NEW_PASS_TEXT_HELPER')}
         </Typography>
       </div>
       <div className="grid gap-6">
@@ -65,18 +83,32 @@ export default function Screen() {
             <div className="grid gap-2">
               <Label>{t('NEW_PASSWORD')}</Label>
               <PasswordInput
-                required
                 name="newPassword"
                 placeholder={t('NEW_PASSWORD')}
               />
+              {actionData?.errors?.newPassword ? (
+                <Typography
+                  className="text-red text-sm"
+                  variant="p"
+                  affects="removePMargin">
+                  {actionData?.errors.newPassword}
+                </Typography>
+              ) : null}
             </div>
             <div className="grid gap-1">
               <Label>{t('CONFIRM_PASSWORD')}</Label>
               <PasswordInput
-                required
                 name="reEnterPassword"
                 placeholder={t('CONFIRM_PASSWORD')}
               />
+              {actionData?.errors?.reEnterPassword ? (
+                <Typography
+                  className="text-red text-sm"
+                  variant="p"
+                  affects="removePMargin">
+                  {actionData?.errors.reEnterPassword}
+                </Typography>
+              ) : null}
             </div>
             <Button>
               {state !== 'idle' ? t('LOADING') : t('RESET_PASSWORD')}

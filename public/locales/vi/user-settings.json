@@ -49,5 +49,6 @@
   "UPDATE_USER": "Cập nhật người dùng",
   "CHANGE": "Thay đổi",
   "USER_PROFILE": "Thông tin người dùng",
-  "AVATAR": "Ảnh đại diện"
+  "AVATAR": "Ảnh đại diện",
+  "THIS_FIELD_IS_REQUIRED": "Trường này là bắt buộc"
 }

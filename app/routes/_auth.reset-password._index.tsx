@@ -11,11 +11,23 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { hocAction } from '~/hoc/remix';
 import { resetPassword } from '~/services/auth.server';
-import type { ActionTypeWithError } from '~/types';
+import { type ActionTypeWithError } from '~/types';
+
+interface FormValidation {
+  email: string;
+}
 
 export const action = hocAction(async ({ request }) => {
   const formData = await request.formData();
   const { email } = Object.fromEntries(formData);
+  const errors: Partial<FormValidation> = {};
+
+  if (!email.toString().includes('@')) {
+    errors.email = 'Invalid email address';
+  }
+  if (Object.keys(errors).length > 0) {
+    return json({ errors });
+  }
 
   if (email && typeof email === 'string') {
     await resetPassword(email);
@@ -57,12 +69,15 @@ export default function Screen() {
               <div className="grid gap-6">
                 <div className="grid gap-2">
                   <Label>{t('EMAIL')}</Label>
-                  <Input
-                    required
-                    name="email"
-                    type="email"
-                    placeholder="name@btaskee.com"
-                  />
+                  <Input name="email" placeholder="name@btaskee.com" />
+                  {actionData?.errors?.email ? (
+                    <Typography
+                      className="text-red text-sm"
+                      variant="p"
+                      affects="removePMargin">
+                      {actionData?.errors.email}
+                    </Typography>
+                  ) : null}
                 </div>
                 <Button>
                   {state !== 'idle' ? <LoadingSpinner /> : t('SEND')}

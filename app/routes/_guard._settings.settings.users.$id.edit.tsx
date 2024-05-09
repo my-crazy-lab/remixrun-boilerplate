@@ -1,6 +1,7 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import { Grid } from '@/components/btaskee/Grid';
 import { GridItem } from '@/components/btaskee/GridItem';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -103,7 +104,7 @@ export default function Screen() {
   const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
 
   const submit = useSubmit();
-  const { register, control, handleSubmit } = useForm<FormData>({
+  const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       email: loaderData?.user?.email,
       cities: loaderData?.user?.cities?.map(city => ({
@@ -137,22 +138,24 @@ export default function Screen() {
             <Label htmlFor="username">{t('USERNAME')}</Label>
             <Input
               {...register('username' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               className="col-span-3"
               placeholder={t('USERNAME')}
             />
+            <ErrorMessageBase errors={formState.errors} name="username" />
           </GridItem>
           <GridItem>
             <Label htmlFor="email">{t('EMAIL')}</Label>
             <Input
               {...register('email' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               type="email"
               className="col-span-3"
               placeholder={t('EMAIL')}
             />
+            <ErrorMessageBase errors={formState.errors} name="email" />
           </GridItem>
           <GridItem>
             <Label>{t('CITIES')}</Label>
@@ -160,6 +163,7 @@ export default function Screen() {
               <Controller
                 control={control}
                 name="cities"
+                rules={{ required: t('THIS_FIELD_IS_REQUIRED') }}
                 render={({ field: { onChange, value } }) => (
                   <MultiSelect
                     selected={value}
@@ -173,6 +177,7 @@ export default function Screen() {
                   />
                 )}
               />
+              <ErrorMessageBase errors={formState.errors} name="cities" />
             </div>
           </GridItem>
         </Grid>

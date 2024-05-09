@@ -1,4 +1,5 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -152,7 +153,7 @@ export default function Screen() {
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
 
-  const { register, control, handleSubmit } = useForm<FormData>({
+  const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       name: group.name,
       description: group.description,
@@ -192,29 +193,31 @@ export default function Screen() {
       </div>
       <form className="gap-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-6 py-4 grid-cols-2">
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label htmlFor="group" className="text-left">
               {t('GROUP_NAME')}
             </Label>
             <Input
               {...register('name' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               placeholder={t('ENTER_GROUP_NAME')}
             />
+            <ErrorMessageBase errors={formState.errors} name="name" />
           </div>
 
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label htmlFor="description">{t('DESCRIPTION')}</Label>
             <Input
               {...register('description' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               placeholder={t('ENTER_DESCRIPTION')}
             />
+            <ErrorMessageBase errors={formState.errors} name="description" />
           </div>
 
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label>{t('USERS')}</Label>
             <Controller
               control={control}
@@ -236,7 +239,7 @@ export default function Screen() {
               )}
             />
           </div>
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label>{t('ROLES')}</Label>
             <Controller
               control={control}

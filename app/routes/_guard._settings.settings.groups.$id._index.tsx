@@ -29,6 +29,7 @@ import { Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
+import ROUTE_NAME from '~/constants/route';
 import { hocAction } from '~/hoc/remix';
 import useGlobalStore from '~/hooks/useGlobalStore';
 import {
@@ -114,7 +115,7 @@ export default function Screen() {
           <Breadcrumbs />
         </div>
         {globalData.permissions?.includes(PERMISSIONS.WRITE_GROUP) ? (
-          <Link to={`/settings/groups/${params.id}/create`}>
+          <Link to={`${ROUTE_NAME.GROUP_SETTING}/${params.id}/create`}>
             <Button className="gap-2">
               <Plus />
               {t('CREATE_NEW_GROUP')}
@@ -124,7 +125,7 @@ export default function Screen() {
       </div>
       <div>
         <Typography className="py-4 font-medium text-base">
-          {t('Children group')}
+          {t('CHILDREN_GROUP')}
         </Typography>
         <div className="grid grid-cols-3 gap-8">
           {outletData.group?.children?.length
@@ -152,7 +153,7 @@ export default function Screen() {
                               align="start"
                               className="w-[160px]">
                               <Link
-                                to={`/settings/groups/${params.id}/edit/${child._id}`}>
+                                to={`${ROUTE_NAME.GROUP_SETTING}/${params.id}/edit/${child._id}`}>
                                 <DropdownMenuItem>{t('EDIT')}</DropdownMenuItem>
                               </Link>
                               <DropdownMenuSeparator />

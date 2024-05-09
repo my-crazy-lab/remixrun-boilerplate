@@ -1,4 +1,5 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import BTaskeeTable from '@/components/btaskee/TableBase';
 import Typography from '@/components/btaskee/Typography';
 import { DataTableColumnHeader } from '@/components/btaskee/table-data/data-table-column-header';
@@ -278,18 +279,19 @@ export default function Screen() {
     }
   }, [actionData]);
 
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
   const [searchParams, setSearchParams] = useSearchParams();
   const globalData = useGlobalStore(state => state);
 
-  const { register, control, reset, handleSubmit } = useForm<FormData>({
-    defaultValues: {
-      email: '',
-      cities: [],
-      username: '',
-      groupIds: [],
-    },
-  });
+  const { register, control, reset, handleSubmit, formState } =
+    useForm<FormData>({
+      defaultValues: {
+        email: '',
+        cities: [],
+        username: '',
+        groupIds: [],
+      },
+    });
 
   const submit = useSubmit();
   const [open, setOpen] = useState<boolean>(false);
@@ -343,37 +345,45 @@ export default function Screen() {
                 <DialogTitle>{t('NEW_USER')}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <Label htmlFor="username" className="text-right">
                     {t('USERNAME')}
                   </Label>
-                  <Input
-                    {...register('username' as const, {
-                      required: true,
-                    })}
-                    className="col-span-3"
-                    placeholder={t('USERNAME')}
-                  />
+                  <div className="col-span-3">
+                    <Input
+                      {...register('username' as const, {
+                        required: t('THIS_FIELD_IS_REQUIRED'),
+                      })}
+                      placeholder={t('USERNAME')}
+                    />
+                    <ErrorMessageBase
+                      errors={formState.errors}
+                      name="username"
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <Label htmlFor="email" className="text-right">
                     {t('EMAIL')}
                   </Label>
-                  <Input
-                    {...register('email' as const, {
-                      required: true,
-                    })}
-                    type="email"
-                    className="col-span-3"
-                    placeholder={t('EMAIL')}
-                  />
+                  <div className="col-span-3">
+                    <Input
+                      {...register('email' as const, {
+                        required: t('THIS_FIELD_IS_REQUIRED'),
+                      })}
+                      type="email"
+                      placeholder={t('EMAIL')}
+                    />
+                    <ErrorMessageBase errors={formState.errors} name="email" />
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <Label className="text-right">{t('CITIES')}</Label>
                   <div className="col-span-3">
                     <Controller
                       control={control}
                       name="cities"
+                      rules={{ required: t('THIS_FIELD_IS_REQUIRED') }}
                       render={({ field: { onChange, value } }) => (
                         <MultiSelect
                           selected={value}
@@ -387,14 +397,16 @@ export default function Screen() {
                         />
                       )}
                     />
+                    <ErrorMessageBase errors={formState.errors} name="cities" />
                   </div>
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <Label className="text-right">{t('GROUPS')}</Label>
                   <div className="col-span-3">
                     <Controller
                       control={control}
                       name="groupIds"
+                      rules={{ required: t('THIS_FIELD_IS_REQUIRED') }}
                       render={({ field: { onChange, value } }) => (
                         <MultiSelect
                           selected={value}
@@ -407,6 +419,10 @@ export default function Screen() {
                           className="w-[360px]"
                         />
                       )}
+                    />
+                    <ErrorMessageBase
+                      errors={formState.errors}
+                      name="groupIds"
                     />
                   </div>
                 </div>

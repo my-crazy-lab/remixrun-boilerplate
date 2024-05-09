@@ -18,5 +18,6 @@
   "VERIFY": "Verify",
   "CREATE_NEW_PASSWORD": "Create new password",
   "ENTER_VERIFICATION_CODE": "Enter code",
-  "VERIFICATION_CODE_HELPER": "Open your gmail and verify your code."
+  "VERIFICATION_CODE_HELPER": "Open your gmail and verify your code.",
+  "CREATE_NEW_PASS_TEXT_HELPER": "Your new password must be different from previous used password."
 }
