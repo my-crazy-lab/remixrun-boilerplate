@@ -946,5 +946,7 @@ export async function getAllChildrenGroupOfUser(userId: string) {
     },
   ]).exec();
 
-  return groups.map(group => group.children);
+  return groups
+    .map(group => group.children)
+    .filter(childrenGroup => !!childrenGroup);
 }

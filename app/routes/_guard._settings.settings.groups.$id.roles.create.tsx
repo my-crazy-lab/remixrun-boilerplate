@@ -20,6 +20,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import { getUserSession } from '~/services/helpers.server';
 import {
   createRole,
@@ -111,6 +112,7 @@ export default function Screen() {
   const { t } = useTranslation('user-settings');
   const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
 
+  const confirm = useConfirm();
   const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       name: '',
@@ -119,7 +121,7 @@ export default function Screen() {
   });
   const submit = useSubmit();
 
-  const onSubmit = (data: FormData) => {
+  async function onSubmit(data: FormData) {
     const formData = new FormData();
     const permissions: string[] = [];
 
@@ -133,8 +135,13 @@ export default function Screen() {
     formData.append('description', data.description);
     formData.append('permissions', JSON.stringify(permissions));
 
-    submit(formData, { method: 'post' });
-  };
+    const isConfirm = await confirm({
+      title: t('EDIT'),
+      body: t('ARE_YOU_SURE_EDIT_THIS_RECORD'),
+    });
+
+    if (isConfirm) submit(formData, { method: 'post' });
+  }
 
   return (
     <>

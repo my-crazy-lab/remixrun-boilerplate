@@ -1,6 +1,7 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import { Grid } from '@/components/btaskee/Grid';
 import { GridItem } from '@/components/btaskee/GridItem';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import { getUserByUserId, updateUser } from '~/services/auth.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
 import { commitSession, getSession } from '~/services/session.server';
@@ -95,6 +97,7 @@ export const loader = hocLoader(
 
 export default function Screen() {
   const { t } = useTranslation('user-settings');
+  const confirm = useConfirm();
 
   const actionData = useActionData<ActionTypeWithError<typeof action>>();
   useEffect(() => {
@@ -106,7 +109,7 @@ export default function Screen() {
   const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
 
   const submit = useSubmit();
-  const { register, control, handleSubmit } = useForm<FormData>({
+  const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       email: loaderData?.user?.email,
       cities: loaderData?.user?.cities?.map(city => ({
@@ -117,15 +120,20 @@ export default function Screen() {
     },
   });
 
-  const onSubmit = (data: FormData) => {
+  async function onSubmit(data: FormData) {
     const formData = new FormData();
 
     formData.append('email', data.email);
     formData.append('cities', JSON.stringify(data.cities?.map(c => c.value)));
     formData.append('username', data.username);
 
-    submit(formData, { method: 'post' });
-  };
+    const isConfirm = await confirm({
+      title: t('EDIT'),
+      body: t('ARE_YOU_SURE_EDIT_THIS_RECORD'),
+    });
+
+    if (isConfirm) submit(formData, { method: 'post' });
+  }
 
   return (
     <>
@@ -140,22 +148,24 @@ export default function Screen() {
             <Label htmlFor="username">{t('USERNAME')}</Label>
             <Input
               {...register('username' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               className="col-span-3"
               placeholder={t('USERNAME')}
             />
+            <ErrorMessageBase errors={formState.errors} name="username" />
           </GridItem>
           <GridItem>
             <Label htmlFor="email">{t('EMAIL')}</Label>
             <Input
               {...register('email' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               type="email"
               className="col-span-3"
               placeholder={t('EMAIL')}
             />
+            <ErrorMessageBase errors={formState.errors} name="email" />
           </GridItem>
           <GridItem>
             <Label>{t('CITIES')}</Label>
@@ -163,6 +173,7 @@ export default function Screen() {
               <Controller
                 control={control}
                 name="cities"
+                rules={{ required: t('THIS_FIELD_IS_REQUIRED') }}
                 render={({ field: { onChange, value } }) => (
                   <MultiSelect
                     selected={value}
@@ -176,6 +187,7 @@ export default function Screen() {
                   />
                 )}
               />
+              <ErrorMessageBase errors={formState.errors} name="cities" />
             </div>
           </GridItem>
         </Grid>

@@ -20,7 +20,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   isTesting = false,
   statusClasses = DefaultStatusClasses,
 }) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
   const statusClass = statusClasses[status] || statusClasses.DEFAULT;
 
   return (

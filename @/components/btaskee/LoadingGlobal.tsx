@@ -1,4 +1,5 @@
-import styled, { keyframes } from 'styled-components';
+import { useNavigation } from '@remix-run/react';
+import { keyframes, styled } from 'styled-components';
 
 const rotate = (y: number) => keyframes`
   0% {
@@ -68,14 +69,18 @@ export const LoadingLIThird = styled.li`
   }
 `;
 
-const LoadingGlobal = ({ backgroundColor = 'transparent' }) => (
-  <LoadingGlobalContainer style={{ backgroundColor }}>
-    <LoadingUL>
-      <LoadingLI />
-      <LoadingLISecond />
-      <LoadingLIThird />
-    </LoadingUL>
-  </LoadingGlobalContainer>
-);
+const LoadingGlobal = ({ backgroundColor = 'transparent' }) => {
+  const navigation = useNavigation();
+
+  return navigation.state !== 'idle' ? (
+    <LoadingGlobalContainer style={{ backgroundColor }}>
+      <LoadingUL>
+        <LoadingLI />
+        <LoadingLISecond />
+        <LoadingLIThird />
+      </LoadingUL>
+    </LoadingGlobalContainer>
+  ) : null;
+};
 
 export default LoadingGlobal;

@@ -1,4 +1,5 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import { getUserSession } from '~/services/helpers.server';
 import {
   getGroupDetail,
@@ -151,8 +153,9 @@ export default function Screen() {
   const navigation = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
+  const confirm = useConfirm();
 
-  const { register, control, handleSubmit } = useForm<FormData>({
+  const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       name: group.name,
       description: group.description,
@@ -167,7 +170,7 @@ export default function Screen() {
     },
   });
 
-  const onSubmit = (data: FormData) => {
+  async function onSubmit(data: FormData) {
     const formData = new FormData();
 
     formData.append('name', data.name);
@@ -181,8 +184,13 @@ export default function Screen() {
       JSON.stringify(data.roleIds.map(role => role.value)),
     );
 
-    submit(formData, { method: 'post' });
-  };
+    const isConfirm = await confirm({
+      title: t('CREATE'),
+      body: t('ARE_YOU_SURE_CREATE_NEW_RECORD'),
+    });
+
+    if (isConfirm) submit(formData, { method: 'post' });
+  }
 
   return (
     <>
@@ -192,29 +200,31 @@ export default function Screen() {
       </div>
       <form className="gap-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-6 py-4 grid-cols-2">
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label htmlFor="group" className="text-left">
               {t('GROUP_NAME')}
             </Label>
             <Input
               {...register('name' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               placeholder={t('ENTER_GROUP_NAME')}
             />
+            <ErrorMessageBase errors={formState.errors} name="name" />
           </div>
 
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label htmlFor="description">{t('DESCRIPTION')}</Label>
             <Input
               {...register('description' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               placeholder={t('ENTER_DESCRIPTION')}
             />
+            <ErrorMessageBase errors={formState.errors} name="description" />
           </div>
 
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label>{t('USERS')}</Label>
             <Controller
               control={control}
@@ -236,7 +246,7 @@ export default function Screen() {
               )}
             />
           </div>
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label>{t('ROLES')}</Label>
             <Controller
               control={control}

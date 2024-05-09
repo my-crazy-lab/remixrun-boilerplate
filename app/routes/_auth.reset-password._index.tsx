@@ -1,28 +1,32 @@
 import { Grid } from '@/components/btaskee/Grid';
 import { LoadingSpinner } from '@/components/btaskee/LoadingSpinner';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
 import { json } from '@remix-run/node';
-import { Form, Link, useActionData, useNavigation } from '@remix-run/react';
+import {
+  Link,
+  useActionData,
+  useNavigation,
+  useSubmit,
+} from '@remix-run/react';
 import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { hocAction } from '~/hoc/remix';
 import { resetPassword } from '~/services/auth.server';
-import type { ActionTypeWithError } from '~/types';
+import { type ActionTypeWithError } from '~/types';
 
 export const action = hocAction(async ({ request }) => {
-  const formData = await request.formData();
-  const { email } = Object.fromEntries(formData);
+  const formData = await request.clone().formData();
+  const email = formData.get('email')?.toString() || '';
 
-  if (email && typeof email === 'string') {
-    await resetPassword(email);
-    return json({ isSent: true });
-  } else {
-    throw new Error('Email incorrect');
-  }
+  await resetPassword(email);
+
+  return json({ isSent: true });
 });
 
 export async function loader() {
@@ -32,6 +36,7 @@ export async function loader() {
 export default function Screen() {
   const { t } = useTranslation('authentication');
   const { state } = useNavigation();
+  const submit = useSubmit();
 
   const actionData = useActionData<ActionTypeWithError<typeof action>>();
   useEffect(() => {
@@ -39,6 +44,16 @@ export default function Screen() {
       toast({ description: actionData.error });
     }
   }, [actionData]);
+
+  const { handleSubmit, formState, register } = useForm<{ email: string }>();
+
+  const onSubmit = (data: { email: string }) => {
+    const formData = new FormData();
+
+    formData.append('email', data.email);
+
+    submit(formData, { method: 'post' });
+  };
 
   return (
     <>
@@ -53,22 +68,23 @@ export default function Screen() {
           t('CHECK_YOUR_EMAIL')
         ) : (
           <Grid>
-            <Form method="post">
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="grid gap-6">
                 <div className="grid gap-2">
                   <Label>{t('EMAIL')}</Label>
                   <Input
-                    required
-                    name="email"
-                    type="email"
+                    {...register('email' as const, {
+                      required: t('THIS_FIELD_IS_REQUIRED'),
+                    })}
                     placeholder="name@btaskee.com"
                   />
+                  <ErrorMessageBase name="email" errors={formState.errors} />
                 </div>
                 <Button>
                   {state !== 'idle' ? <LoadingSpinner /> : t('SEND')}
                 </Button>
               </div>
-            </Form>
+            </form>
             <Link to="/sign-in">
               <Button className="w-full" variant="outline">
                 {t('BACK_TO_SIGN_IN')}
