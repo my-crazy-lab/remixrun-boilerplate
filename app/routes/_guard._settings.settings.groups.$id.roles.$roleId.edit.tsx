@@ -102,7 +102,7 @@ export const action = hocAction(
 );
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
 
   const actionData = useActionData<ActionTypeWithError<typeof action>>();
   useEffect(() => {

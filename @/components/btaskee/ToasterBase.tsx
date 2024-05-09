@@ -19,7 +19,7 @@ import { Grid } from './Grid';
 
 export function Toaster() {
   const { toasts } = useToast();
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
 
   function renderContentBasedOnVariant(variant: any, description: any) {
     switch (variant) {

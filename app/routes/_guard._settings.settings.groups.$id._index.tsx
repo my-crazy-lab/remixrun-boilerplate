@@ -83,7 +83,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
 
   const actionData = useActionData<ActionTypeWithError<typeof action>>();
   const outletData = useOutletContext<GroupDetail>();

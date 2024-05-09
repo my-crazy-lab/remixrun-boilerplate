@@ -68,7 +68,7 @@ export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
   const navigate = useNavigate();
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
 
   const error: MustBeAny = useRouteError();
 
