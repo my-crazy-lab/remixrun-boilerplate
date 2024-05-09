@@ -26,6 +26,7 @@ import { HomeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useChangeLanguage } from 'remix-i18next/react';
 
+import LoadingGlobal from '@/components/btaskee/LoadingGlobal';
 import { hocAction } from './hoc/remix';
 import { getUserId, getUserSession } from './services/helpers.server';
 import { setUserLanguage } from './services/settings.server';
@@ -60,6 +61,10 @@ export const links: LinksFunction = () => {
     {
       rel: 'stylesheet',
       href: styles,
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
     },
   ];
 };
@@ -151,6 +156,7 @@ export default function App() {
         <Links />
       </head>
       <body className="font-sans">
+        <LoadingGlobal />
         <AlertDialogProvider>
           <Outlet />
         </AlertDialogProvider>
