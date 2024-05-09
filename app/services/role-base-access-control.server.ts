@@ -741,6 +741,19 @@ export async function deleteGroup({ groupId }: { groupId: string }) {
     },
   );
 
+  // update nearestChildren
+  await GroupsModel.updateOne(
+    {
+      status: statusOriginal.ACTIVE,
+      nearestChildren: groupId,
+    },
+    {
+      $pull: {
+        nearestChildren: groupId,
+      },
+    },
+  );
+
   return group?.name || '';
 }
 
