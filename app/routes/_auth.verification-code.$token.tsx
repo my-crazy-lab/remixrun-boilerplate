@@ -1,11 +1,13 @@
 import { LoadingSpinner } from '@/components/btaskee/LoadingSpinner';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { Form, useNavigation } from '@remix-run/react';
+import { useNavigation, useSubmit } from '@remix-run/react';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
 import {
@@ -46,6 +48,17 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 export default function Screen() {
   const { t } = useTranslation('authentication');
   const navigation = useNavigation();
+  const submit = useSubmit();
+  const { handleSubmit, formState, register } = useForm<{
+    code: string;
+  }>();
+
+  const onSubmit = (data: { code: string }) => {
+    const formData = new FormData();
+    formData.append('code', data.code);
+
+    submit(formData, { method: 'post' });
+  };
 
   return (
     <>
@@ -56,21 +69,24 @@ export default function Screen() {
         </Typography>
       </div>
       <div className="grid gap-6">
-        <Form method="post">
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="code">{t('VERIFICATION_CODE')}</Label>
               <Input
-                name="code"
-                required
+                {...register('code' as const, {
+                  required: t('THIS_FIELD_IS_REQUIRED'),
+                })}
                 placeholder={t('ENTER_VERIFICATION_CODE')}
               />
+              <ErrorMessageBase errors={formState.errors} name="code" />
             </div>
+
             <Button>
               {navigation.state !== 'idle' ? <LoadingSpinner /> : t('VERIFY')}
             </Button>
           </div>
-        </Form>
+        </form>
       </div>
     </>
   );

@@ -72,7 +72,7 @@ export default function Screen() {
   if (!storeRef.current) {
     storeRef.current = createGlobalStore(user);
   }
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
 
   const { i18n } = useTranslation();
   const submit = useSubmit();

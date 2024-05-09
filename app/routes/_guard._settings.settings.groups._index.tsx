@@ -66,7 +66,7 @@ export default function Screen() {
                     </div>
                     <div>
                       <Typography className="text-gray-400" variant="p">
-                        {t('Children group')}
+                        {t('CHILDREN_GROUP')}
                       </Typography>
                       <Typography className="text-primary" variant="h4">
                         {group.children?.length}

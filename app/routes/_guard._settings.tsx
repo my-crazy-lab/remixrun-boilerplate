@@ -17,7 +17,7 @@ export const handle = {
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
   const { pathname } = useLocation();
 
   // not have permission field mean not require permission

@@ -1,4 +1,5 @@
 import { Grid } from '@/components/btaskee/Grid';
+import LoadingGlobal from '@/components/btaskee/LoadingGlobal';
 import { Toaster } from '@/components/btaskee/ToasterBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,10 @@ export const links: LinksFunction = () => {
       rel: 'stylesheet',
       href: styles,
     },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+    },
   ];
 };
 
@@ -67,7 +72,7 @@ export const handle = { i18n: 'common' };
 
 export function ErrorBoundary() {
   const navigate = useNavigate();
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
 
   const error = useRouteError() as ErrorResponse;
 
@@ -154,6 +159,7 @@ export default function App() {
         <Links />
       </head>
       <body className="font-sans">
+        <LoadingGlobal />
         <AlertDialogProvider>
           <Outlet />
         </AlertDialogProvider>
