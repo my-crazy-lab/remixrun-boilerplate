@@ -46,7 +46,7 @@ export default function Screen() {
     [],
   );
 
-  const globalData = useGlobalStore(state => state);
+  const permissions = useGlobalStore(state => state.permissions);
 
   return (
     <div className="space-y-6 md:block">
@@ -67,8 +67,7 @@ export default function Screen() {
               'flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1',
             )}>
             {navigation.map(item =>
-              !item.permission ||
-              globalData.permissions.includes(item.permission) ? (
+              !item.permission || permissions.includes(item.permission) ? (
                 <Link
                   key={item.href}
                   to={item.href}

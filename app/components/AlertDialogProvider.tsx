@@ -9,35 +9,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import React from 'react';
-
-export const AlertDialogContext = React.createContext<
-  <T extends AlertAction>(
-    params: T,
-  ) => Promise<T['type'] extends 'alert' | 'confirm' ? boolean : null | string>
->(() => null!);
-
-export type AlertAction =
-  | { type: 'alert'; title: string; body?: string; cancelButton?: string }
-  | {
-      type: 'confirm';
-      title: string;
-      body?: string | React.ReactNode;
-      cancelButton?: string;
-      actionButton?: string;
-    }
-  | {
-      type: 'prompt';
-      title: string;
-      body?: string | React.ReactNode;
-      cancelButton?: string;
-      actionButton?: string;
-      defaultValue?: string;
-      inputProps?: React.DetailedHTMLProps<
-        React.InputHTMLAttributes<HTMLInputElement>,
-        HTMLInputElement
-      >;
-    }
-  | { type: 'close' };
+import {
+  type AlertAction,
+  AlertDialogContext,
+} from '~/context/dialog-confirmation';
+import { type MustBeAny } from '~/types';
 
 interface AlertDialogState {
   open: boolean;
@@ -55,7 +31,7 @@ interface AlertDialogState {
   >;
 }
 
-export function alertDialogReducer(
+function alertDialogReducer(
   state: AlertDialogState,
   action: AlertAction,
 ): AlertDialogState {
@@ -94,7 +70,7 @@ export function AlertDialogProvider({
     actionButton: 'Continue',
   });
 
-  const resolveRef = React.useRef<(tf: any) => void>();
+  const resolveRef = React.useRef<(tf: MustBeAny) => void>();
 
   function close() {
     dispatch({ type: 'close' });
@@ -157,38 +133,4 @@ export function AlertDialogProvider({
       </AlertDialog>
     </AlertDialogContext.Provider>
   );
-}
-type Params<T extends 'alert' | 'confirm' | 'prompt'> =
-  | Omit<Extract<AlertAction, { type: T }>, 'type'>
-  | string;
-
-export function useConfirm() {
-  const dialog = React.useContext(AlertDialogContext);
-
-  return React.useCallback(
-    (params: Params<'confirm'>) => {
-      return dialog({
-        ...(typeof params === 'string' ? { title: params } : params),
-        type: 'confirm',
-      });
-    },
-    [dialog],
-  );
-}
-export function usePrompt() {
-  const dialog = React.useContext(AlertDialogContext);
-
-  return (params: Params<'prompt'>) =>
-    dialog({
-      ...(typeof params === 'string' ? { title: params } : params),
-      type: 'prompt',
-    });
-}
-export function useAlert() {
-  const dialog = React.useContext(AlertDialogContext);
-  return (params: Params<'alert'>) =>
-    dialog({
-      ...(typeof params === 'string' ? { title: params } : params),
-      type: 'alert',
-    });
 }

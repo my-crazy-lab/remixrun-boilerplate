@@ -3,7 +3,6 @@ import {
   type LoaderFunction,
   type TypedResponse,
 } from '@remix-run/node';
-import type { TActionPermissionModule } from '~/constants/common';
 
 export type OptionType = {
   label: string;
@@ -54,8 +53,6 @@ export interface Users {
   avatarUrl?: string;
 }
 
-export type IUserType = 'ACTIVE' | 'INACTIVE';
-
 export interface Permissions {
   _id: string;
   name: string;
@@ -88,17 +85,6 @@ export interface Groups {
   createdAt: Date;
   updatedAt?: Date;
   status: string;
-}
-
-export interface IActionPermission {
-  module: TActionPermissionModule;
-  actions: Array<{
-    _id: string;
-    name: string;
-    description: string;
-    module: TActionPermissionModule;
-    children?: Array<{ _id: string }>;
-  }>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

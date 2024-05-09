@@ -1,4 +1,3 @@
-import { AlertDialogProvider } from '@/components/btaskee/AlertDialogProvider';
 import { Grid } from '@/components/btaskee/Grid';
 import LoadingGlobal from '@/components/btaskee/LoadingGlobal';
 import { Toaster } from '@/components/btaskee/ToasterBase';
@@ -26,6 +25,7 @@ import {
 import { HomeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useChangeLanguage } from 'remix-i18next/react';
+import { AlertDialogProvider } from '~/components/AlertDialogProvider';
 
 import { hocAction } from './hoc/remix';
 import { getUserId, getUserSession } from './services/helpers.server';

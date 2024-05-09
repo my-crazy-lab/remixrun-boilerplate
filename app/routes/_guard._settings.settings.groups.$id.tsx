@@ -22,7 +22,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     groupId,
   });
 
-  const group = await hoc404(async () =>
+  const group = await hoc404(() =>
     getGroupDetail<GroupDetail>({
       isSuperUser,
       isParent,

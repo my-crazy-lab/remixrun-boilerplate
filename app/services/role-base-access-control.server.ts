@@ -56,7 +56,7 @@ export async function getUserPermissionsIgnoreRoot(userId: string) {
 
   if (permissions.includes(PERMISSIONS.ROOT)) {
     const allPermissions = await getAllPermissionsIgnoreRoot();
-    return allPermissions.map(p => p._id);
+    return allPermissions.map(permission => permission._id);
   }
 
   return permissions;
@@ -92,7 +92,7 @@ export async function getUserPermissions(userId: string) {
 
   if (permissions.includes(PERMISSIONS.ROOT)) {
     const allPermissions = await getAllPermissions();
-    return allPermissions.map(p => p._id);
+    return allPermissions.map(permission => permission._id);
   }
 
   return permissions;

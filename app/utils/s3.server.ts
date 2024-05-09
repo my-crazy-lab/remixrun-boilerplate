@@ -7,7 +7,6 @@ import { PassThrough } from 'stream';
 import { dotenv } from '~/services/dotenv.server';
 
 export const s3UploadHandler = async ({
-  name,
   filename,
   data,
 }: UploadHandlerPart) => {
