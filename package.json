@@ -13,7 +13,7 @@
     "cspell": "cspell --config .spellcheckerrc.json \"**\"",
     "prepare": "husky",
     "test:local": "jest --config=./jest.config.dev.ts --detectOpenHandles",
-    "test:ci": "jest --config=./jest.config.ci.ts --detectOpenHandles"
+    "test:ci": "jest --config=./jest.config.ci.ts"
   },
   "dependencies": {
     "@hookform/error-message": "^2.0.1",
