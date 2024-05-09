@@ -173,6 +173,11 @@ export function hocLoader<A>(
   return loader;
 }
 
+export interface ErrorResponse {
+  status: number;
+  statusText: string;
+}
+
 export const res500 = {
   status: 500,
   statusText: 'INTERNAL_SERVER_ERROR',

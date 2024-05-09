@@ -1,27 +1,6 @@
-import getLodash from 'lodash/get';
-import type { MustBeAny } from '~/types';
-
 import { dotenv } from './dotenv.server';
 
-const throwError = (error: MustBeAny) => {
-  throw new Error(
-    getLodash(
-      error,
-      // `error.errorText.${getMeteorUser().profile.language}`,
-      error?.message ||
-        error.response?.data?.error?.message ||
-        error?.response?.data?.message ||
-        error.response?.content ||
-        error.code ||
-        error?.error?.message ||
-        error?.error?.code ||
-        error,
-    ),
-    getLodash(error, 'data', error?.error?.data || ''),
-  );
-};
-
-const fetchAPI = async (url: string, params: MustBeAny, isoCode: string) => {
+async function fetchAPI<T>(url: string, params: T, isoCode: string) {
   const data = await fetch(`${dotenv.GO_REST_API_URI}/${url}`, {
     method: 'POST',
     headers: {
@@ -47,9 +26,23 @@ const fetchAPI = async (url: string, params: MustBeAny, isoCode: string) => {
       }
     })
     .then(response => Promise.resolve(response))
-    .catch(error => throwError(error));
+    .catch(error => {
+      throw new Error(
+        error.error?.message ||
+          error.error?.response?.data?.error?.message ||
+          error.error?.response?.data?.message ||
+          error.error?.response?.content ||
+          error.error?.code ||
+          error.error?.error?.message ||
+          error.error?.error?.code ||
+          error.error ||
+          error.data ||
+          error.error?.data ||
+          '',
+      );
+    });
 
   return data;
-};
+}
 
-export default fetchAPI;
+export { fetchAPI };
