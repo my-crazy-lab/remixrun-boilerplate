@@ -7,11 +7,10 @@
     "build": "remix build",
     "dev": "remix dev -c \"node server.mjs\"",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve build",
+    "deploy": "remix-serve ./build/index.js",
     "type:check": "tsc",
     "prettier": "prettier --write .",
     "cspell": "cspell --config .spellcheckerrc.json \"**\"",
-    "deploy": "cross-env NODE_ENV=production node server.mjs",
     "prepare": "husky",
     "test:local": "jest --config=./jest.config.dev.ts --detectOpenHandles",
     "test:ci": "jest --config=./jest.config.ci.ts --detectOpenHandles"
