@@ -1,4 +1,3 @@
-import { useConfirm } from '@/components/btaskee/AlertDialogProvider';
 import AvatarUpload from '@/components/btaskee/AvatarUpload';
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import { Grid } from '@/components/btaskee/Grid';
@@ -29,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { ACTION_NAME } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
 import { hocAction } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import { getUserId } from '~/services/helpers.server';
 import { changeUserAvatar, getUserProfile } from '~/services/settings.server';
 import type { ActionTypeWithError } from '~/types';

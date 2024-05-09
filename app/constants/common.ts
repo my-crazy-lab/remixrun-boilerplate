@@ -21,14 +21,6 @@ export const ACTION_NAME = {
   UPDATE_USER_AVATAR: 'Update user avatar',
 };
 
-export enum IActionPermissionModule {
-  task = 'task',
-  tasker = 'tasker',
-  special = 'special',
-}
-
-export type TActionPermissionModule = keyof typeof IActionPermissionModule;
-
 export const PIE_CHART_COLOR = [
   '#0088FE',
   '#00C49F',

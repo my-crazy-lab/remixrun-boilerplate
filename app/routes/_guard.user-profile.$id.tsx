@@ -10,6 +10,7 @@ import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
+import { hoc404 } from '~/hoc/remix';
 import { getUserProfile } from '~/services/settings.server';
 import type { Users } from '~/types';
 
@@ -24,17 +25,19 @@ export const handle = {
       />
     );
   },
+  i18n: 'user-settings',
 };
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const userId = params.id || '';
-  const userProfile = await getUserProfile(userId);
+
+  const userProfile = await hoc404(() => getUserProfile(userId));
 
   return json({ userProfile });
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
   const loaderData = useLoaderData<typeof loader>();
 
   return (

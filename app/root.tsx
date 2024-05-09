@@ -1,4 +1,3 @@
-import { AlertDialogProvider } from '@/components/btaskee/AlertDialogProvider';
 import { Grid } from '@/components/btaskee/Grid';
 import { Toaster } from '@/components/btaskee/ToasterBase';
 import Typography from '@/components/btaskee/Typography';
@@ -25,12 +24,12 @@ import {
 import { HomeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useChangeLanguage } from 'remix-i18next/react';
+import { AlertDialogProvider } from '~/components/AlertDialogProvider';
+import { type ErrorResponse, hocAction } from '~/hoc/remix';
 
-import { hocAction } from './hoc/remix';
 import { getUserId, getUserSession } from './services/helpers.server';
 import { setUserLanguage } from './services/settings.server';
 import styles from './tailwind.css';
-import type { MustBeAny } from './types';
 
 export const action = hocAction(async ({ request }: ActionFunctionArgs) => {
   const formData = await request.clone().formData();
@@ -70,7 +69,11 @@ export function ErrorBoundary() {
   const navigate = useNavigate();
   const { t } = useTranslation(['common']);
 
-  const error: MustBeAny = useRouteError();
+  const error = useRouteError() as ErrorResponse;
+
+  if (!error || !error.status || !error.statusText) {
+    return null;
+  }
 
   function renderContentBasedOnErrorStatus(status: number) {
     switch (status) {

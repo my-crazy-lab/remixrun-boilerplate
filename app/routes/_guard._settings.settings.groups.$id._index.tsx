@@ -104,7 +104,7 @@ export default function Screen() {
   }, [actionData]);
 
   const params = useParams();
-  const globalData = useGlobalStore(state => state);
+  const permissions = useGlobalStore(state => state.permissions);
 
   return (
     <>
@@ -113,7 +113,7 @@ export default function Screen() {
           <Typography variant="h3">{outletData.group?.name}</Typography>
           <Breadcrumbs />
         </div>
-        {globalData.permissions?.includes(PERMISSIONS.WRITE_GROUP) ? (
+        {permissions?.includes(PERMISSIONS.WRITE_GROUP) ? (
           <Link to={`/settings/groups/${params.id}/create`}>
             <Button className="gap-2">
               <Plus />
@@ -136,9 +136,7 @@ export default function Screen() {
                         <Typography variant="h4" affects="removePMargin">
                           {child.name}
                         </Typography>
-                        {globalData.permissions?.includes(
-                          PERMISSIONS.WRITE_GROUP,
-                        ) ? (
+                        {permissions?.includes(PERMISSIONS.WRITE_GROUP) ? (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -235,7 +233,7 @@ export default function Screen() {
               </Typography>
               <Separator />
             </div>
-            {globalData.permissions?.includes(PERMISSIONS.WRITE_ROLE) ? (
+            {permissions?.includes(PERMISSIONS.WRITE_ROLE) ? (
               <Link to={`/settings/groups/${params.id}/roles/create`}>
                 <Button className="gap-2">
                   <Plus />
@@ -264,9 +262,7 @@ export default function Screen() {
                         <span className="sr-only">Open menu</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    {globalData.permissions?.includes(
-                      PERMISSIONS.WRITE_ROLE,
-                    ) ? (
+                    {permissions?.includes(PERMISSIONS.WRITE_ROLE) ? (
                       <DropdownMenuContent align="center" className="w-[160px]">
                         <Link
                           to={`/settings/groups/${params.id}/roles/${role._id}/edit`}>

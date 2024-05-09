@@ -31,8 +31,11 @@ import { UserCircle } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
-import type { GlobalStore } from '~/hooks/useGlobalStore';
-import { GlobalContext, createGlobalStore } from '~/hooks/useGlobalStore';
+import {
+  GlobalContext,
+  type GlobalStore,
+  createGlobalStore,
+} from '~/context/global-store';
 import { authenticator } from '~/services/auth.server';
 import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';

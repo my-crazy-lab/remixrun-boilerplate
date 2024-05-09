@@ -280,7 +280,7 @@ export default function Screen() {
 
   const { t } = useTranslation(['user-settings']);
   const [searchParams, setSearchParams] = useSearchParams();
-  const globalData = useGlobalStore(state => state);
+  const permissions = useGlobalStore(state => state.permissions);
 
   const { register, control, reset, handleSubmit } = useForm<FormData>({
     defaultValues: {
@@ -329,7 +329,7 @@ export default function Screen() {
             }
             setOpen(open);
           }}>
-          {globalData.permissions?.includes(PERMISSIONS.MANAGER) ? (
+          {permissions?.includes(PERMISSIONS.MANAGER) ? (
             <DialogTrigger asChild>
               <Button className="gap-2" variant="default">
                 <Plus />

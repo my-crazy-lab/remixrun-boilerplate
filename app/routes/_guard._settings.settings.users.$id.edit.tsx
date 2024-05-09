@@ -14,7 +14,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
-import { hocAction, hocLoader } from '~/hoc/remix';
+import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
 import { getUserByUserId, updateUser } from '~/services/auth.server';
 import { getCities, getUserSession } from '~/services/helpers.server';
 import { commitSession, getSession } from '~/services/session.server';
@@ -36,6 +36,7 @@ export const handle = {
       />
     );
   },
+  i18n: 'user-settings',
 };
 interface FormData {
   email: string;
@@ -79,7 +80,9 @@ export const loader = hocLoader(
     const { isoCode } = await getUserSession({ headers: request.headers });
 
     const cities = await getCities(isoCode);
-    const user = await getUserByUserId({ userId: params.id || '' });
+    const user = await hoc404(() =>
+      getUserByUserId({ userId: params.id || '' }),
+    );
 
     if (!user || !user?.email) {
       throw new Error('USER_NOT_FOUND');
