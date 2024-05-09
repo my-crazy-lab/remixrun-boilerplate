@@ -168,14 +168,8 @@ describe('Setting page', () => {
   });
 
   describe('createNewUser', () => {
-    const mockUsername = 'thienduy.cao';
-    afterEach(async () => {
-      await UsersModel.deleteOne({
-        username: mockUsername,
-      });
-    });
-
-    it('should create new user successfully', async () => {
+    test('should create new user successfully', async () => {
+      const mockUsername = 'thienduy.cao';
       const mockParams = {
         username: mockUsername,
         email: 'thienduy.cao@btaskee.com',
@@ -195,6 +189,10 @@ describe('Setting page', () => {
 
       groups.forEach(group => {
         expect(group.userIds).toContain(result._id);
+      });
+
+      await UsersModel.deleteOne({
+        username: mockUsername,
       });
     });
   });
