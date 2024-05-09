@@ -1,5 +1,6 @@
 import { AlertDialogProvider } from '@/components/btaskee/AlertDialogProvider';
 import { Grid } from '@/components/btaskee/Grid';
+import LoadingGlobal from '@/components/btaskee/LoadingGlobal';
 import { Toaster } from '@/components/btaskee/ToasterBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,6 @@ import { HomeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useChangeLanguage } from 'remix-i18next/react';
 
-import LoadingGlobal from '@/components/btaskee/LoadingGlobal';
 import { hocAction } from './hoc/remix';
 import { getUserId, getUserSession } from './services/helpers.server';
 import { setUserLanguage } from './services/settings.server';
