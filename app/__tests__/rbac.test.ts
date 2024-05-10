@@ -8,16 +8,23 @@ import {
   deleteGroup,
   deleteRole,
   deleteUser,
+  getAllChildrenGroupOfUser,
   getAllPermissions,
   getGroupDetail,
   getGroupPermissions,
   getGroupsOfUser,
+  getPermissionsCreatedByGroupId,
   getRoleDetail,
+  getRolesByGroupId,
   getUserPermissions,
+  getUserPermissionsIgnoreRoot,
   isParentOfGroup,
   searchUser,
   updateGroups,
   updateRole,
+  updateUser,
+  verifyManager,
+  verifySuperUser,
   verifyUserInGroup,
 } from '~/services/role-base-access-control.server';
 import {
@@ -109,7 +116,28 @@ describe('Role base access control', () => {
     },
   ];
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    await UsersModel.create({
+      _id: userId,
+      email: 'test1@gmail.com',
+      username: 'Test 1',
+      createdAt: new Date(),
+      status: 'ACTIVE',
+      cities: ['Hồ Chí Minh'],
+      isoCode: 'VN',
+    });
+    await GroupsModel.create({
+      _id: groupId,
+      userIds: [groupId],
+      roleIds: [groupId],
+      name: 'groupName1',
+      description: 'groupName1 desc',
+      genealogy: ['genealogy1'],
+      hierarchy: 2,
+      createdAt: new Date('2023-12-01'),
+      status: 'ACTIVE',
+      isoCode: 'VN',
+    });
     await PermissionsModel.insertMany(mockPermission);
     await UsersModel.insertMany([
       {
@@ -210,7 +238,7 @@ describe('Role base access control', () => {
         roleAssignedIds: [rootId],
         name: 'root',
         description: 'root group desc',
-        hierarchy: 2,
+        hierarchy: 1,
         createdAt: new Date(),
         status: 'ACTIVE',
       },
@@ -218,6 +246,7 @@ describe('Role base access control', () => {
         _id: managerId,
         userIds: [managerId],
         roleIds: [managerId],
+        roleAssignedIds: [managerId],
         name: 'manager group',
         description: 'manager group desc',
         genealogy: ['genealogy1'],
@@ -232,7 +261,7 @@ describe('Role base access control', () => {
         name: 'leader',
         description: 'leader group desc',
         genealogy: ['genealogy1'],
-        hierarchy: 2,
+        hierarchy: 3,
         createdAt: new Date('2024-01-01'),
         status: 'ACTIVE',
       },
@@ -243,43 +272,16 @@ describe('Role base access control', () => {
         name: 'employee',
         description: 'employee group desc',
         genealogy: ['genealogy1'],
-        hierarchy: 2,
+        hierarchy: 4,
         createdAt: new Date('2024-02-05'),
         status: 'ACTIVE',
       },
     ]);
   });
 
-  beforeEach(async () => {
-    await UsersModel.create({
-      _id: userId,
-      email: 'test1@gmail.com',
-      username: 'Test 1',
-      createdAt: new Date(),
-      status: 'ACTIVE',
-      cities: ['Hồ Chí Minh'],
-      isoCode: 'VN',
-    });
-    await GroupsModel.create({
-      _id: groupId,
-      userIds: [groupId],
-      roleIds: [groupId],
-      name: 'groupName1',
-      description: 'groupName1 desc',
-      genealogy: ['genealogy1'],
-      hierarchy: 2,
-      createdAt: new Date('2023-12-01'),
-      status: 'ACTIVE',
-      isoCode: 'VN',
-    });
-  });
-
   afterEach(async () => {
     await UsersModel.deleteOne({ _id: userId });
     await GroupsModel.deleteOne({ _id: groupId });
-  });
-
-  afterAll(async () => {
     await UsersModel.deleteMany({
       _id: {
         $in: [rootId, leaderId, managerId, employeeId],
@@ -386,11 +388,12 @@ describe('Role base access control', () => {
 
   describe('updateGroups', () => {
     const mockGroupId = 'group-test';
+    const mockRoleId = 'role-test';
     const mockData = {
       name: 'Test',
       description: 'Test',
       userIds: ['1'],
-      roleIds: ['1'],
+      roleIds: [mockRoleId],
       hierarchy: 1,
       createdAt: new Date(),
       status: 'ACTIVE',
@@ -401,10 +404,20 @@ describe('Role base access control', () => {
         _id: mockGroupId,
         ...mockData,
       });
+      await RolesModel.create({
+        _id: mockRoleId,
+        permissions: [managerId],
+        name: 'Manager role',
+        description: 'Manager description',
+        createdAt: new Date('2024-03-01'),
+        status: 'ACTIVE',
+        slug: 'm-a-n-a-g-e-r',
+      });
     });
 
     afterEach(async () => {
       await GroupsModel.deleteOne({ _id: mockGroupId });
+      await RolesModel.deleteOne({ _id: mockRoleId });
     });
 
     it('should update group successfully', async () => {
@@ -443,7 +456,9 @@ describe('Role base access control', () => {
 
   describe('getGroupDetail', () => {
     const groupId1 = 'groupId1';
+    const groupUserId = 'groupUserId';
     const userId1 = 'userId1';
+    const userId2 = 'userId2';
     const roleId1 = 'roleId1';
     const genealogyId1 = 'genealogyId1';
     const groups = [
@@ -468,6 +483,16 @@ describe('Role base access control', () => {
         createdAt: new Date('2023-11-01'),
         status: 'ACTIVE',
       },
+      {
+        _id: groupUserId,
+        userIds: [userId2],
+        roleIds: ['roleId2'],
+        name: 'groupName3',
+        description: 'groupName3 desc',
+        hierarchy: 2,
+        createdAt: new Date('2023-11-01'),
+        status: 'ACTIVE',
+      },
     ];
     const role = {
       _id: roleId1,
@@ -487,12 +512,22 @@ describe('Role base access control', () => {
       cities: ['Hồ Chí Minh'],
       isoCode: 'VN',
     };
+    const user2 = {
+      _id: userId2,
+      username: 'userName2',
+      email: 'userName2@gmail.com',
+      createdAt: new Date('2024-01-01'),
+      status: 'ACTIVE',
+      cities: ['Hồ Chí Minh'],
+      isoCode: 'VN',
+    };
     beforeEach(async () => {
       groups.forEach(async group => {
         await GroupsModel.create(group);
       });
       await RolesModel.create(role);
       await UsersModel.create(user);
+      await UsersModel.create(user2);
     });
     afterEach(async () => {
       groups.forEach(async group => {
@@ -500,6 +535,7 @@ describe('Role base access control', () => {
       });
       await RolesModel.deleteOne(role);
       await UsersModel.deleteOne(user);
+      await UsersModel.deleteOne(user2);
     });
     it('should return group detail if user is root', async () => {
       const groupDetail = await getGroupDetail({
@@ -519,11 +555,23 @@ describe('Role base access control', () => {
         userId: userId1,
         groupId: groupId1,
         projection: { _id: 1 },
-        isParent: false,
+        isParent: true,
       });
 
       expect(groupDetail).toBeDefined();
       expect(groupDetail._id).toEqual(groupId1);
+    });
+    it('should return group detail for a group user', async () => {
+      const groupDetail = await getGroupDetail({
+        isSuperUser: false,
+        userId: userId2,
+        groupId: groupUserId,
+        projection: { _id: 1 },
+        isParent: false,
+      });
+
+      expect(groupDetail).toBeDefined();
+      expect(groupDetail._id).toEqual(groupUserId);
     });
     it('should throw an error if group does not exist and user is root', async () => {
       const { errorText, restore } = mockResponseThrowError();
@@ -538,6 +586,7 @@ describe('Role base access control', () => {
       ).rejects.toThrow(errorText);
       restore();
     });
+
     it('should throw an error if group does not exist and user is parent of group', async () => {
       const { errorText, restore } = mockResponseThrowError();
       await expect(
@@ -551,9 +600,54 @@ describe('Role base access control', () => {
       ).rejects.toThrow(errorText);
       restore();
     });
+
+    it('should throw an error if group does not exist and user is group user', async () => {
+      const { errorText, restore } = mockResponseThrowError();
+      await expect(
+        getGroupDetail({
+          isSuperUser: false,
+          userId: userId2,
+          groupId: 'nonexistentGroupId',
+          projection: { _id: 1 },
+          isParent: true,
+        }),
+      ).rejects.toThrow(errorText);
+      restore();
+    });
   });
 
   describe('getGroupPermissions', () => {
+    const role = {
+      _id: 'roleId1',
+      status: 'ACTIVE',
+      name: 'roleName1',
+      description: 'role desc',
+      permissions: ['permission1'],
+      slug: 'r-o-l-e-n-a-m-e-1',
+      createdAt: new Date('2024-02-01'),
+    };
+    const group = {
+      _id: 'groupId1',
+      status: 'ACTIVE',
+      name: 'groupName1',
+      description: 'groupName1 desc',
+      roleAssignedIds: ['anotherRoleId'],
+      userIds: ['userId1'],
+      roleIds: [role._id],
+      hierarchy: 12,
+      createdAt: new Date('2024-02-01'),
+    };
+
+    beforeEach(async () => {
+      await GroupsModel.create(group);
+      await RolesModel.create(role);
+    });
+
+    afterEach(async () => {
+      await GroupsModel.deleteOne({ _id: group._id });
+      await RolesModel.deleteOne({ _id: role._id });
+    });
+
     it('Should get entire permission when found root permission in a group correctly', async () => {
       const result = await getGroupPermissions({
         groupId: rootId,
@@ -572,6 +666,24 @@ describe('Role base access control', () => {
       expect(result).toHaveLength(
         mockPermission.filter(permission => permission._id !== rootId).length,
       );
+    });
+
+    it('Should return empty array if group does not exist', async () => {
+      const result = await getGroupPermissions({
+        groupId: 'anotherGroupId',
+        isSuperUser: false,
+      });
+
+      expect(result).toEqual([]);
+    });
+
+    it('Should return empty array if group does not have any permission', async () => {
+      const result = await getGroupPermissions({
+        groupId: group._id,
+        isSuperUser: false,
+      });
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -668,44 +780,135 @@ describe('Role base access control', () => {
   });
 
   describe('deleteRole', () => {
-    const role = {
-      _id: 'roleId1',
+    const permissionA = {
+      _id: 'a',
+      name: 'permissionA',
+      module: 'special',
+      'slug-module': 'permissionA',
       status: 'ACTIVE',
-      name: 'roleName1',
-      description: 'role desc',
-      permissions: ['permission1'],
-      slug: 'r-o-l-e-n-a-m-e-1',
+      description: 'a',
+    };
+    const permissionB = {
+      _id: 'b',
+      name: 'permissionB',
+      module: 'special',
+      'slug-module': 'permissionB',
+      status: 'ACTIVE',
+      description: 'b',
+    };
+    const permissionC = {
+      _id: 'c',
+      name: 'permissionC',
+      module: 'special',
+      'slug-module': 'permissionC',
+      status: 'ACTIVE',
+      description: 'c',
+    };
+    const r1 = {
+      _id: 'r1',
+      name: 'r1',
+      description: 'r1',
+      status: 'ACTIVE',
+      slug: 'r1',
+      permissions: ['c'],
       createdAt: new Date('2024-02-01'),
     };
-
-    const group = {
-      _id: 'groupId1',
+    const r2 = {
+      _id: 'r2',
+      name: 'r2',
+      description: 'r2',
+      slug: 'r2',
       status: 'ACTIVE',
-      name: 'groupName1',
-      description: 'groupName1 desc',
-      userIds: ['userId1'],
-      roleIds: [role._id],
-      hierarchy: 12,
+      permissions: ['b'],
       createdAt: new Date('2024-02-01'),
+    };
+    const r3 = {
+      _id: 'r3',
+      name: 'r3',
+      description: 'r3',
+      slug: 'r3',
+      status: 'ACTIVE',
+      permissions: ['a', 'b'],
+      createdAt: new Date('2024-02-01'),
+    };
+    const r4 = {
+      _id: 'r4',
+      name: 'r4',
+      description: 'r4',
+      slug: 'r4',
+      status: 'ACTIVE',
+      permissions: ['a'],
+      createdAt: new Date('2024-02-01'),
+    };
+    const r5 = {
+      _id: 'r5',
+      name: 'r5',
+      description: 'r5',
+      slug: 'r5',
+      status: 'ACTIVE',
+      permissions: ['b'],
+      createdAt: new Date('2024-02-01'),
+    };
+    const g1 = {
+      _id: 'g1',
+      status: 'ACTIVE',
+      name: 'g1',
+      description: 'g1 desc',
+      userIds: ['userId1'],
+      roleIds: ['r1', 'r2', 'r3'],
+      hierarchy: 2,
+      createdAt: new Date('2024-02-01'),
+      genealogy: ['root'],
+    };
+    const g2 = {
+      _id: 'g2',
+      status: 'ACTIVE',
+      name: 'g2',
+      description: 'g2 desc',
+      userIds: ['userId1'],
+      roleIds: ['r4', 'r5'],
+      roleAssignedIds: ['r2', 'r3'],
+      hierarchy: 3,
+      createdAt: new Date('2024-02-01'),
+      genealogy: ['root', 'g1'],
+    };
+    const g3 = {
+      _id: 'g3',
+      status: 'ACTIVE',
+      name: 'g3',
+      description: 'g3 desc',
+      userIds: ['userId1'],
+      roleAssignedIds: ['r4', 'r5'],
+      hierarchy: 4,
+      createdAt: new Date('2024-02-01'),
+      genealogy: ['root', 'g1', 'g2'],
     };
 
     beforeEach(async () => {
-      await RolesModel.create(role);
-      await GroupsModel.create(group);
+      await PermissionsModel.insertMany([
+        permissionA,
+        permissionB,
+        permissionC,
+      ]);
+      await RolesModel.insertMany([r1, r2, r3, r4, r5]);
+      await GroupsModel.insertMany([g1, g2, g3]);
     });
 
     afterEach(async () => {
-      await RolesModel.deleteOne({ _id: role._id });
-      await GroupsModel.deleteOne({ _id: group._id });
+      await PermissionsModel.deleteMany({ _id: { $in: ['a', 'b', 'c'] } });
+      await RolesModel.deleteMany({
+        _id: { $in: ['r1', 'r2', 'r3', 'r4', 'r5'] },
+      });
+      await GroupsModel.deleteMany({ _id: { $in: ['g1', 'g2', 'g3'] } });
     });
 
     it('Should delete role successfully', async () => {
       const deletedRoleFound = await deleteRole({
-        roleId: role._id,
-        groupId: group._id,
+        roleId: 'r3',
+        groupId: 'g1',
       });
 
-      expect(deletedRoleFound).toEqual(role.name);
+      expect(deletedRoleFound).toEqual('r3');
     });
   });
 
@@ -719,14 +922,28 @@ describe('Role base access control', () => {
       roleIds: ['roleId1'],
       hierarchy: 12,
       createdAt: new Date('2024-02-01'),
+      genealogy: [],
+    };
+    const groupChildren = {
+      _id: 'groupId2',
+      status: 'ACTIVE',
+      name: 'groupName1',
+      description: 'groupName1 desc',
+      userIds: ['userId1'],
+      roleIds: ['roleId1'],
+      hierarchy: 12,
+      createdAt: new Date('2024-02-01'),
+      genealogy: [group._id],
     };
 
     beforeEach(async () => {
       await GroupsModel.create(group);
+      await GroupsModel.create(groupChildren);
     });
 
     afterEach(async () => {
       await GroupsModel.deleteOne({ _id: group._id });
+      await GroupsModel.deleteOne({ _id: groupChildren._id });
     });
 
     it('Should delete group by id successfully', async () => {
@@ -796,6 +1013,149 @@ describe('Role base access control', () => {
       });
 
       expect(isParent).toBe(true);
+    });
+
+    it('Should return false if user is not parent of group', async () => {
+      const isParent = await isParentOfGroup({
+        parentId: user._id,
+        groupId: 'anotherGroupId',
+      });
+
+      expect(isParent).toBe(false);
+    });
+  });
+
+  describe('verifySuperUser', () => {
+    it('Should verify super user correctly', async () => {
+      const isSuperUser = await verifySuperUser(rootId);
+
+      expect(isSuperUser).toBe(true);
+    });
+  });
+
+  describe('verifyManager', () => {
+    it('Should verify manager correctly', async () => {
+      const isManager = await verifyManager(managerId);
+
+      expect(isManager).toBe(true);
+    });
+  });
+
+  describe('getUserPermissionsIgnoreRoot', () => {
+    it('should get all permission ignore root if user has root permission', async () => {
+      const permissions = await getUserPermissionsIgnoreRoot(rootId);
+
+      expect(permissions.sort()).toEqual(
+        [managerId, leaderId, employeeId].sort(),
+      );
+    });
+
+    it('should get all permission if user does not have root permission', async () => {
+      const permissions = await getUserPermissionsIgnoreRoot(managerId);
+
+      expect(permissions.sort()).toEqual([managerId].sort());
+    });
+  });
+
+  describe('updateUser', () => {
+    it('should update user successfully', async () => {
+      const mockParams = {
+        userId,
+        email: 'test2@gmail.com',
+        username: 'Test 2',
+        cities: ['Hồ Chí Minh'],
+      };
+
+      await updateUser(mockParams);
+
+      const result = await UsersModel.findOne({
+        _id: mockParams.userId,
+      }).lean();
+
+      expect(result?.email).toEqual(mockParams.email);
+      expect(result?.username).toEqual(mockParams.username);
+      expect(result?.cities).toEqual(mockParams.cities);
+    });
+  });
+
+  describe('getRolesByGroupId', () => {
+    it('should return roles for a given group id', async () => {
+      const result = await getRolesByGroupId(managerId);
+      expect(result[0]._id).toEqual(managerId);
+    });
+
+    it('should return an empty array if no group is found', async () => {
+      const groupId = 'testGroupId';
+
+      const roles = await getRolesByGroupId(groupId);
+
+      expect(roles).toEqual([]);
+    });
+  });
+
+  describe('getPermissionsCreatedByGroupId', () => {
+    it('should return permissions for a given group id', async () => {
+      const result = await getPermissionsCreatedByGroupId({
+        groupId: managerId,
+      });
+
+      expect(result).toEqual([managerId]);
+    });
+
+    it('should return an empty array if no group is found', async () => {
+      const groupId = 'anotherGroupId';
+      const result = await getPermissionsCreatedByGroupId({ groupId });
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getAllChildrenGroupOfUser', () => {
+    const group = {
+      _id: 'groupId1',
+      genealogy: ['genealogyId'],
+      name: 'groupName1',
+      description: 'groupName1 desc',
+      userIds: ['userId1'],
+      roleIds: ['roleId1'],
+      hierarchy: 10,
+      createdAt: new Date('2024-02-01'),
+      status: 'ACTIVE',
+    };
+
+    const childrenGroup = {
+      _id: 'groupId2',
+      genealogy: ['groupId1'],
+      name: 'groupName2',
+      description: 'groupName2 desc',
+      userIds: ['userId1'],
+      roleIds: ['roleId2'],
+      hierarchy: 10,
+      createdAt: new Date('2024-03-01'),
+      status: 'ACTIVE',
+    };
+
+    beforeEach(async () => {
+      await GroupsModel.create(group);
+      await GroupsModel.create(childrenGroup);
+    });
+
+    afterEach(async () => {
+      await GroupsModel.deleteOne({ _id: group._id });
+      await GroupsModel.deleteOne({ _id: childrenGroup._id });
+    });
+
+    it('should return all children group of a user', async () => {
+      const result = await getAllChildrenGroupOfUser('userId1');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]._id).toEqual(childrenGroup._id);
+    });
+
+    it('should return an empty array if no children group is found', async () => {
+      const result = await getAllChildrenGroupOfUser('anotherUserId');
+
+      expect(result).toEqual([]);
     });
   });
 });

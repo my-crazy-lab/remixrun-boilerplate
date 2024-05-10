@@ -498,7 +498,6 @@ async function getPermissionsRemovedAfterUpdateOrRemoveRoles({
 }) {
   // get previous permissions
   const previousPermissions = await getPermissionsCreatedByGroupId({ groupId });
-
   await updateOrRemoveCallback();
 
   const permissionsAfterUpdateOrRemoveRole =
@@ -511,9 +510,10 @@ async function getPermissionsRemovedAfterUpdateOrRemoveRoles({
   return permissionsRemoved;
 }
 
+// get R5
 async function getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
-  groupId,
-  permissionsRemoved,
+  groupId, // g1
+  permissionsRemoved, // a
 }: {
   groupId: string;
   permissionsRemoved: Array<string>;
@@ -564,13 +564,11 @@ async function getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
 
   const rolesWillBeUpdated = removeDuplicatedItem(
     children.map(e => {
-      if (e?.roles) {
-        return e.roles.map(i => i._id);
-      }
-      if (e?.rolesAssigned) {
-        return e.rolesAssigned.map(i => i._id);
-      }
-      return [];
+      const result: string[] = [];
+      e?.roles?.map(i => result.push(i._id));
+      e?.rolesAssigned?.map(i => result.push(i._id));
+
+      return result;
     }),
   );
 
@@ -631,7 +629,6 @@ export async function deleteRole({
         groupId,
         permissionsRemoved,
       });
-
     // remove permissions of roles were born from list permissions deleted
     await RolesModel.updateMany(
       { _id: { $in: rolesWillBeUpdated } },
