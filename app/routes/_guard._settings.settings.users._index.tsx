@@ -123,16 +123,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }),
   );
 
-  const users = await getUsersManagedByManagerId({
-    skip,
-    limit,
-    projection: { _id: 1, cities: 1, username: 1, email: 1 },
-    managerId,
-  });
-  const groups = await getAllChildrenGroupOfUser(managerId);
-  const cities = await getCities(isoCode);
+  const [users, groups, cities, session] = await Promise.all([
+    getUsersManagedByManagerId({
+      skip,
+      limit,
+      projection: { _id: 1, cities: 1, username: 1, email: 1 },
+      managerId,
+    }),
+    getAllChildrenGroupOfUser(managerId),
+    getCities(isoCode),
+    getSession(request.headers.get('Cookie')),
+  ]);
 
-  const session = await getSession(request.headers.get('Cookie'));
   const message = session.get('flashMessage');
 
   return json(

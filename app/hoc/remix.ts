@@ -108,10 +108,12 @@ export function hocAction<A>(
 
       return actionResult;
     } catch (error) {
+      const t = await i18next.getFixedT(args.request, 'user-settings');
       if (error instanceof Error) {
-        return json({ error: error.message });
+        return json({ error: t(error.message) });
       }
-      return json({ error: ERROR.UNKNOWN_ERROR, detail: error });
+
+      return json({ error: t(ERROR.UNKNOWN_ERROR), detail: error });
     }
   }
 
@@ -123,7 +125,7 @@ export function hocLoader<A>(
     args: LoaderFunctionArgs,
     argsHoc: { permissionsPassed: Array<string> },
   ) => A,
-  permission: string | Array<string>,
+  permission?: string | Array<string>,
 ) {
   async function loader(args: LoaderFunctionArgs) {
     try {
@@ -155,16 +157,16 @@ export function hocLoader<A>(
       }
 
       const loaderResult = await callback(args, {
-        permissionsPassed: [permission],
+        permissionsPassed: permission ? [permission] : [],
       });
       return loaderResult;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('DEBUGGER loader: ', error);
-      if (error instanceof Error) {
-        return json({ error: error.message });
-      }
       const t = await i18next.getFixedT(args.request, 'user-settings');
+      if (error instanceof Error) {
+        return json({ error: t(error.message) });
+      }
 
       return json({ error: t(ERROR.UNKNOWN_ERROR) });
     }

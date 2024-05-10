@@ -140,9 +140,7 @@ export function updateUser({
   ).lean<Users>();
 }
 
-export async function verifyCode(
-  code: string,
-): Promise<AuthenticatorSessionData> {
+async function verifyCode(code: string): Promise<AuthenticatorSessionData> {
   const user = await UsersModel.findOneAndUpdate(
     {
       'verification.expired': { $gt: momentTz().toDate() },

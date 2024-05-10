@@ -18,11 +18,13 @@ export const loader = hocLoader(
     const roleId = params.roleId || '';
     const userId = await getUserId({ request });
 
-    const isParent = await isParentOfGroup({
-      parentId: userId,
-      groupId,
-    });
-    const userInGroup = await verifyUserInGroup({ userId, groupId });
+    const [isParent, userInGroup] = await Promise.all([
+      isParentOfGroup({
+        parentId: userId,
+        groupId,
+      }),
+      verifyUserInGroup({ userId, groupId }),
+    ]);
 
     // just parent or member in group can view role detail of group
     if (!isParent && !userInGroup) {

@@ -36,18 +36,22 @@ import {
   type GlobalStore,
   createGlobalStore,
 } from '~/context/global-store';
+import { hocLoader } from '~/hoc/remix';
 import { authenticator } from '~/services/auth.server';
 import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
 import { getUserProfile } from '~/services/settings.server';
+import type { LoaderTypeWithError } from '~/types';
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export const loader = hocLoader(async ({ request }: LoaderFunctionArgs) => {
   const user = await authenticator.isAuthenticated(request, {
     failureRedirect: ROUTE_NAME.SIGN_IN,
   });
-  const session = await getSession(request.headers.get('cookie'));
-  const userPermissions = await getUserPermissionsIgnoreRoot(user.userId);
-  const userProfile = await getUserProfile(user.userId);
+  const [session, userPermissions, userProfile] = await Promise.all([
+    getSession(request.headers.get('cookie')),
+    getUserPermissionsIgnoreRoot(user.userId),
+    getUserProfile(user.userId),
+  ]);
 
   // get flash session
   session.get('flashMessage');
@@ -63,10 +67,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
       },
     },
   );
-}
+});
 
 export default function Screen() {
-  const { user, userProfile } = useLoaderData<typeof loader>();
+  const { user, userProfile } =
+    useLoaderData<LoaderTypeWithError<typeof loader>>();
 
   const storeRef = useRef<GlobalStore>();
   if (!storeRef.current) {
