@@ -1,7 +1,5 @@
 import { redirect } from '@remix-run/node';
 import bcrypt from 'bcrypt';
-import { Authenticator } from 'remix-auth';
-import { FormStrategy } from 'remix-auth-form';
 import { v4 as uuidv4 } from 'uuid';
 import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
@@ -12,22 +10,9 @@ import {
 import { dotenv } from '~/services/dotenv.server';
 import { sendEmail } from '~/services/mail.server';
 import UsersModel from '~/services/model/users.server';
-import {
-  verifyManager,
-  verifySuperUser,
-} from '~/services/role-base-access-control.server';
-import { sessionStorage } from '~/services/session.server';
-import { type AuthenticatorSessionData, type Users } from '~/types';
+// import '~/services/passports.server';
+import type { Users } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
-
-// Create an instance of the authenticator, pass a generic with what
-// strategies will return and will store in the session
-export const authenticator = new Authenticator<AuthenticatorSessionData>(
-  sessionStorage,
-  {
-    throwOnError: true,
-  },
-);
 
 export function hashPassword(password: string) {
   return bcrypt.hashSync(
@@ -140,38 +125,6 @@ export function updateUser({
   ).lean<Users>();
 }
 
-async function verifyCode(code: string): Promise<AuthenticatorSessionData> {
-  const user = await UsersModel.findOneAndUpdate(
-    {
-      'verification.expired': { $gt: momentTz().toDate() },
-      'verification.code': code,
-    },
-    {
-      $set: {
-        'verification.expired': momentTz().toDate(),
-      },
-    },
-  ).lean<Users>();
-
-  if (!user?._id) {
-    throw new Error('CODE_INCORRECT_OR_EXPIRED');
-  }
-
-  const isSuperUser = await verifySuperUser(user._id);
-  const isManager = await verifyManager(user._id);
-
-  return {
-    userId: user._id,
-    isSuperUser,
-    isManager,
-    isoCode: user.isoCode,
-    cities: user.cities,
-    username: user.username,
-    email: user.email,
-    language: user.language,
-  };
-}
-
 export async function resetPassword(email: string) {
   const resetToken = uuidv4();
 
@@ -233,21 +186,3 @@ export async function changePassword({
   }
   return account._id;
 }
-
-// Tell the Authenticator to use the form strategy
-authenticator.use(
-  new FormStrategy(async ({ form }) => {
-    const code = form.get('code')?.toString();
-    if (!code) {
-      throw new Error('Login failure');
-    }
-    const user = await verifyCode(code);
-    // the type of this user must match the type you pass to the Authenticator
-    // the strategy will automatically inherit the type if you instantiate
-    // directly inside the `use` method
-    return user; // will be save into sessions storage
-  }),
-  // each strategy has a name and can be changed to use another one
-  // same strategy multiple times, especially useful for the OAuth2 strategy.
-  'user-pass',
-);

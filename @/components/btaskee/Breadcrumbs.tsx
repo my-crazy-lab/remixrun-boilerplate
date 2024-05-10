@@ -20,7 +20,8 @@ export const BreadcrumbsLink = ({
   disabled,
   ...props
 }: BreadcrumbsItemProps) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
+
   return (
     <NavigationLink
       itemProp="item"

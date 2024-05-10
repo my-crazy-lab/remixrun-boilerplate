@@ -1,21 +1,12 @@
 import bcrypt from 'bcrypt';
-import { Authenticator } from 'remix-auth';
-import { FormStrategy } from 'remix-auth-form';
 import { verifyAndSendCode } from '~/services/auth.server';
 import { dotenv } from '~/services/dotenv.server';
 import * as EmailService from '~/services/mail.server';
 import UsersModel from '~/services/model/users.server';
-import { type AuthenticatorSessionData } from '~/types';
 
 jest.mock('~/services/mail.server', () => ({
   __esModule: true,
   sendEmail: jest.fn(),
-}));
-
-jest.mock('~/services/auth.server', () => ({
-  __esModule: true,
-  verifyCode: jest.fn(),
-  ...jest.requireActual('~/services/auth.server'),
 }));
 
 describe('Authentication', () => {
@@ -75,36 +66,6 @@ describe('Authentication', () => {
 
       randomSpy.mockRestore();
       bcryptCompareSpy.mockRestore();
-    });
-  });
-
-  // describe('changePassword', () => {});
-
-  describe('authenticator OAuth2 strategy', () => {
-    let authenticator: Authenticator<AuthenticatorSessionData>;
-
-    beforeEach(() => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      authenticator = new Authenticator();
-    });
-
-    test('valid code', async () => {
-      const code = 'valid-code';
-      const user = { id: 'user-id', username: 'username' };
-
-      authenticator.use = jest.fn().mockImplementation(strategy => {
-        return strategy.authenticate({ form: { get: () => code } });
-      });
-
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      const result = await authenticator.use(new FormStrategy());
-
-      authenticator.authenticate('user-pass');
-
-      console.log(result);
-      expect(result).toEqual(user);
     });
   });
 });
