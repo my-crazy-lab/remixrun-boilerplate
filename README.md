@@ -63,7 +63,7 @@ db.getCollection("users").insert(
   {
     "_id" : "root",
     "isoCode": "VN",
-    "username" : "Super user",
+    "username" : "superuser",
     "email" : "leminh.nguyen@btaskee.com",
     "status" : "ACTIVE"
   }
@@ -179,11 +179,15 @@ Because this is internal applications, the User cannot register freely. We will 
 Example:
 
 ```
-db.getCollection("users").insert({
-  "_id": "root",
-  "username" : "MinLee",
-  "email" : "test@gmail.com",
-})
+db.getCollection("users").insert(
+  {
+    "_id" : "root",
+    "isoCode": "VN",
+    "username" : "superuser",
+    "email" : "leminh.nguyen@btaskee.com",
+    "status" : "ACTIVE"
+  }
+)
 ```
 
 After that, forgot and change password (to match by your .env, because this machine hash password from your key and salt-round).
