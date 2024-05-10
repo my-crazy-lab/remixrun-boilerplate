@@ -1,7 +1,12 @@
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
 import GroupsModel from '~/services/model/groups.server';
 import UsersModel from '~/services/model/users.server';
-import { createNewUser, getUserProfile } from '~/services/settings.server';
+import {
+  createNewUser,
+  getActionsHistoryManagedByManagerId,
+  getTotalActionsHistoryManageByManagerId,
+  getUserProfile,
+} from '~/services/settings.server';
 import type { ActionsHistory, Groups, Users } from '~/types';
 
 describe('Setting page', () => {
@@ -64,18 +69,18 @@ describe('Setting page', () => {
       roleAssignedIds: [],
       hierarchy: 2,
       status: 'ACTIVE',
-      genealogy: [mockGroupId_2],
+      genealogy: [], // group parent
     },
     {
       _id: mockGroupId_2,
       name: 'Group 2',
-      userIds: [mockUserId_2],
+      userIds: [mockUserId_2, mockUserId],
       createdAt: new Date(),
       description: 'group description',
       roleAssignedIds: [],
       hierarchy: 2,
       status: 'ACTIVE',
-      genealogy: ['group-3'],
+      genealogy: [mockGroupId],
     },
   ];
 
@@ -103,59 +108,49 @@ describe('Setting page', () => {
     });
   });
 
-  // describe('getTotalActionsHistory', () => {
-  //   it('should return total action history correctly', async () => {
-  //     const result = await getTotalActionsHistory({
-  //       searchText: '',
-  //       userId: mockUserId,
-  //     });
-  //     expect(result).toEqual(
-  //       mockActionsHistory.filter(action => action.actorId !== mockUserId)
-  //         .length,
-  //     );
-  //   });
+  describe('getTotalActionsHistory', () => {
+    it('should return total action history correctly', async () => {
+      const result = await getTotalActionsHistoryManageByManagerId({
+        searchText: '',
+        managerId: mockUserId,
+      });
+      expect(result).toEqual(mockActionsHistory.length);
+    });
 
-  //   it('should return total action history correctly with search text', async () => {
-  //     const mockSearchText =
-  //       mockUsers.find(user => user._id === mockUserId_2)?.username || '';
+    it('should return total action history correctly with search text', async () => {
+      const mockSearchText =
+        mockUsers.find(user => user._id === mockUserId)?.username || '';
 
-  //     const result = await getTotalActionsHistory({
-  //       searchText: mockSearchText,
-  //       userId: mockUserId,
-  //     });
+      const result = await getTotalActionsHistoryManageByManagerId({
+        searchText: mockSearchText,
+        managerId: mockUserId,
+      });
 
-  //     expect(result).toEqual(
-  //       mockActionsHistory.filter(action => action.actorId !== mockUserId)
-  //         .length,
-  //     );
-  //   });
-  // });
+      expect(result).toEqual(1);
+    });
+  });
 
-  // describe('getActionsHistory', () => {
-  //   it('should return data action history correctly with skip and limit', async () => {
-  //     const skip = 1;
-  //     const limit = 10;
-  //     const actionsHistory = await getActionsHistory({
-  //       searchText: '',
-  //       skip,
-  //       limit,
-  //       projection: {
-  //         username: '$user.username',
-  //         action: 1,
-  //         data: 1,
-  //         createdAt: 1,
-  //       },
-  //       userId: mockUserId,
-  //     });
-  //     expect(actionsHistory).toHaveLength(
-  //       mockActionsHistory.filter(action => action.actorId !== mockUserId)
-  //         .length,
-  //     );
-  //     expect(actionsHistory[0]).toEqual(
-  //       actionsHistory.find(action => action._id === mockActionId_2),
-  //     );
-  //   });
-  // });
+  describe('getActionsHistory', () => {
+    it('should return data action history correctly with skip and limit', async () => {
+      const skip = 1;
+      const limit = 10;
+      const actionsHistory = await getActionsHistoryManagedByManagerId({
+        searchText: '',
+        skip,
+        limit,
+        projection: {
+          username: '$user.username',
+          action: 1,
+          data: 1,
+          createdAt: 1,
+        },
+        managerId: mockUserId,
+      });
+
+      expect(actionsHistory).toHaveLength(1);
+      expect(actionsHistory[0]._id).toEqual(mockActionId_2);
+    });
+  });
 
   describe('getUserProfile', () => {
     it('should return data user correctly', async () => {
