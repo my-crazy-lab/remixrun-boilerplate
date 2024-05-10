@@ -52,3 +52,20 @@ export const ERROR = {
 };
 
 export const defaultLanguage = 'en';
+
+export const res500 = {
+  status: 500,
+  statusText: 'INTERNAL_SERVER_ERROR',
+};
+export const res404 = {
+  status: 404,
+  statusText: 'PAGE_NOT_FOUND',
+};
+export const res403 = {
+  status: 403,
+  statusText: 'NOT_PERMISSION_TO_ACCESS',
+};
+export const res403GroupParent = {
+  status: 403,
+  statusText: 'NOT_PARENT_OF_GROUP',
+};

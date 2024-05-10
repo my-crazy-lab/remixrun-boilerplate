@@ -4,7 +4,7 @@ import {
   type LoaderFunctionArgs,
   json,
 } from '@remix-run/node';
-import { ACTION_NAME, ERROR } from '~/constants/common';
+import { ACTION_NAME, ERROR, res403, res404 } from '~/constants/common';
 import i18next from '~/i18next.server';
 import { newRecordCommonField } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
@@ -177,23 +177,6 @@ export interface ErrorResponse {
   status: number;
   statusText: string;
 }
-
-export const res500 = {
-  status: 500,
-  statusText: 'INTERNAL_SERVER_ERROR',
-};
-export const res404 = {
-  status: 404,
-  statusText: 'PAGE_NOT_FOUND',
-};
-export const res403 = {
-  status: 403,
-  statusText: 'NOT_PERMISSION_TO_ACCESS',
-};
-export const res403GroupParent = {
-  status: 403,
-  statusText: 'NOT_PARENT_OF_GROUP',
-};
 
 export async function hoc404<TResult>(callback: () => Promise<TResult>) {
   const result = await callback();

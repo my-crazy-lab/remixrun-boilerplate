@@ -1,8 +1,8 @@
 import { BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
-import { PERMISSIONS } from '~/constants/common';
-import { hocLoader, res403 } from '~/hoc/remix';
+import { PERMISSIONS, res403 } from '~/constants/common';
+import { hocLoader } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
   getRoleDetail,
