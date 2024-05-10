@@ -4,6 +4,7 @@ import {
   getUserByUserId,
   isResetPassExpired,
   isVerificationCodeExpired,
+  resetPassword,
   updateUser,
   verifyAndSendCode,
 } from '~/services/auth.server';
@@ -74,35 +75,16 @@ describe('Authentication', () => {
       randomSpy.mockRestore();
       bcryptCompareSpy.mockRestore();
     });
+
+    it('Should throw incorrect account', async () => {
+      await expect(
+        verifyAndSendCode({
+          username: 'notExistedUsername',
+          password: '123456',
+        }),
+      ).rejects.toThrow('INCORRECT_ACCOUNT');
+    });
   });
-
-  // describe('authenticator OAuth2 strategy', () => {
-  //   let authenticator: Authenticator<AuthenticatorSessionData>;
-
-  //   beforeEach(() => {
-  //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //     //@ts-ignore
-  //     authenticator = new Authenticator();
-  //   });
-
-  //   test('valid code', async () => {
-  //     const code = 'valid-code';
-  //     const user = { id: 'user-id', username: 'username' };
-
-  //     authenticator.use = jest.fn().mockImplementation(strategy => {
-  //       return strategy.authenticate({ form: { get: () => code } });
-  //     });
-
-  //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //     //@ts-ignore
-  //     const result = await authenticator.use(new FormStrategy());
-
-  //     authenticator.authenticate('user-pass');
-
-  //     console.log(result);
-  //     expect(result).toEqual(user);
-  //   });
-  // });
 
   describe('Change User information', () => {
     const mockUser = {
@@ -133,6 +115,18 @@ describe('Authentication', () => {
       await UsersModel.deleteOne({ _id: mockUser._id });
     });
 
+    it('Should return data correctly when update user', async () => {
+      const account = await updateUser({
+        username: mockUser.username,
+        email: mockUser.email,
+        cities: mockUser.cities,
+        userId: mockUser._id,
+      });
+
+      expect(account?._id).toEqual(mockUser._id);
+      expect(account?.email).toEqual(mockUser.email);
+    });
+
     it('Should change password successful', async () => {
       const result = await changePassword({
         newPassword: '123456',
@@ -150,15 +144,16 @@ describe('Authentication', () => {
     });
 
     it('Should return data correctly when update user', async () => {
-      const account = await updateUser({
-        username: mockUser.username,
-        email: mockUser.email,
-        cities: mockUser.cities,
-        userId: mockUser._id,
-      });
+      await expect(resetPassword('wrongEmail')).rejects.toThrow(
+        'EMAIL_INCORRECT',
+      );
+    });
 
-      expect(account?._id).toEqual(mockUser._id);
-      expect(account?.email).toEqual(mockUser.email);
+    it('should not reset password if account incorrect', async () => {
+      const result = await isResetPassExpired({
+        token: mockUser.resetPassword.token,
+      });
+      expect(result).toBe(false);
     });
   });
 
