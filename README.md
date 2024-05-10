@@ -7,7 +7,6 @@
 - :globe_with_meridians: **International**: Built-in i18n solution
 - :gear: **Best Practices**: Solid workflow to make your code healthy
 - :zap: **Router Redirect**: Available Error boundary page
-- :four_leaf_clover: **Plugin Architecture**: Modify multi project for Enterprise by plugin architecture (DOING)
 - :pencil: **Code Conventions**:
   - [Linter](https://eslint.org/)
   - [Formatter](https://prettier.io/)
