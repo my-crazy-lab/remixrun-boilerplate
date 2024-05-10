@@ -6,11 +6,12 @@ import vn from './vn.server';
 
 export enum API_KEY {}
 
-export type IApiKey = keyof typeof API_KEY;
+export type ApiUrl = {
+  [k in keyof typeof API_KEY]: string;
+};
+
 const storageApi: {
-  [key in EnumIsoCode]: {
-    [k in IApiKey]: string | null;
-  };
+  [key in EnumIsoCode]: ApiUrl;
 } = {
   [EnumIsoCode.VN]: vn,
   [EnumIsoCode.TH]: th,
@@ -21,7 +22,7 @@ function getRestApiByMultiRegion({
   apiKey,
   isoCode,
 }: {
-  apiKey: IApiKey;
+  apiKey: keyof typeof API_KEY;
   isoCode: string;
 }) {
   if (isoCode === 'VN') {
