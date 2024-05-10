@@ -1,8 +1,8 @@
 import { BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import { type LoaderFunctionArgs, json } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
-import { PERMISSIONS } from '~/constants/common';
-import { hocLoader, res403 } from '~/hoc/remix';
+import { PERMISSIONS, res403 } from '~/constants/common';
+import { hocLoader } from '~/hoc/remix';
 import { getUserId } from '~/services/helpers.server';
 import {
   getRoleDetail,
@@ -18,11 +18,13 @@ export const loader = hocLoader(
     const roleId = params.roleId || '';
     const userId = await getUserId({ request });
 
-    const isParent = await isParentOfGroup({
-      parentId: userId,
-      groupId,
-    });
-    const userInGroup = await verifyUserInGroup({ userId, groupId });
+    const [isParent, userInGroup] = await Promise.all([
+      isParentOfGroup({
+        parentId: userId,
+        groupId,
+      }),
+      verifyUserInGroup({ userId, groupId }),
+    ]);
 
     // just parent or member in group can view role detail of group
     if (!isParent && !userInGroup) {

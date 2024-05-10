@@ -123,16 +123,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }),
   );
 
-  const users = await getUsersManagedByManagerId({
-    skip,
-    limit,
-    projection: { _id: 1, cities: 1, username: 1, email: 1 },
-    managerId,
-  });
-  const groups = await getAllChildrenGroupOfUser(managerId);
-  const cities = await getCities(isoCode);
+  const [users, groups, cities, session] = await Promise.all([
+    getUsersManagedByManagerId({
+      skip,
+      limit,
+      projection: { _id: 1, cities: 1, username: 1, email: 1 },
+      managerId,
+    }),
+    getAllChildrenGroupOfUser(managerId),
+    getCities(isoCode),
+    getSession(request.headers.get('Cookie')),
+  ]);
 
-  const session = await getSession(request.headers.get('Cookie'));
   const message = session.get('flashMessage');
 
   return json(
@@ -144,112 +146,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     },
   );
 };
-
-const columns: ColumnDef<SerializeFrom<Users>>[] = [
-  {
-    accessorKey: '_id',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="translate-y-[2px]"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={value => row.toggleSelected(!!value)}
-        aria-label="Select row"
-        className="translate-y-[2px]"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'username',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Username" />
-    ),
-    cell: ({ row }) => (
-      <div className="w-[80px]">{row.getValue('username')}</div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'email',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="max-w-[500px] truncate font-medium">
-            {row.getValue('email')}
-          </span>
-        </div>
-      );
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'cities',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="City" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
-            {row.original.cities?.map((e, index) => (
-              <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
-                {e}
-              </Badge>
-            ))}
-          </span>
-        </div>
-      );
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'actions',
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
-            <DotsHorizontalIcon className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[160px]">
-          <Link to={`/settings/users/${row.getValue('_id')}/edit`}>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-          </Link>
-          <Form className="w-full" method="post">
-            <button
-              style={{ width: '100%' }}
-              name="userDeleted"
-              value={row.getValue('_id')}
-              type="submit">
-              <DropdownMenuItem>Delete</DropdownMenuItem>
-            </button>
-          </Form>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
-
 interface FormData {
   email: string;
   cities: Array<OptionType>;
@@ -263,6 +159,111 @@ export default function Screen() {
     message?: string;
   }>();
   const loaderData = useLoaderData<typeof loader>();
+
+  const columns: ColumnDef<SerializeFrom<Users>>[] = [
+    {
+      accessorKey: '_id',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+          className="translate-y-[2px]"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={value => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="translate-y-[2px]"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'username',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Username" />
+      ),
+      cell: ({ row }) => (
+        <div className="w-[80px]">{row.getValue('username')}</div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'email',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Email" />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            <span className="max-w-[500px] truncate font-medium">
+              {row.getValue('email')}
+            </span>
+          </div>
+        );
+      },
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'cities',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="City" />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            <span className="max-w-[500px] space-x-2 space-y-2 truncate font-medium overflow-visible whitespace-normal">
+              {row.original.cities?.map((e, index) => (
+                <Badge className="bg-blue-50 text-blue rounded-md" key={index}>
+                  {e}
+                </Badge>
+              ))}
+            </span>
+          </div>
+        );
+      },
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: 'actions',
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+              <DotsHorizontalIcon className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[160px]">
+            <Link to={`/settings/users/${row.getValue('_id')}/edit`}>
+              <DropdownMenuItem>Edit</DropdownMenuItem>
+            </Link>
+            <Form className="w-full" method="post">
+              <button
+                style={{ width: '100%' }}
+                name="userDeleted"
+                value={row.getValue('_id')}
+                type="submit">
+                <DropdownMenuItem>Delete</DropdownMenuItem>
+              </button>
+            </Form>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   useEffect(() => {
     if (loaderData?.message) {

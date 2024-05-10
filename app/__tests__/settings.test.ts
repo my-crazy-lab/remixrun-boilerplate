@@ -2,14 +2,19 @@ import ActionsHistoryModel from '~/services/model/actionHistory.server';
 import GroupsModel from '~/services/model/groups.server';
 import UsersModel from '~/services/model/users.server';
 import {
+  changeUserAvatar,
   createNewUser,
   getActionsHistoryManagedByManagerId,
   getTotalActionsHistoryManageByManagerId,
+  getTotalUsersManagedByManagerId,
   getUserProfile,
+  getUsersManagedByManagerId,
+  setUserLanguage,
 } from '~/services/settings.server';
 import type { ActionsHistory, Groups, Users } from '~/types';
 
 describe('Setting page', () => {
+  const managerId = 'manager';
   const mockUserId = 'user-1';
   const mockUserId_2 = 'user-2';
 
@@ -22,7 +27,7 @@ describe('Setting page', () => {
   const mockUsers: Array<Users> = [
     {
       _id: mockUserId,
-      username: 'Test 1',
+      username: mockUserId,
       status: 'ACTIVE',
       email: 'user-1@gmail.com',
       isoCode: 'VN',
@@ -32,7 +37,7 @@ describe('Setting page', () => {
     },
     {
       _id: mockUserId_2,
-      username: 'Test 2',
+      username: mockUserId_2,
       status: 'ACTIVE',
       email: 'user-2@gmail.com',
       isoCode: 'VN',
@@ -80,7 +85,7 @@ describe('Setting page', () => {
       roleAssignedIds: [],
       hierarchy: 2,
       status: 'ACTIVE',
-      genealogy: [mockGroupId],
+      genealogy: [mockGroupId], // include group parent id
     },
   ];
 
@@ -150,6 +155,25 @@ describe('Setting page', () => {
       expect(actionsHistory).toHaveLength(1);
       expect(actionsHistory[0]._id).toEqual(mockActionId_2);
     });
+    it('should not return data action history correctly with searchText', async () => {
+      const randomText = 'randomText';
+      const skip = 1;
+      const limit = 10;
+      const actionsHistory = await getActionsHistoryManagedByManagerId({
+        searchText: randomText,
+        skip,
+        limit,
+        projection: {
+          username: '$user.username',
+          action: 1,
+          data: 1,
+          createdAt: 1,
+        },
+        managerId: mockUserId,
+      });
+
+      expect(actionsHistory).toHaveLength(0);
+    });
   });
 
   describe('getUserProfile', () => {
@@ -189,6 +213,58 @@ describe('Setting page', () => {
       await UsersModel.deleteOne({
         username: mockUsername,
       });
+    });
+  });
+
+  describe('setUserLanguage & changeAvatarUrl', () => {
+    it('Should set user language successfully', async () => {
+      const mockParams = {
+        userId: mockUserId,
+        language: 'en',
+      };
+      await setUserLanguage(mockParams);
+
+      const updatedUser = await UsersModel.findOne({ _id: mockUserId });
+      expect(updatedUser?.language).toEqual(mockParams.language);
+    });
+
+    it('should handle change avatar Url', async () => {
+      const avatarUrl = 'imageUrl';
+
+      await changeUserAvatar({ avatarUrl, userId: mockUserId });
+
+      const updatedUser = await UsersModel.findOne({ _id: mockUserId });
+      expect(updatedUser?.avatarUrl).toEqual(avatarUrl);
+    });
+  });
+
+  describe('getTotalUsersManagedByManagerId', () => {
+    it('should return 0 when manager has no users managed', async () => {
+      const total = await getTotalUsersManagedByManagerId(managerId);
+      expect(total).toEqual(0);
+    });
+
+    it('should return total user managed by manager id', async () => {
+      const total = await getTotalUsersManagedByManagerId(mockUserId);
+      expect(total).toEqual(mockUsers.length);
+    });
+  });
+
+  describe('getUsersManagedByManagerId', () => {
+    it('should return Users Managed By Manager Id', async () => {
+      const skip = 1;
+      const limit = 10;
+      const users = await getUsersManagedByManagerId({
+        skip,
+        limit,
+        projection: {
+          username: 1,
+          createdAt: 1,
+        },
+        managerId: mockUserId,
+      });
+      users.map(user => expect(user.username).toEqual(mockUserId_2));
+      expect(users.length).toEqual(1);
     });
   });
 });

@@ -1,5 +1,12 @@
 import bcrypt from 'bcrypt';
-import { verifyAndSendCode } from '~/services/auth.server';
+import {
+  changePassword,
+  getUserByUserId,
+  isResetPassExpired,
+  isVerificationCodeExpired,
+  updateUser,
+  verifyAndSendCode,
+} from '~/services/auth.server';
 import { dotenv } from '~/services/dotenv.server';
 import * as EmailService from '~/services/mail.server';
 import UsersModel from '~/services/model/users.server';
@@ -66,6 +73,141 @@ describe('Authentication', () => {
 
       randomSpy.mockRestore();
       bcryptCompareSpy.mockRestore();
+    });
+  });
+
+  // describe('authenticator OAuth2 strategy', () => {
+  //   let authenticator: Authenticator<AuthenticatorSessionData>;
+
+  //   beforeEach(() => {
+  //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //     //@ts-ignore
+  //     authenticator = new Authenticator();
+  //   });
+
+  //   test('valid code', async () => {
+  //     const code = 'valid-code';
+  //     const user = { id: 'user-id', username: 'username' };
+
+  //     authenticator.use = jest.fn().mockImplementation(strategy => {
+  //       return strategy.authenticate({ form: { get: () => code } });
+  //     });
+
+  //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  //     //@ts-ignore
+  //     const result = await authenticator.use(new FormStrategy());
+
+  //     authenticator.authenticate('user-pass');
+
+  //     console.log(result);
+  //     expect(result).toEqual(user);
+  //   });
+  // });
+
+  describe('Change User information', () => {
+    const mockUser = {
+      _id: 'fake-id',
+      username: 'fake-user',
+      email: 'user1@gmail.com',
+      createdAt: new Date('2024-02-01'),
+      status: 'ACTIVE',
+      cities: ['Hồ Chí Minh'],
+      services: {
+        password: {
+          bcrypt: 'testing',
+        },
+      },
+      isoCode: 'VN',
+      language: 'vi',
+      resetPassword: {
+        expired: new Date(Date.now() + 24 * 60 * 60 * 1000), // tomorrow,
+        token: 'resetToken',
+      },
+    };
+
+    beforeEach(async () => {
+      await UsersModel.create(mockUser);
+    });
+
+    afterEach(async () => {
+      await UsersModel.deleteOne({ _id: mockUser._id });
+    });
+
+    it('Should change password successful', async () => {
+      const result = await changePassword({
+        newPassword: '123456',
+        token: mockUser.resetPassword.token,
+      });
+      expect(result).toEqual(mockUser._id);
+    });
+
+    it('Should return data correctly when get user by user id', async () => {
+      const account = await getUserByUserId({ userId: mockUser._id });
+
+      expect(account?._id).toEqual(mockUser._id);
+      expect(account?.username).toEqual(mockUser.username);
+      expect(account?.email).toEqual(mockUser.email);
+    });
+
+    it('Should return data correctly when update user', async () => {
+      const account = await updateUser({
+        username: mockUser.username,
+        email: mockUser.email,
+        cities: mockUser.cities,
+        userId: mockUser._id,
+      });
+
+      expect(account?._id).toEqual(mockUser._id);
+      expect(account?.email).toEqual(mockUser.email);
+    });
+  });
+
+  describe('isVerificationCodeExpired & isResetPassExpired', () => {
+    const mockUser = {
+      _id: 'fake-id',
+      username: 'fake-user',
+      email: 'user1@gmail.com',
+      createdAt: new Date('2024-02-01'),
+      status: 'ACTIVE',
+      cities: ['Hồ Chí Minh'],
+      services: {
+        password: {
+          bcrypt: 'testing',
+        },
+      },
+      isoCode: 'VN',
+      language: 'vi',
+      resetPassword: {
+        expired: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        token: 'resetToken',
+      },
+      verification: {
+        code: '123456',
+        token: 'verificationToken',
+        expired: new Date(Date.now() - 24 * 60 * 60 * 1000), //last day
+      },
+    };
+
+    beforeEach(async () => {
+      await UsersModel.create(mockUser);
+    });
+
+    afterEach(async () => {
+      await UsersModel.deleteOne({ _id: mockUser._id });
+    });
+
+    it('isVerificationCodeExpired', async () => {
+      const result = await isVerificationCodeExpired({
+        token: mockUser.verification.token,
+      });
+      expect(result).toBe(true);
+    });
+
+    it('isResetPassExpired', async () => {
+      const result = await isResetPassExpired({
+        token: mockUser.resetPassword.token,
+      });
+      expect(result).toBe(true);
     });
   });
 });

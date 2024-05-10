@@ -14,6 +14,7 @@ export const handle = {
   breadcrumb: () => (
     <BreadcrumbsLink disabled to="/settings" label="SETTINGS" />
   ),
+  i18n: 'user-settings',
 };
 
 export default function Screen() {

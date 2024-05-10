@@ -44,11 +44,12 @@ export const handle = {
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
-
-    const role = await getRoleDetail(params.roleId || '');
-
     const { isSuperUser } = await getUserSession({ headers: request.headers });
-    const permissions = await getGroupPermissions({ groupId, isSuperUser });
+
+    const [permissions, role] = await Promise.all([
+      getGroupPermissions({ groupId, isSuperUser }),
+      getRoleDetail(params.roleId || ''),
+    ]);
 
     return json({
       role,
@@ -77,18 +78,21 @@ export const action = hocAction(
     const permissions =
       JSON.parse(formData.get('permissions')?.toString() || '') || [];
 
-    const roleName = await updateRole({
-      name,
-      description,
-      permissions,
-      roleId: params.roleId || '',
-      groupId: params.id || '',
-    });
+    const [roleName, session] = await Promise.all([
+      updateRole({
+        name,
+        description,
+        permissions,
+        roleId: params.roleId || '',
+        groupId: params.id || '',
+      }),
+      getSession(request.headers.get('cookie')),
+    ]);
+
     setInformationActionHistory({
       action: ACTION_NAME.UPDATE_ROLE,
     });
 
-    const session = await getSession(request.headers.get('cookie'));
     session.flash('flashMessage', `Role ${roleName} updated`);
 
     const newSession = await commitSession(session);

@@ -27,9 +27,15 @@ const config: Config = {
   coverageDirectory: 'coverage',
 
   // An array of regexp pattern strings used to skip coverage collection
-  // coveragePathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/app/i18n.ts',
+    '<rootDir>/app/enums/',
+    '<rootDir>/app/constants/',
+    '<rootDir>/app/services/dotenv.server.ts',
+    '<rootDir>/app/utils/db.server.ts',
+    '<rootDir>/app/utils/passports.server.ts',
+  ],
 
   // Indicates which provider should be used to instrument code for coverage
   // coverageProvider: "babel",

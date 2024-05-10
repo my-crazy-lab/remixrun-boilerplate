@@ -4,7 +4,7 @@ import {
   type LoaderFunctionArgs,
   json,
 } from '@remix-run/node';
-import { ACTION_NAME, ERROR } from '~/constants/common';
+import { ACTION_NAME, ERROR, res403, res404 } from '~/constants/common';
 import i18next from '~/i18next.server';
 import { newRecordCommonField } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
@@ -108,10 +108,12 @@ export function hocAction<A>(
 
       return actionResult;
     } catch (error) {
+      const t = await i18next.getFixedT(args.request, 'user-settings');
       if (error instanceof Error) {
-        return json({ error: error.message });
+        return json({ error: t(error.message) });
       }
-      return json({ error: ERROR.UNKNOWN_ERROR, detail: error });
+
+      return json({ error: t(ERROR.UNKNOWN_ERROR), detail: error });
     }
   }
 
@@ -123,7 +125,7 @@ export function hocLoader<A>(
     args: LoaderFunctionArgs,
     argsHoc: { permissionsPassed: Array<string> },
   ) => A,
-  permission: string | Array<string>,
+  permission?: string | Array<string>,
 ) {
   async function loader(args: LoaderFunctionArgs) {
     try {
@@ -155,16 +157,16 @@ export function hocLoader<A>(
       }
 
       const loaderResult = await callback(args, {
-        permissionsPassed: [permission],
+        permissionsPassed: permission ? [permission] : [],
       });
       return loaderResult;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('DEBUGGER loader: ', error);
-      if (error instanceof Error) {
-        return json({ error: error.message });
-      }
       const t = await i18next.getFixedT(args.request, 'user-settings');
+      if (error instanceof Error) {
+        return json({ error: t(error.message) });
+      }
 
       return json({ error: t(ERROR.UNKNOWN_ERROR) });
     }
@@ -177,23 +179,6 @@ export interface ErrorResponse {
   status: number;
   statusText: string;
 }
-
-export const res500 = {
-  status: 500,
-  statusText: 'INTERNAL_SERVER_ERROR',
-};
-export const res404 = {
-  status: 404,
-  statusText: 'PAGE_NOT_FOUND',
-};
-export const res403 = {
-  status: 403,
-  statusText: 'NOT_PERMISSION_TO_ACCESS',
-};
-export const res403GroupParent = {
-  status: 403,
-  statusText: 'NOT_PARENT_OF_GROUP',
-};
 
 export async function hoc404<TResult>(callback: () => Promise<TResult>) {
   const result = await callback();

@@ -55,18 +55,30 @@ export const action = hocAction(
     const email = formData.get('email')?.toString() || '';
     const cities = JSON.parse(formData.get('cities')?.toString() || '') || [];
 
-    const user = await updateUser({
-      username,
-      email,
-      cities,
-      userId: params.id || '',
-    });
+    // const user = await updateUser({
+    //   username,
+    //   email,
+    //   cities,
+    //   userId: params.id || '',
+    // });
+
+    // const session = await getSession(request.headers.get('cookie'));
+
+    const [user, session] = await Promise.all([
+      updateUser({
+        username,
+        email,
+        cities,
+        userId: params.id || '',
+      }),
+      getSession(request.headers.get('cookie')),
+    ]);
+
+    session.flash('flashMessage', `User ${user?.username} updated`);
+
     setInformationActionHistory({
       action: ACTION_NAME.UPDATE_USER,
     });
-
-    const session = await getSession(request.headers.get('cookie'));
-    session.flash('flashMessage', `User ${user?.username} updated`);
 
     return redirect('/settings/users', {
       headers: {
@@ -81,10 +93,10 @@ export const loader = hocLoader(
   async ({ request, params }: LoaderFunctionArgs) => {
     const { isoCode } = await getUserSession({ headers: request.headers });
 
-    const cities = await getCities(isoCode);
-    const user = await hoc404(() =>
-      getUserByUserId({ userId: params.id || '' }),
-    );
+    const [cities, user] = await Promise.all([
+      getCities(isoCode),
+      hoc404(() => getUserByUserId({ userId: params.id || '' })),
+    ]);
 
     if (!user || !user?.email) {
       throw new Error('USER_NOT_FOUND');

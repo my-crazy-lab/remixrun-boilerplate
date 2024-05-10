@@ -1,5 +1,4 @@
-import { PERMISSIONS } from '~/constants/common';
-import { res403, res404 } from '~/hoc/remix';
+import { PERMISSIONS, res403, res404 } from '~/constants/common';
 import {
   newRecordCommonField,
   statusOriginal,

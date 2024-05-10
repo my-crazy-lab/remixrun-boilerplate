@@ -7,7 +7,6 @@
 - :globe_with_meridians: **International**: Built-in i18n solution
 - :gear: **Best Practices**: Solid workflow to make your code healthy
 - :zap: **Router Redirect**: Available Error boundary page
-- :four_leaf_clover: **Plugin Architecture**: Modify multi project for Enterprise by plugin architecture (DOING)
 - :pencil: **Code Conventions**:
   - [Linter](https://eslint.org/)
   - [Formatter](https://prettier.io/)
@@ -24,8 +23,8 @@
   - [Dashboard advanced](https://tanstack.com/table/latest)
 - :ok_hand: **Unit Test**:
   - Fly safely with unit [Jest](https://jestjs.io/)
-  - 100% coverage. (DOING)
-- :cyclone: **Available CI/CD**: :construction: doing
+  - 100% coverage.
+- :cyclone: **Available CI/CD**
 
 ## Features
 
@@ -171,6 +170,8 @@ npm run dev
 
 ## Deployment
 
+### Manually
+
 First, build your app for production:
 
 ```sh
@@ -180,7 +181,11 @@ npm run build
 Then run the app in production mode:
 
 ```sh
-npm start
+npm run deploy
 ```
 
 Now you'll need to pick a host to deploy it to.
+
+### Dockerfile
+
+We have dockerfile to deploy anywhere you want.
