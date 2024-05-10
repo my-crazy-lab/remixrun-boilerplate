@@ -37,7 +37,7 @@ import {
   createGlobalStore,
 } from '~/context/global-store';
 import { hocLoader } from '~/hoc/remix';
-import { authenticator } from '~/services/auth.server';
+import { authenticator } from '~/services/passports.server';
 import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
 import { commitSession, getSession } from '~/services/session.server';
 import { getUserProfile } from '~/services/settings.server';
@@ -68,6 +68,8 @@ export const loader = hocLoader(async ({ request }: LoaderFunctionArgs) => {
     },
   );
 });
+
+export const handle = { i18n: 'common' };
 
 export default function Screen() {
   const { user, userProfile } =

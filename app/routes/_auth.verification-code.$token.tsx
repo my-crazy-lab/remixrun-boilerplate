@@ -10,10 +10,8 @@ import { useNavigation, useSubmit } from '@remix-run/react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import ROUTE_NAME from '~/constants/route';
-import {
-  authenticator,
-  isVerificationCodeExpired,
-} from '~/services/auth.server';
+import { isVerificationCodeExpired } from '~/services/auth.server';
+import { authenticator } from '~/services/passports.server';
 import { commitSession, getSession } from '~/services/session.server';
 
 export async function action({ request, params }: ActionFunctionArgs) {

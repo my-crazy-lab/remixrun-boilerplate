@@ -34,6 +34,7 @@ const config: Config = {
     '<rootDir>/app/constants/',
     '<rootDir>/app/services/dotenv.server.ts',
     '<rootDir>/app/utils/db.server.ts',
+    '<rootDir>/app/utils/passports.server.ts',
   ],
 
   // Indicates which provider should be used to instrument code for coverage

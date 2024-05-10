@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import DefaultImage from '@/images/default-image.svg';
 import { UploadIcon } from '@radix-ui/react-icons';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ImageUploadProps {

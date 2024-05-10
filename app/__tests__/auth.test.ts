@@ -16,12 +16,6 @@ jest.mock('~/services/mail.server', () => ({
   sendEmail: jest.fn(),
 }));
 
-jest.mock('~/services/auth.server', () => ({
-  __esModule: true,
-  verifyCode: jest.fn(),
-  ...jest.requireActual('~/services/auth.server'),
-}));
-
 describe('Authentication', () => {
   describe('verifyAndSendCode & sendVerificationCode', () => {
     const mockUser = {
