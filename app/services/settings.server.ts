@@ -1,10 +1,13 @@
-import ActionsHistoryModel from '~/model/actionHistory.server';
-import UsersModel from '~/model/users.server';
-import { type Users } from '~/types';
+import { defaultLanguage } from '~/constants/common';
+import ActionsHistoryModel from '~/services/model/actionHistory.server';
+import UsersModel from '~/services/model/users.server';
+import { type ActionsHistory, type Users } from '~/types';
+import { momentTz } from '~/utils/common';
 import { type PipelineStage } from '~/utils/db.server';
 
-import { hashPassword } from './auth.server';
-import { newRecordCommonField } from './constants.server';
+import { newRecordCommonField, statusOriginal } from './constants.server';
+import GroupsModel from './model/groups.server';
+import { getUsersInGroupsByUserId } from './role-base-access-control.server';
 
 interface ISearch {
   $match: {
@@ -15,10 +18,12 @@ interface ISearch {
   };
 }
 
-export async function getTotalActionsHistory({
+export async function getTotalActionsHistoryManageByManagerId({
   searchText,
+  managerId,
 }: {
   searchText: string;
+  managerId: string;
 }) {
   const $search: ISearch = { $match: {} };
 
@@ -28,12 +33,18 @@ export async function getTotalActionsHistory({
       $options: 'i',
     };
   }
+  const userIdsManaged = await getUsersInGroupsByUserId(managerId);
 
-  const result = await ActionsHistoryModel.aggregate([
+  const result = await ActionsHistoryModel.aggregate<{ total: number }>([
+    {
+      $match: {
+        $or: [{ actorId: { $in: userIdsManaged } }, { actorId: managerId }],
+      },
+    },
     {
       $lookup: {
         from: 'users',
-        localField: 'userId',
+        localField: 'actorId',
         foreignField: '_id',
         as: 'user',
       },
@@ -46,23 +57,26 @@ export async function getTotalActionsHistory({
     },
     $search,
     { $count: 'total' },
-  ]);
+  ]).exec();
 
-  return result.length > 0 ? result[0].total : 0;
+  return result.length > 0 ? result?.[0].total : 0;
 }
 
-export async function getActionsHistory({
+export async function getActionsHistoryManagedByManagerId({
   skip,
   limit,
   projection,
   searchText,
+  managerId,
 }: {
   searchText: string;
   skip: PipelineStage.Skip['$skip'];
   limit: PipelineStage.Limit['$limit'];
   projection: PipelineStage.Project['$project'];
+  managerId: string;
 }) {
   const $search: ISearch = { $match: {} };
+  const userIdsManaged = await getUsersInGroupsByUserId(managerId);
 
   if (searchText) {
     $search.$match['user.username'] = {
@@ -71,11 +85,20 @@ export async function getActionsHistory({
     };
   }
 
-  const actionsHistory = await ActionsHistoryModel.aggregate([
+  const actionsHistory = await ActionsHistoryModel.aggregate<
+    ActionsHistory & {
+      user: Users;
+    }
+  >([
+    {
+      $match: {
+        $or: [{ actorId: { $in: userIdsManaged } }, { actorId: managerId }],
+      },
+    },
     {
       $lookup: {
         from: 'users',
-        localField: 'userId',
+        localField: 'actorId',
         foreignField: '_id',
         as: 'user',
       },
@@ -86,32 +109,42 @@ export async function getActionsHistory({
         preserveNullAndEmptyArrays: true,
       },
     },
+    $search,
     { $sort: { createdAt: -1 } },
     { $project: { ...projection } },
-    $search,
     { $skip: skip },
     { $limit: limit },
-  ]);
+  ]).exec();
 
   return actionsHistory;
 }
 
-export async function getTotalUsers() {
-  const total = await UsersModel.countDocuments({});
+export async function getTotalUsersManagedByManagerId(managerId: string) {
+  const userIds = await getUsersInGroupsByUserId(managerId);
 
-  return total;
+  const users = await UsersModel.find(
+    { status: statusOriginal.ACTIVE, _id: { $in: userIds } },
+    {},
+  ).lean<Users[]>();
+
+  return users.length;
 }
 
-export async function getUsers({
+export async function getUsersManagedByManagerId({
   skip,
   limit,
   projection,
+  managerId,
 }: {
   skip: PipelineStage.Skip['$skip'];
   limit: PipelineStage.Limit['$limit'];
   projection: PipelineStage.Project['$project'];
+  managerId: string;
 }) {
+  const userIds = await getUsersInGroupsByUserId(managerId);
+
   const users = await UsersModel.find(
+    { status: statusOriginal.ACTIVE, _id: { $in: userIds } },
     {},
     {
       sort: {
@@ -123,28 +156,71 @@ export async function getUsers({
       skip,
       limit,
     },
-  );
+  ).lean<Users[]>();
 
   return users;
 }
 
 export function getUserProfile(_id: string) {
-  return UsersModel.findOne({ _id });
+  return UsersModel.findOne({ _id }).lean<Users>();
 }
 
 export async function createNewUser({
   username,
-  password,
   email,
   cities,
-}: Pick<Users, 'username' | 'email' | 'cities'> & { password: string }) {
-  const passwordHashed = hashPassword(password);
-
-  await UsersModel.create({
+  isoCode,
+  groupIds,
+}: Pick<Users, 'username' | 'email' | 'cities' | 'isoCode'> & {
+  groupIds: Array<string>;
+}) {
+  const newUser = await UsersModel.create({
     ...newRecordCommonField(),
     username,
     email,
     cities,
-    services: { password: { bcrypt: passwordHashed } },
+    isoCode,
+    lang: defaultLanguage,
   });
+
+  await GroupsModel.updateMany(
+    {
+      _id: { $in: groupIds },
+    },
+    {
+      $push: { userIds: newUser._id },
+    },
+  );
+
+  return newUser;
+}
+
+export async function setUserLanguage({
+  language,
+  userId,
+}: Pick<Users, 'language'> & { userId: string }) {
+  await UsersModel.updateOne(
+    { _id: userId },
+    {
+      $set: {
+        updatedAt: momentTz().toDate(),
+        language,
+      },
+    },
+  );
+}
+
+export async function changeUserAvatar({
+  avatarUrl,
+  userId,
+}: Pick<Users, 'avatarUrl'> & { userId: string }) {
+  await UsersModel.updateOne(
+    { _id: userId },
+    {
+      $set: {
+        updatedAt: momentTz().toDate(),
+        avatarUrl,
+      },
+    },
+  );
 }

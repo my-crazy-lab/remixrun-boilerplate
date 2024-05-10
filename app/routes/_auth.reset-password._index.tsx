@@ -1,51 +1,59 @@
+import { Grid } from '@/components/btaskee/Grid';
+import { LoadingSpinner } from '@/components/btaskee/LoadingSpinner';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { type ActionFunctionArgs, json } from '@remix-run/node';
-import { Form, useActionData, useNavigation } from '@remix-run/react';
+import { json } from '@remix-run/node';
+import {
+  Link,
+  useActionData,
+  useNavigation,
+  useSubmit,
+} from '@remix-run/react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ERROR } from '~/constants/common';
+import { hocAction } from '~/hoc/remix';
 import { resetPassword } from '~/services/auth.server';
+import { type ActionTypeWithError } from '~/types';
 
-interface ActionData {
-  isSent?: boolean;
-  error?: string;
-}
+export const action = hocAction(async ({ request }) => {
+  const formData = await request.clone().formData();
+  const email = formData.get('email')?.toString() || '';
 
-export async function action({ request }: ActionFunctionArgs) {
-  try {
-    const formData = await request.formData();
-    const { email } = Object.fromEntries(formData);
+  await resetPassword(email);
 
-    if (email && typeof email === 'string') {
-      await resetPassword(email);
-    } else {
-      throw new Error('Email incorrect');
-    }
-
-    return json({ isSent: true });
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
-  }
-}
+  return json({ isSent: true });
+});
 
 export async function loader() {
   return null;
 }
 
 export default function Screen() {
-  const { t } = useTranslation(['authentication']);
+  const { t } = useTranslation('authentication');
   const { state } = useNavigation();
+  const submit = useSubmit();
 
-  const actionData = useActionData<ActionData>();
-  if (actionData?.error) {
-    toast({ description: actionData.error });
-  }
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ description: actionData.error });
+    }
+  }, [actionData]);
+
+  const { handleSubmit, formState, register } = useForm<{ email: string }>();
+
+  const onSubmit = (data: { email: string }) => {
+    const formData = new FormData();
+
+    formData.append('email', data.email);
+
+    submit(formData, { method: 'post' });
+  };
 
   return (
     <>
@@ -59,23 +67,30 @@ export default function Screen() {
         {actionData?.isSent ? (
           t('CHECK_YOUR_EMAIL')
         ) : (
-          <Form method="post">
-            <div className="grid gap-6">
-              <div className="grid gap-2">
-                <Label>{t('EMAIL')}</Label>
-                <Input
-                  required
-                  name="email"
-                  type="email"
-                  placeholder="name@btaskee.com"
-                />
+          <Grid>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label>{t('EMAIL')}</Label>
+                  <Input
+                    {...register('email' as const, {
+                      required: t('THIS_FIELD_IS_REQUIRED'),
+                    })}
+                    placeholder="name@btaskee.com"
+                  />
+                  <ErrorMessageBase name="email" errors={formState.errors} />
+                </div>
+                <Button>
+                  {state !== 'idle' ? <LoadingSpinner /> : t('SEND')}
+                </Button>
               </div>
-              <>
-                <Button>{state !== 'idle' ? t('LOADING') : t('SEND')}</Button>
-                <Button variant="outline">{t('BACK_TO_SIGN_IN')}</Button>
-              </>
-            </div>
-          </Form>
+            </form>
+            <Link to="/sign-in">
+              <Button className="w-full" variant="outline">
+                {t('BACK_TO_SIGN_IN')}
+              </Button>
+            </Link>
+          </Grid>
         )}
       </div>
     </>

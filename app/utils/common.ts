@@ -42,9 +42,17 @@ export function convertRolesToPermissions(roles: Roles[]) {
   const initialValue: Roles['permissions'] = [];
   const setOfPermissions = new Set(
     roles.reduce(
-      (acc, role) => [...acc, ...(role?.permissions || [])],
+      (acc, role) => [...acc, ...(role?.permissions || initialValue)],
       initialValue,
     ),
   );
   return [...setOfPermissions];
+}
+
+export function removeDuplicatedItem(array: Array<Array<string>>) {
+  const initialValue: Array<string> = [];
+  const setOfValue = new Set(
+    array.reduce((acc, item) => [...acc, ...(item || [])], initialValue),
+  );
+  return [...setOfValue];
 }

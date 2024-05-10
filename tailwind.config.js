@@ -54,12 +54,23 @@ module.exports = {
         },
         gray: {
           DEFAULT: 'hsl(var(--gray-500))',
+          700: 'hsl(var(--gray-700))',
           400: 'hsl(var(--gray-400))',
+          200: 'hsl(var(--gray-200))',
           100: 'hsl(var(--gray-100))',
+          50: 'hsl(var(--gray-50))',
         },
         blue: {
           DEFAULT: 'hsl(var(--blue-500))',
           50: 'hsl(var(--blue-50))',
+        },
+        yellow: {
+          DEFAULT: 'hsl(var(--yellow-500))',
+          50: 'hsl(var(--yellow-50))',
+        },
+        red: {
+          DEFAULT: 'hsl(var(--red-500))',
+          50: 'hsl(var(--red-50))',
         },
       },
       borderRadius: {
@@ -80,6 +91,9 @@ module.exports = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
       },
     },
   },

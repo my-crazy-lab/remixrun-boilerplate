@@ -1,4 +1,5 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import {
   Accordion,
@@ -10,63 +11,85 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { toast } from '@/components/ui/use-toast';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { useLoaderData, useSubmit } from '@remix-run/react';
+import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
 import _ from 'lodash';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ERROR, PERMISSIONS } from '~/constants/common';
+import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hocAction, hocLoader } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import { getUserSession } from '~/services/helpers.server';
 import {
   createRole,
   getGroupPermissions,
 } from '~/services/role-base-access-control.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import { commitSession, getSession } from '~/services/session.server';
+import type { ActionTypeWithError, LoaderTypeWithError } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
 export const handle = {
-  breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/groups" label="Create role" />
-  ),
+  breadcrumb: (data: { groupId: string }) => {
+    return (
+      <BreadcrumbsLink
+        to={`/settings/groups/${data.groupId}/roles/create`}
+        label="CREATE_ROLE"
+      />
+    );
+  },
+  i18n: 'user-settings',
 };
 
 export const action = hocAction(
-  async ({ params }: ActionFunctionArgs, { formData }) => {
-    try {
-      const { name, description, permissions } = formData;
-      await createRole({
-        name,
-        groupId: params.id || '',
-        description,
-        permissions: JSON.parse(permissions),
-      });
+  async (
+    { request, params }: ActionFunctionArgs,
+    { setInformationActionHistory },
+  ) => {
+    const groupId = params.id || '';
 
-      return redirect(`/settings/groups/${params.id}`);
-    } catch (error) {
-      if (error instanceof Error) {
-        return json({ error: error.message });
-      }
-      return json({ error: ERROR.UNKNOWN_ERROR });
-    }
+    const formData = await request.clone().formData();
+
+    const name = formData.get('name')?.toString() || '';
+    const description = formData.get('description')?.toString() || '';
+    const permissions =
+      JSON.parse(formData.get('permissions')?.toString() || '') || [];
+
+    const role = await createRole({
+      name,
+      groupId,
+      description,
+      permissions,
+    });
+    setInformationActionHistory({
+      action: ACTION_NAME.CREATE_ROLE,
+      dataRelated: { roleId: role._id },
+    });
+
+    const session = await getSession(request.headers.get('cookie'));
+    session.flash('flashMessage', `Role ${role?.name} created`);
+
+    const newSession = await commitSession(session);
+
+    return redirect(`/settings/groups/${params.id}`, {
+      headers: {
+        'Set-Cookie': newSession,
+      },
+    });
   },
   PERMISSIONS.WRITE_ROLE,
 );
 
-interface LoaderData {
-  permissions: ReturnValueIgnorePromise<typeof getGroupPermissions>;
-  permissionsGrouped: ReturnType<typeof groupPermissionsByModule>;
-}
-
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
-    const { isSuperUser } = await getUserSession({ request });
 
+    const { isSuperUser } = await getUserSession({ headers: request.headers });
     const permissions = await getGroupPermissions({ groupId, isSuperUser });
 
     return json({
+      groupId,
       permissions,
       permissionsGrouped: groupPermissionsByModule(permissions),
     });
@@ -79,12 +102,18 @@ interface FormData {
   name: string;
   description: string;
 }
+
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
+  if (actionData?.error) {
+    toast({ description: actionData.error });
+  }
 
-  const loaderData = useLoaderData<LoaderData>();
+  const { t } = useTranslation('user-settings');
+  const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
 
-  const { register, control, handleSubmit } = useForm<FormData>({
+  const confirm = useConfirm();
+  const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       name: '',
       description: '',
@@ -92,11 +121,11 @@ export default function Screen() {
   });
   const submit = useSubmit();
 
-  const onSubmit = (data: FormData) => {
+  async function onSubmit(data: FormData) {
     const formData = new FormData();
     const permissions: string[] = [];
 
-    Object.entries(data.permissions).forEach(item => {
+    Object.entries(data.permissions || []).forEach(item => {
       if (item[1]) {
         permissions.push(item[0]);
       }
@@ -106,8 +135,13 @@ export default function Screen() {
     formData.append('description', data.description);
     formData.append('permissions', JSON.stringify(permissions));
 
-    submit(formData, { method: 'post' });
-  };
+    const isConfirm = await confirm({
+      title: t('EDIT'),
+      body: t('ARE_YOU_SURE_EDIT_THIS_RECORD'),
+    });
+
+    if (isConfirm) submit(formData, { method: 'post' });
+  }
 
   return (
     <>
@@ -123,16 +157,22 @@ export default function Screen() {
             <Input
               placeholder={t('ENTER_ROLE_NAME')}
               className="mt-2"
-              {...register('name' as const, { required: true })}
+              {...register('name' as const, {
+                required: t('THIS_FIELD_IS_REQUIRED'),
+              })}
             />
+            <ErrorMessageBase name="name" errors={formState.errors} />
           </div>
           <div>
             <Label htmlFor="description">{t('DESCRIPTION')}</Label>
             <Input
               placeholder={t('ENTER_DESCRIPTION')}
               className="mt-2"
-              {...register('description' as const, { required: true })}
+              {...register('description' as const, {
+                required: t('THIS_FIELD_IS_REQUIRED'),
+              })}
             />
+            <ErrorMessageBase name="description" errors={formState.errors} />
           </div>
         </div>
 

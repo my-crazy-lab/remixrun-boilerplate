@@ -1,94 +1,97 @@
-import { type Document } from 'mongodb';
-import { PERMISSIONS } from '~/constants/common';
-import { res404 } from '~/hoc/remix';
-import GroupsModel from '~/model/groups.server';
-import PermissionsModel from '~/model/permissions.server';
-import RolesModel from '~/model/roles.servers';
-import UsersModel from '~/model/users.server';
+import { PERMISSIONS, res403, res404 } from '~/constants/common';
 import {
   newRecordCommonField,
   statusOriginal,
 } from '~/services/constants.server';
-import { getUserId } from '~/services/helpers.server';
-import { type Groups, type Permissions, type Roles, type Users } from '~/types';
-import { type GetRolesOfGroupsProjection } from '~/types/bridge';
-import { convertRolesToPermissions, momentTz } from '~/utils/common';
+import GroupsModel from '~/services/model/groups.server';
+import PermissionsModel from '~/services/model/permissions.server';
+import RolesModel from '~/services/model/roles.servers';
+import UsersModel from '~/services/model/users.server';
+import type { Groups, Roles, Users } from '~/types';
+import {
+  convertRolesToPermissions,
+  momentTz,
+  removeDuplicatedItem,
+} from '~/utils/common';
+import { type Projection } from '~/utils/db.server';
 
-/**
- * @description verify the user is super-user or not
- */
-export async function isRoot(userId: string) {
-  const permissions: Array<string> = await getUserPermissions(userId);
+export async function verifySuperUser(userId: string) {
+  const permissions = await getUserPermissions(userId);
   return Boolean(permissions.includes(PERMISSIONS.ROOT));
 }
 
-export async function verifyPermissions(
-  { request }: { request: Request },
-  permissions: Array<string>,
-) {
-  const userId = await getUserId({ request });
-  const roles = await RolesModel.find(
-    { permissions: { $in: permissions }, status: statusOriginal.ACTIVE },
-    { projection: { _id: 1 } },
-  ).exec();
-
-  const groupFound = await GroupsModel.findOne({
-    userIds: userId,
-    roleIds: { $in: roles.map(role => role._id) },
-    status: statusOriginal.ACTIVE,
-  });
-
-  if (groupFound) {
-    return true;
-  }
-  return false;
+export async function verifyManager(userId: string) {
+  const permissions = await getUserPermissions(userId);
+  return Boolean(permissions.includes(PERMISSIONS.MANAGER));
 }
 
-export async function requirePermissions(
-  { request }: { request: Request },
-  permissions: Array<string>,
-) {
-  const isAccepted = await verifyPermissions({ request }, permissions);
-  if (!isAccepted) {
-    throw new Error("User don't have permission");
+export async function getUserPermissionsIgnoreRoot(userId: string) {
+  const groups = await GroupsModel.aggregate([
+    {
+      $match: {
+        userIds: userId,
+        status: statusOriginal.ACTIVE,
+      },
+    },
+    // roleAssignedIds store permissions of group
+    {
+      $lookup: {
+        from: 'roles',
+        localField: 'roleAssignedIds',
+        foreignField: '_id',
+        as: 'roles',
+      },
+    },
+    {
+      $unwind: {
+        path: '$roles',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ]).exec();
+  const permissions = convertRolesToPermissions(
+    groups.map(group => group.roles),
+  );
+
+  if (permissions.includes(PERMISSIONS.ROOT)) {
+    const allPermissions = await getAllPermissionsIgnoreRoot();
+    return allPermissions.map(permission => permission._id);
   }
+
+  return permissions;
 }
 
 export async function getUserPermissions(userId: string) {
-  const matchGroups = {
-    $match: {
-      userIds: userId,
-      status: statusOriginal.ACTIVE,
+  const groups = await GroupsModel.aggregate([
+    {
+      $match: {
+        userIds: userId,
+        status: statusOriginal.ACTIVE,
+      },
     },
-  };
-
-  const lookupRole = {
-    $lookup: {
-      from: 'roles',
-      localField: 'roleAssignedIds',
-      foreignField: '_id',
-      as: 'roles',
+    // roleAssignedIds store permissions of group
+    {
+      $lookup: {
+        from: 'roles',
+        localField: 'roleAssignedIds',
+        foreignField: '_id',
+        as: 'roles',
+      },
     },
-  };
-
-  const unwindRole = {
-    $unwind: {
-      path: '$roles',
-      preserveNullAndEmptyArrays: true,
+    {
+      $unwind: {
+        path: '$roles',
+        preserveNullAndEmptyArrays: true,
+      },
     },
-  };
-
-  const aggregate = [matchGroups, lookupRole, unwindRole];
-
-  const groups = await GroupsModel.aggregate(aggregate).exec();
-
+  ]).exec();
   const permissions = convertRolesToPermissions(
     groups.map(group => group.roles),
   );
 
   if (permissions.includes(PERMISSIONS.ROOT)) {
     const allPermissions = await getAllPermissions();
-    return allPermissions.map(p => p._id);
+    return allPermissions.map(permission => permission._id);
   }
 
   return permissions;
@@ -97,29 +100,43 @@ export async function getUserPermissions(userId: string) {
 export async function createGroup({
   name,
   description,
-  parent,
+  parentId,
   userIds,
   roleAssignedIds,
 }: Pick<Groups, 'name' | 'description' | 'userIds' | 'roleAssignedIds'> & {
-  parent: string;
+  parentId: string;
 }) {
   const parentGroup = await GroupsModel.findOne({
-    _id: parent,
+    _id: parentId,
     status: statusOriginal.ACTIVE,
-  });
+  }).lean();
   if (!parentGroup) {
     throw new Error('PARENT_GROUP_NOT_FOUND');
   }
 
-  await GroupsModel.create({
+  // root group (hierarchy 1) not have genealogy field
+  const genealogy = [...(parentGroup.genealogy || []), parentId];
+
+  const groupCreated = await GroupsModel.create({
     ...newRecordCommonField(),
     name,
     description,
     userIds,
     roleAssignedIds,
-    genealogy: [...(parentGroup.genealogy || []), parent],
+    genealogy,
     hierarchy: parentGroup.hierarchy + 1, // increase hierarchy
   });
+
+  // update parent group
+  await GroupsModel.updateOne(
+    { _id: parentId },
+    {
+      $set: { updateAt: momentTz().toDate() },
+      $push: { nearestChildren: groupCreated._id },
+    },
+  );
+
+  return groupCreated;
 }
 
 export async function updateGroups({
@@ -131,46 +148,395 @@ export async function updateGroups({
 }: Pick<Groups, 'name' | 'description' | 'userIds' | 'roleAssignedIds'> & {
   groupId: string;
 }) {
-  await GroupsModel.updateOne(
+  const updatedAt = momentTz().toDate();
+
+  const previousPermissions = await getPermissionsCreatedByGroupId({ groupId });
+
+  const newRolesAssigned = await RolesModel.find({
+    _id: { $in: roleAssignedIds },
+  }).lean<Roles[]>();
+
+  const permissionsAfterUpdateRole =
+    convertRolesToPermissions(newRolesAssigned);
+
+  const permissionsRemoved = previousPermissions.filter(
+    permission => !permissionsAfterUpdateRole.includes(permission),
+  );
+
+  const group = await GroupsModel.findOneAndUpdate(
     { _id: groupId },
     {
       $set: {
-        updatedAt: momentTz().toDate(),
+        updatedAt,
         name,
         description,
         userIds,
         roleAssignedIds,
       },
     },
+    { new: true },
+  ).lean<Groups>();
+
+  // update roleIds
+  const roleIdsOfGroupWillBeUpdated = await GroupsModel.aggregate([
+    {
+      $match: { _id: groupId },
+    },
+    {
+      $lookup: {
+        from: 'roles',
+        localField: 'roleIds',
+        foreignField: '_id',
+        as: 'roles',
+      },
+    },
+    {
+      $unwind: {
+        path: '$roles',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $match: { 'roles.permissions': { $in: permissionsRemoved } },
+    },
+  ]).exec();
+  await RolesModel.updateMany(
+    {
+      _id: {
+        $in: roleIdsOfGroupWillBeUpdated?.map(e => e?.roles?._id || '') || [],
+      },
+    },
+    {
+      $set: {
+        updatedAt,
+      },
+      $pullAll: { permissions: permissionsRemoved },
+    },
   );
+
+  if (permissionsRemoved.length) {
+    const rolesWillBeUpdated =
+      await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
+        groupId,
+        permissionsRemoved,
+      });
+
+    await RolesModel.updateMany(
+      { _id: { $in: rolesWillBeUpdated } },
+      {
+        $set: {
+          updatedAt,
+        },
+        $pullAll: { permissions: permissionsRemoved },
+      },
+    );
+  }
+
+  return group;
+}
+
+export async function getUsersByGroupId(groupIds: string[]) {
+  const groups = await GroupsModel.find({
+    status: statusOriginal.ACTIVE,
+    genealogy: { $in: groupIds },
+  }).lean();
+
+  let userIds: Array<string> = [];
+  groups.forEach(group => {
+    userIds = [...userIds, ...group.userIds];
+  });
+
+  // remove duplicate user id
+  return [...new Set(userIds)];
 }
 
 export async function getRoleDetail(roleId: string) {
-  const roles = await RolesModel.aggregate<
-    Roles & { actionPermissions: Permissions[] }
-  >([
-    { $match: { _id: roleId, status: statusOriginal.ACTIVE } },
-    {
-      $lookup: {
-        from: 'permissions',
-        localField: 'permissions',
-        foreignField: '_id',
-        as: 'actionPermissions',
-      },
-    },
-  ]).exec();
+  const roles = await RolesModel.findOne({
+    _id: roleId,
+    status: statusOriginal.ACTIVE,
+  }).lean();
 
-  if (!roles.length) throw new Response(null, res404);
+  if (!roles) throw new Response(null, res404);
 
-  return roles[0];
+  const actionPermissions = await PermissionsModel.find({
+    _id: { $in: roles.permissions },
+  }).lean();
+
+  return { ...roles, actionPermissions };
 }
 
-export async function getRolesOfGroups(groupId: string) {
-  const groups = await GroupsModel.aggregate<GetRolesOfGroupsProjection>([
+export async function getRolesByGroupId(groupId: string) {
+  const group = await GroupsModel.findOne({
+    status: statusOriginal.ACTIVE,
+    $or: [{ genealogy: groupId }, { _id: groupId }],
+  }).lean();
+
+  if (!group) return [];
+
+  const roles = await RolesModel.find({ _id: { $in: group.roleIds } }).lean();
+
+  return roles;
+}
+
+export async function getPermissionsCreatedByGroupId({
+  groupId,
+}: {
+  groupId: string;
+}) {
+  const group = await GroupsModel.findOne(
+    {
+      status: statusOriginal.ACTIVE,
+      _id: groupId,
+    },
+    { roleIds: 1 },
+  ).lean();
+
+  if (!group) return [];
+
+  const roles = await RolesModel.find({
+    _id: { $in: group.roleIds },
+  }).lean<Roles[]>();
+
+  return convertRolesToPermissions(roles);
+}
+
+export async function searchUser(searchText: string) {
+  const pattern = new RegExp(searchText, 'i');
+  const users = await UsersModel.find({
+    status: statusOriginal.ACTIVE,
+    $or: [
+      {
+        email: { $regex: pattern },
+      },
+      {
+        username: { $regex: pattern },
+      },
+    ],
+  }).lean();
+  return users;
+}
+
+export async function getGroupPermissions({
+  groupId,
+  isSuperUser,
+}: {
+  groupId: string;
+  isSuperUser: boolean;
+}) {
+  const group = await GroupsModel.findOne({
+    _id: groupId,
+    status: statusOriginal.ACTIVE,
+  }).lean();
+  if (!group) return [];
+
+  // with super user, show all permissions in create/update roles
+  // just apply when super user is standing group's root
+  if (isSuperUser && !group.genealogy?.length) {
+    return getAllPermissionsIgnoreRoot();
+  }
+
+  const roles = await RolesModel.find({
+    _id: { $in: group.roleAssignedIds },
+  }).lean<Roles[]>();
+  if (!roles.length) return [];
+
+  return PermissionsModel.find({
+    _id: { $in: convertRolesToPermissions(roles) },
+  }).lean();
+}
+
+export async function verifyUserInGroup({
+  userId,
+  groupId,
+}: {
+  userId: string;
+  groupId: string;
+}) {
+  const group = await GroupsModel.findOne({
+    status: statusOriginal.ACTIVE,
+    _id: groupId,
+    userIds: userId,
+  }).lean();
+  return Boolean(group);
+}
+
+export async function getGroupsOfUser<T extends Projection = Projection>({
+  projection,
+  userId,
+}: {
+  projection: Projection;
+  userId: string;
+}) {
+  const groups = await GroupsModel.aggregate<T>([
     {
       $match: {
+        userIds: userId,
         status: statusOriginal.ACTIVE,
-        $or: [{ genealogy: { $in: [groupId] } }, { _id: groupId }],
+      },
+    },
+    {
+      $lookup: {
+        from: 'groups',
+        localField: 'nearestChildren',
+        foreignField: '_id',
+        as: 'children',
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userIds',
+        foreignField: '_id',
+        as: 'users',
+      },
+    },
+    {
+      $lookup: {
+        from: 'roles',
+        localField: 'roleIds',
+        foreignField: '_id',
+        as: 'roles',
+      },
+    },
+    { $project: projection },
+  ]).exec();
+
+  return groups;
+}
+
+export async function createRole({
+  groupId,
+  name,
+  permissions,
+  description,
+}: Pick<Roles, 'name' | 'description' | 'permissions'> & { groupId: string }) {
+  const createdRole = await RolesModel.create({
+    ...newRecordCommonField(),
+    name,
+    permissions,
+    description,
+    slug: name.toLocaleLowerCase().split(' ').join('-'),
+  });
+
+  // add roleId into group
+  // because role must be managed by at least 1 group
+  await GroupsModel.updateOne(
+    { _id: groupId },
+    { $push: { roleIds: createdRole._id } },
+  );
+
+  return createdRole;
+}
+
+export function getAllPermissionsIgnoreRoot() {
+  return PermissionsModel.find({ _id: { $ne: PERMISSIONS.ROOT } }).lean();
+}
+export function getAllPermissions() {
+  return PermissionsModel.find({}).lean();
+}
+
+export async function getUsersInGroupsByUserId(userId: string) {
+  const groupIdsOfUser = await GroupsModel.find({
+    userIds: { $in: userId },
+  }).lean();
+  return getUsersByGroupId(groupIdsOfUser.map(e => e._id));
+}
+
+export async function updateUser({
+  userId,
+  email,
+  username,
+  cities,
+}: Pick<Users, 'email' | 'username' | 'cities'> & {
+  userId: string;
+}) {
+  await UsersModel.updateOne(
+    { _id: userId, status: statusOriginal.ACTIVE },
+    {
+      $set: {
+        updatedAt: momentTz().toDate(),
+        email,
+        username,
+        cities,
+      },
+    },
+  );
+}
+
+export async function deleteUser(userId: string) {
+  await UsersModel.updateOne(
+    { _id: userId, status: statusOriginal.ACTIVE },
+    {
+      $set: {
+        status: statusOriginal.REMOVED,
+        updatedAt: momentTz().toDate(),
+      },
+    },
+  );
+
+  // remove user id in group they're in
+  await GroupsModel.updateMany(
+    {
+      userIds: userId,
+      status: statusOriginal.ACTIVE,
+    },
+    {
+      $pull: {
+        userIds: userId,
+      },
+    },
+  );
+}
+
+async function getPermissionsRemovedAfterUpdateOrRemoveRoles({
+  groupId,
+  updateOrRemoveCallback,
+}: {
+  groupId: string;
+  updateOrRemoveCallback: () => Promise<void>;
+}) {
+  // get previous permissions
+  const previousPermissions = await getPermissionsCreatedByGroupId({ groupId });
+  await updateOrRemoveCallback();
+
+  const permissionsAfterUpdateOrRemoveRole =
+    await getPermissionsCreatedByGroupId({ groupId });
+
+  const permissionsRemoved = previousPermissions.filter(
+    permission => !permissionsAfterUpdateOrRemoveRole.includes(permission),
+  );
+
+  return permissionsRemoved;
+}
+
+// get R5
+async function getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
+  groupId, // g1
+  permissionsRemoved, // a
+}: {
+  groupId: string;
+  permissionsRemoved: Array<string>;
+}) {
+  // get groups have roles will be updated
+  const children = await GroupsModel.aggregate<
+    Groups & { roles?: Roles[]; rolesAssigned?: Roles[] }
+  >([
+    {
+      $match: {
+        $or: [
+          {
+            genealogy: groupId,
+          },
+        ],
+        status: statusOriginal.ACTIVE,
+      },
+    },
+    {
+      $lookup: {
+        from: 'roles',
+        localField: 'roleAssignedIds',
+        foreignField: '_id',
+        as: 'rolesAssigned',
       },
     },
     {
@@ -182,34 +548,243 @@ export async function getRolesOfGroups(groupId: string) {
       },
     },
     {
-      $project: { 'roles.name': 1, 'roles._id': 1 },
+      $match: {
+        $or: [
+          {
+            'rolesAssigned.permissions': { $in: permissionsRemoved },
+          },
+          {
+            'roles.permissions': { $in: permissionsRemoved },
+          },
+        ],
+      },
     },
   ]).exec();
 
-  return groups[0]?.roles || [];
+  const rolesWillBeUpdated = removeDuplicatedItem(
+    children.map(e => {
+      const result: string[] = [];
+      e?.roles?.map(i => result.push(i._id));
+      e?.rolesAssigned?.map(i => result.push(i._id));
+
+      return result;
+    }),
+  );
+
+  return rolesWillBeUpdated;
 }
 
-export async function searchUser(searchText: string) {
-  const pattern = new RegExp(searchText, 'i');
-  const users = await UsersModel.find<Users>({
+export async function deleteRole({
+  roleId,
+  groupId,
+}: {
+  roleId: string;
+  groupId: string;
+}) {
+  let roleNameDeleted = '';
+  const updatedAt = momentTz().toDate();
+
+  const permissionsRemoved =
+    await getPermissionsRemovedAfterUpdateOrRemoveRoles({
+      groupId,
+      updateOrRemoveCallback: async () => {
+        // remove role by id
+        const roleDeleted = await RolesModel.findOneAndDelete({
+          _id: roleId,
+        }).lean<Roles>();
+        roleNameDeleted = roleDeleted?.name || '';
+
+        // update group created role removed
+        await GroupsModel.updateOne(
+          { _id: groupId, status: statusOriginal.ACTIVE },
+          {
+            $set: {
+              updatedAt,
+            },
+            $pull: {
+              roleIds: roleId,
+            },
+          },
+        );
+
+        // update children group assigned role removed
+        await GroupsModel.updateMany(
+          { roleAssignedIds: roleId, status: statusOriginal.ACTIVE },
+          {
+            $set: {
+              updatedAt,
+            },
+            $pull: {
+              roleAssignedIds: roleId,
+            },
+          },
+        );
+      },
+    });
+
+  if (permissionsRemoved.length) {
+    const rolesWillBeUpdated =
+      await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
+        groupId,
+        permissionsRemoved,
+      });
+    // remove permissions of roles were born from list permissions deleted
+    await RolesModel.updateMany(
+      { _id: { $in: rolesWillBeUpdated } },
+      {
+        $set: {
+          updatedAt,
+        },
+        $pullAll: { permissions: permissionsRemoved },
+      },
+    );
+  }
+
+  return roleNameDeleted;
+}
+
+export async function updateRole({
+  roleId,
+  name,
+  permissions,
+  description,
+  groupId,
+}: Pick<Roles, 'name' | 'permissions' | 'description'> & {
+  roleId: string;
+  groupId: string;
+}) {
+  const updatedAt = momentTz().toDate();
+  let roleName = '';
+
+  const permissionsRemoved =
+    await getPermissionsRemovedAfterUpdateOrRemoveRoles({
+      groupId,
+      updateOrRemoveCallback: async () => {
+        // update role by id
+        const role = await RolesModel.findOneAndUpdate(
+          { _id: roleId },
+          {
+            $set: {
+              updatedAt,
+              name,
+              slug: name.toLocaleLowerCase().split(' ').join('-'),
+              permissions,
+              description,
+            },
+          },
+          { new: true },
+        ).lean<Roles>();
+        roleName = role?.name || '';
+      },
+    });
+
+  if (permissionsRemoved.length) {
+    const rolesWillBeUpdated =
+      await getRolesWillBeUpdatedAtAllHierarchiesAfterUpdateOrRemoveRoles({
+        groupId,
+        permissionsRemoved,
+      });
+
+    // remove permissions of roles were born from list permissions deleted
+    await RolesModel.updateMany(
+      { _id: { $in: rolesWillBeUpdated } },
+      {
+        $set: {
+          updatedAt,
+        },
+        $pullAll: { permissions: permissionsRemoved },
+      },
+    );
+  }
+
+  return roleName;
+}
+
+export async function deleteGroup({ groupId }: { groupId: string }) {
+  const updatedAt = momentTz().toDate();
+
+  // get group and children of it
+  // declare together
+  const groupsChildren = await GroupsModel.find({
     status: statusOriginal.ACTIVE,
-    $or: [
-      {
-        email: { $regex: pattern },
+    $or: [{ genealogy: groupId }],
+  }).lean();
+  const group = await GroupsModel.findOne({
+    status: statusOriginal.ACTIVE,
+    _id: groupId,
+  }).lean<Groups>();
+
+  // get role's ids will be deleted
+  const rolesWillBeDeleted = removeDuplicatedItem([
+    group?.roleIds || [], // don't remove roles of parent, just remove in children
+    ...groupsChildren.map(e => [...(e?.roleIds || []), ...e.roleAssignedIds]),
+  ]);
+
+  // remove roles
+  await RolesModel.deleteMany({ _id: { $in: rolesWillBeDeleted } });
+
+  // remove group and children group
+  await GroupsModel.updateMany(
+    {
+      status: statusOriginal.ACTIVE,
+      $or: [{ _id: groupId }, { genealogy: groupId }],
+    },
+    {
+      $set: {
+        updatedAt,
+        status: statusOriginal.REMOVED,
       },
-      {
-        username: { $regex: pattern },
+    },
+  );
+
+  // update nearestChildren
+  await GroupsModel.updateOne(
+    {
+      status: statusOriginal.ACTIVE,
+      nearestChildren: groupId,
+    },
+    {
+      $pull: {
+        nearestChildren: groupId,
       },
-    ],
-  }).exec();
-  return users;
+    },
+  );
+
+  return group?.name || '';
+}
+
+export async function isParentOfGroup({
+  parentId,
+  groupId,
+}: {
+  parentId: string;
+  groupId: string;
+}) {
+  const groupChecking = await GroupsModel.findOne({
+    _id: groupId,
+    status: statusOriginal.ACTIVE,
+  }).lean<Groups>();
+  if (!groupChecking?.genealogy?.length) return false;
+
+  // get list parent of group checking
+  // genealogy store ids of parent
+  const groupParent = await GroupsModel.find({
+    _id: { $in: groupChecking.genealogy },
+    status: statusOriginal.ACTIVE,
+    userIds: parentId,
+  }).lean();
+
+  return Boolean(groupParent.length);
 }
 
 /**
- * @description get groups detail with 2 cases: parent or not
- * @param isParent have another logic to get data if user is parent of group
+ * 4 cases
+ * - user is super user
+ * - user in group parent
+ * - user in group
+ * - user not in group
  */
-export async function getGroupDetail<T = Document>({
+export async function getGroupDetail<T = Projection>({
   isSuperUser,
   userId,
   isParent,
@@ -220,7 +795,7 @@ export async function getGroupDetail<T = Document>({
   userId: string;
   groupId: string;
   isSuperUser: boolean;
-  projection: Document;
+  projection: Projection;
 }) {
   const lookupRoles = {
     $lookup: {
@@ -238,14 +813,16 @@ export async function getGroupDetail<T = Document>({
       as: 'roleAssigned',
     },
   };
-  const lookupChildrenGroups = {
-    $lookup: {
-      from: 'groups',
-      localField: '_id',
-      foreignField: 'genealogy',
-      as: 'children',
+  const lookupChildrenGroups = [
+    {
+      $lookup: {
+        from: 'groups',
+        localField: 'nearestChildren',
+        foreignField: '_id',
+        as: 'children',
+      },
     },
-  };
+  ];
   const lookupUsers = {
     $lookup: {
       from: 'users',
@@ -255,13 +832,13 @@ export async function getGroupDetail<T = Document>({
     },
   };
 
-  // super user can view all groups
+  // case super user: allow access all groups
   if (isSuperUser) {
     const groupAsSuperUser = await GroupsModel.aggregate([
       {
         $match: { _id: groupId, status: statusOriginal.ACTIVE },
       },
-      lookupChildrenGroups,
+      ...lookupChildrenGroups,
       lookupRoles,
       lookupRolesAssigned,
       lookupUsers,
@@ -272,6 +849,8 @@ export async function getGroupDetail<T = Document>({
       },
     ]).exec();
 
+    // group not found
+    // status code 404
     if (!groupAsSuperUser?.[0]) {
       throw new Response(null, res404);
     }
@@ -287,14 +866,14 @@ export async function getGroupDetail<T = Document>({
     },
   };
 
-  // allow access group detail when user is parent of group
+  // case user in parent group: allow access group
   if (isParent) {
     const groupOfOwner = await GroupsModel.aggregate([
       {
         $match: { _id: groupId, status: statusOriginal.ACTIVE },
       },
       lookupParentGroups,
-      lookupChildrenGroups,
+      ...lookupChildrenGroups,
       lookupRoles,
       lookupRolesAssigned,
       lookupUsers,
@@ -304,327 +883,66 @@ export async function getGroupDetail<T = Document>({
         },
       },
       {
-        $project: {
-          ...projection,
-        },
+        $project: projection,
       },
     ]).exec();
 
+    // group not found
+    // status code 404
     if (!groupOfOwner?.[0]) {
       throw new Response(null, res404);
     }
     return groupOfOwner[0] as T;
   }
 
-  // verify user in group
+  // case user in group: allow access group
+  // get 1 record but use aggregate method because have many joinable collection
   const groupOfUser = await GroupsModel.aggregate([
     {
       $match: { _id: groupId, userIds: userId, status: statusOriginal.ACTIVE },
     },
-    lookupChildrenGroups,
+    ...lookupChildrenGroups,
     lookupRoles,
     lookupRolesAssigned,
     lookupUsers,
     {
-      $project: {
-        ...projection,
-      },
+      $project: projection,
     },
   ]).exec();
 
+  // group not found or user not in group
+  // status code 403
   if (!groupOfUser?.[0]) {
-    throw new Response(null, res404);
+    throw new Response(null, res403);
   }
+
   return groupOfUser[0] as T;
 }
 
-export async function getGroupPermissions({
-  groupId,
-  isSuperUser,
-}: {
-  groupId: string;
-  isSuperUser: boolean;
-}) {
-  // root account can access all permissions
-  if (isSuperUser) {
-    return PermissionsModel.find({}).lean();
-  }
-
-  const matchGroups = {
-    $match: {
-      _id: groupId,
-      status: statusOriginal.ACTIVE,
-    },
-  };
-
-  const lookupRole = {
-    $lookup: {
-      from: 'roles',
-      localField: 'roleAssignedIds',
-      foreignField: '_id',
-      as: 'roles',
-    },
-  };
-
-  const unwindRole = {
-    $unwind: {
-      path: '$roles',
-      preserveNullAndEmptyArrays: true,
-    },
-  };
-
-  const aggregate = [matchGroups, lookupRole, unwindRole];
-
-  type GroupUnwindRole = Groups & { roles: Roles };
-  const data = await GroupsModel.aggregate<GroupUnwindRole>(aggregate).exec();
-
-  const initial: Roles['permissions'] = [];
-  const permissions = data.reduce((accumulator, obj) => {
-    const setOfPermissions = new Set([
-      ...accumulator,
-      ...(obj?.roles?.permissions || []),
-    ]);
-    return [...setOfPermissions];
-  }, initial);
-
-  return PermissionsModel.find({
-    _id: { $in: permissions },
-    status: statusOriginal.ACTIVE,
-  }).lean();
-}
-
-export async function verifyUserInGroup({
-  userId,
-  groupId,
-}: {
-  userId: string;
-  groupId: string;
-}) {
-  const group = await GroupsModel.findOne({
-    status: statusOriginal.ACTIVE,
-    _id: groupId,
-    userIds: userId,
-  });
-  return Boolean(group);
-}
-
-export async function getGroupsOfUser<T extends Document = Document>({
-  projection,
-  userId,
-}: {
-  projection: Document;
-  userId: string;
-}) {
-  const lookupUser = {
-    $lookup: {
-      from: 'users',
-      localField: 'userIds',
-      foreignField: '_id',
-      as: 'users',
-    },
-  };
-  const lookupRole = {
-    $lookup: {
-      from: 'roles',
-      localField: 'roleIds',
-      foreignField: '_id',
-      as: 'roles',
-    },
-  };
-
-  const groups = await GroupsModel.aggregate<T>([
+export async function getAllChildrenGroupOfUser(userId: string) {
+  const groups = await GroupsModel.aggregate([
     {
       $match: {
         userIds: userId,
-        status: statusOriginal.ACTIVE,
       },
-    },
-    lookupUser,
-    lookupRole,
-    { $project: projection },
-  ]).exec();
-
-  return groups;
-}
-
-/**
- * @description create role and add roleId into group
- * (the role must be existed in a group)
- */
-export async function createRole({
-  groupId,
-  name,
-  permissions,
-  description,
-}: Pick<Roles, 'name' | 'description' | 'permissions'> & { groupId: string }) {
-  const createdRoles = await RolesModel.create({
-    ...newRecordCommonField(),
-    name,
-    slug: name.toLocaleLowerCase().split(' ').join('-'),
-    permissions,
-    description,
-  });
-
-  await GroupsModel.updateOne(
-    { _id: groupId },
-    { $push: { roleIds: createdRoles._id } },
-  );
-}
-
-export async function updateRole({
-  roleId,
-  name,
-  permissions,
-  description,
-}: Pick<Roles, 'name' | 'permissions' | 'description'> & { roleId: string }) {
-  await RolesModel.updateOne(
-    { _id: roleId },
-    {
-      $set: {
-        updatedAt: momentTz().toDate(),
-        name,
-        slug: name.toLocaleLowerCase().split('').join('-'),
-        permissions,
-        description,
-      },
-    },
-  );
-}
-
-export function getAllPermissions() {
-  return PermissionsModel.find({}).exec();
-}
-
-export async function deleteUser(userId: string) {
-  await UsersModel.updateOne(
-    { _id: userId },
-    {
-      $set: {
-        status: statusOriginal.REMOVED,
-        updatedAt: momentTz().toDate(),
-      },
-    },
-  );
-}
-
-export async function deleteRole(roleId: string) {
-  await RolesModel.updateOne(
-    { _id: roleId },
-    {
-      $set: {
-        updatedAt: momentTz().toDate(),
-        status: statusOriginal.REMOVED,
-      },
-    },
-  );
-}
-
-export async function deleteGroup(groupId: string) {
-  // remove group and children
-  await GroupsModel.updateMany(
-    {
-      $or: [{ _id: groupId }, { genealogy: groupId }],
-    },
-    {
-      $set: {
-        updatedAt: momentTz().toDate(),
-        status: statusOriginal.REMOVED,
-      },
-    },
-  );
-
-  const groups = await GroupsModel.find({
-    $or: [{ _id: groupId }, { genealogy: groupId }],
-  }).exec();
-
-  // get their roles will be deleted
-  // use Set to remove duplicated
-  const rolesWillBeDeleted = groups
-    .map(e => e.roleAssignedIds)
-    .reduce((finalListRoles, permissionsEachGroup) => {
-      const setOfPermissions = new Set([
-        ...finalListRoles,
-        ...permissionsEachGroup,
-      ]);
-      return [...setOfPermissions];
-    }, []);
-
-  // remove their roles
-  await RolesModel.updateMany(
-    { _id: { $in: rolesWillBeDeleted } },
-    {
-      $set: {
-        updatedAt: momentTz().toDate(),
-        status: statusOriginal.REMOVED,
-      },
-    },
-  );
-}
-
-export async function getPermissionsOfGroup(groupId: string) {
-  const lookupRole = {
-    $lookup: {
-      from: 'roles',
-      localField: 'roles._id',
-      foreignField: '_id',
-      as: 'role',
-    },
-  };
-
-  const unwindRole = {
-    $unwind: {
-      path: '$role',
-      preserveNullAndEmptyArrays: true,
-    },
-  };
-
-  const aggregate = [
-    { $match: { _id: groupId, status: statusOriginal.ACTIVE } },
-    lookupRole,
-    unwindRole,
-  ];
-
-  type GroupUnwindRole = Groups & { role: Roles };
-  const data = await GroupsModel.aggregate<GroupUnwindRole>(aggregate).exec();
-
-  const initial: Roles['permissions'] = [];
-  return data.reduce((accumulator, obj) => {
-    const setOfPermissions = new Set([
-      ...accumulator,
-      ...(obj?.role?.permissions || []),
-    ]);
-    return [...setOfPermissions];
-  }, initial);
-}
-
-/**
- * @description verify the current user is parent of group or not
- */
-export async function isParentOfGroup({
-  userId,
-  groupId,
-}: {
-  userId: string;
-  groupId: string;
-}) {
-  const group = await GroupsModel.aggregate([
-    {
-      $match: { _id: groupId, status: statusOriginal.ACTIVE },
     },
     {
       $lookup: {
         from: 'groups',
-        localField: 'genealogy',
-        foreignField: '_id',
-        as: 'parents',
+        localField: '_id',
+        foreignField: 'genealogy',
+        as: 'children',
       },
     },
     {
-      $match: {
-        'parents.userIds': userId,
+      $unwind: {
+        path: '$children',
+        preserveNullAndEmptyArrays: true,
       },
     },
   ]).exec();
 
-  return Boolean(group.length);
+  return groups
+    .map(group => group.children)
+    .filter(childrenGroup => !!childrenGroup);
 }

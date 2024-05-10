@@ -2,21 +2,26 @@ import { cn } from '@/lib/utils';
 import type { NavLinkProps, UIMatch } from '@remix-run/react';
 import { useMatches } from '@remix-run/react';
 import { ChevronRight } from 'lucide-react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes } from 'react';
 import { Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { NavigationLink } from './NavigationLink';
 
 type BreadcrumbsItemProps = HTMLAttributes<HTMLElement> &
   NavLinkProps & {
-    label: ReactNode;
+    label: string;
+    disabled?: boolean;
   };
 
 export const BreadcrumbsLink = ({
   children,
   label,
+  disabled,
   ...props
 }: BreadcrumbsItemProps) => {
+  const { t } = useTranslation('common');
+
   return (
     <NavigationLink
       itemProp="item"
@@ -25,11 +30,12 @@ export const BreadcrumbsLink = ({
         'group-only:font-medium group-only:text-secondary',
         'max-md:font-medium max-md:text-gray-400',
         'text-gray-400',
+        disabled && 'opacity-50 cursor-not-allowed',
       ])}
       end
       {...props}>
       {children}
-      <span itemProp="name">{label}</span>
+      <span itemProp="name">{t(label)}</span>
     </NavigationLink>
   );
 };
@@ -51,9 +57,7 @@ export const Breadcrumbs = ({
   className,
   ...props
 }: HTMLAttributes<HTMLElement>) => {
-  const matches = (useMatches() as unknown as BreadcrumbMatch[]).filter(
-    ({ handle }) => handle?.breadcrumb,
-  );
+  const matches = useMatches() as unknown as BreadcrumbMatch[];
 
   return (
     <ol
@@ -61,19 +65,21 @@ export const Breadcrumbs = ({
       itemType="https://schema.org/BreadcrumbList"
       className={cn('flex items-center gap-2.5', className)}
       {...props}>
-      {matches.map(({ handle, data }, i) => (
-        <Fragment key={i}>
-          <li
-            className={cn('group contents', i > 0 && 'max-md:hidden')}
-            itemProp="itemListElement"
-            itemScope
-            itemType="https://schema.org/ListItem">
-            {i > 0 && <BreadcrumbsSeparator />}
-            {handle.breadcrumb(data)}
-            <meta itemProp="position" content={`${i + 1}`} />
-          </li>
-        </Fragment>
-      ))}
+      {matches
+        ?.filter(match => match?.handle?.breadcrumb)
+        ?.map((match, i) => (
+          <Fragment key={i}>
+            <li
+              className={cn('group contents', i > 0 && 'max-md:hidden')}
+              itemProp="itemListElement"
+              itemScope
+              itemType="https://schema.org/ListItem">
+              {i > 0 && <BreadcrumbsSeparator />}
+              {match?.handle?.breadcrumb(match?.data)}
+              <meta itemProp="position" content={`${i + 1}`} />
+            </li>
+          </Fragment>
+        ))}
     </ol>
   );
 };

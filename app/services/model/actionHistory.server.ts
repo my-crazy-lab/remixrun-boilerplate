@@ -1,15 +1,18 @@
 import { Schema } from 'mongoose';
+import type { ActionsHistory } from '~/types';
 import { mongoClientBE } from '~/utils/db.server';
 
-const ActionsHistorySchema = new Schema(
+const ActionsHistorySchema = new Schema<ActionsHistory>(
   {
-    userId: {
+    _id: {
       $type: String,
       required: true,
-      ref: 'Users',
     },
-    action: { $type: String, required: true },
-    data: { $type: Schema.Types.Mixed, required: true },
+    actorId: {
+      $type: String,
+    },
+    action: { $type: String },
+    requestFormData: { $type: Schema.Types.Mixed },
     createdAt: { $type: Date, required: true },
   },
   { typeKey: '$type', collection: 'actionHistory' },

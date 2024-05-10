@@ -1,5 +1,7 @@
 import BarBase, { type BarBaseProps } from '@/components/base/BarBase';
-import BarChartBase, { type BarChartProps } from '@/components/base/BarChartBase';
+import BarChartBase, {
+  type BarChartProps,
+} from '@/components/base/BarChartBase';
 import CartesianGridBase, {
   type CartesianGridBaseProps,
 } from '@/components/base/CartesianGridBase';

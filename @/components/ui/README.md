@@ -1,1 +1,1 @@
-Default generation from Shadcn. Not override them. 
+Default generation from Shadcn. Not override them.

@@ -9,24 +9,24 @@ import { Link, useLoaderData } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { getUserId } from '~/services/helpers.server';
 import { getGroupsOfUser } from '~/services/role-base-access-control.server';
+import { type Groups } from '~/types';
 
-interface LoaderData {
-  groups: Array<{
-    _id: string;
-    name: string;
-    description: string;
-  }>;
+interface LoaderGroups
+  extends Pick<Groups, '_id' | 'name' | 'description' | 'userIds'> {
+  children: Array<string>;
 }
 
 // Don't need permission Read
 // Users added to groups obviously know how many groups they have
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await getUserId({ request });
-  const groups = await getGroupsOfUser<LoaderData['groups']>({
+  const groups = await getGroupsOfUser<LoaderGroups>({
     userId,
     projection: {
       name: 1,
       description: 1,
+      userIds: 1,
+      children: 1,
     },
   });
 
@@ -34,8 +34,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
-  const loaderData = useLoaderData<LoaderData>();
+  const { t } = useTranslation('user-settings');
+  const loaderData = useLoaderData<typeof loader>();
 
   return (
     <div className="h-full flex-1 flex-col space-y-8 flex">
@@ -69,7 +69,7 @@ export default function Screen() {
                         {t('CHILDREN_GROUP')}
                       </Typography>
                       <Typography className="text-primary" variant="h4">
-                        2
+                        {group.children?.length}
                       </Typography>
                     </div>
                   </div>
@@ -85,7 +85,7 @@ export default function Screen() {
                       <Typography
                         className="text-secondary-foreground"
                         variant="h3">
-                        2
+                        {group.userIds?.length}
                       </Typography>
                     </div>
                   </div>

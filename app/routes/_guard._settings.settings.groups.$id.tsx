@@ -2,6 +2,7 @@ import { BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Outlet, useLoaderData } from '@remix-run/react';
+import ROUTE_NAME from '~/constants/route';
 import { hoc404 } from '~/hoc/remix';
 import { getUserSession } from '~/services/helpers.server';
 import {
@@ -13,13 +14,15 @@ import { type GroupDetail } from '~/types/LoaderData';
 
 export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   const groupId = params.id || '';
-  const { userId, isSuperUser } = await getUserSession({ request });
+  const { userId, isSuperUser } = await getUserSession({
+    headers: request.headers,
+  });
   const isParent = await isParentOfGroup({
-    userId,
+    parentId: userId,
     groupId,
   });
 
-  const group = await hoc404(async () =>
+  const group = await hoc404(() =>
     getGroupDetail<GroupDetail>({
       isSuperUser,
       isParent,
@@ -47,7 +50,7 @@ export const handle = {
 
     return (
       <BreadcrumbsLink
-        to={`/settings/groups/${group._id}`}
+        to={`${ROUTE_NAME.GROUP_SETTING}/${group._id}`}
         label={group.name}
       />
     );
@@ -55,6 +58,7 @@ export const handle = {
 };
 
 export default function Screen() {
-  const loaderData = useLoaderData<GroupDetail>();
+  const loaderData = useLoaderData<typeof loader>();
+
   return <Outlet context={loaderData} />;
 }

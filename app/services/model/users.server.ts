@@ -1,7 +1,8 @@
 import { Schema } from 'mongoose';
+import type { Users } from '~/types';
 import { mongoClientBE } from '~/utils/db.server';
 
-const UsersSchema = new Schema(
+const UsersSchema = new Schema<Users>(
   {
     _id: {
       $type: String,
@@ -14,8 +15,13 @@ const UsersSchema = new Schema(
     email: {
       $type: String,
       required: true,
+      unique: true,
     },
-    createdAt: { $type: Date, default: Date.now },
+    isoCode: {
+      $type: String,
+      required: true,
+    },
+    createdAt: { $type: Date, require: true },
     status: {
       $type: String,
       required: true,
@@ -23,6 +29,13 @@ const UsersSchema = new Schema(
     cities: {
       $type: [String],
       required: true,
+    },
+    language: {
+      $type: String,
+      require: true,
+    },
+    avatarUrl: {
+      $type: String,
     },
     services: {
       password: {

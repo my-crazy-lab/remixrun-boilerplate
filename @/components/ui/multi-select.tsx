@@ -12,19 +12,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import debounce from 'lodash/debounce.js';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import * as React from 'react';
 import type { SetURLSearchParams } from 'react-router-dom';
-import { type CommonFunction } from '~/types';
-
-import { Skeleton } from './skeleton';
-
-export type OptionType = {
-  label: string;
-  value: string;
-};
+import { type CommonFunction, OptionType } from '~/types';
 
 interface MultiSelectAsyncProps<T> {
   options: OptionType[];
@@ -80,7 +74,7 @@ export function MultiSelectAsync<T extends CommonFunction>({
               <Badge
                 variant="secondary"
                 key={item.value}
-                className="mr-1 rounded-md"
+                className="mr-1 rounded-md text-blue bg-blue-50"
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button
@@ -103,7 +97,7 @@ export function MultiSelectAsync<T extends CommonFunction>({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent align="end" className="w-full p-0">
         <Command className={className} shouldFilter={false}>
           <CommandInput
             value={searchText}
@@ -210,7 +204,7 @@ export function MultiSelect<T extends CommonFunction>({
               <Badge
                 variant="secondary"
                 key={item.value}
-                className="mr-1 rounded-md"
+                className="mr-1 rounded-md text-blue bg-blue-50"
                 onClick={() => handleUnselect(item.value)}>
                 {item.label}
                 <button
@@ -233,7 +227,7 @@ export function MultiSelect<T extends CommonFunction>({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent align="end" className="w-full p-0">
         <Command className={className}>
           <CommandInput placeholder="Search..." />
           <CommandEmpty>No item found.</CommandEmpty>

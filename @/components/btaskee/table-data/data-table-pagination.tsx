@@ -20,7 +20,7 @@ interface DataTablePaginationProps<TData> {
   setSearchParams: SetURLSearchParams;
 }
 
-export const defaultPageSize = [3, 10, 20, 30, 40, 50] as const;
+export const defaultPageSize = [10, 20, 30, 40, 50] as const;
 export type PageSizeClient = (typeof defaultPageSize)[number];
 
 export function DataTablePagination<TData>({

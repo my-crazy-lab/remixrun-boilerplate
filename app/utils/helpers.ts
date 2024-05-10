@@ -43,6 +43,7 @@ export function getPageSizeAndPageIndex({
     valueChecking: pageSize,
     defaultValue: defaultPageSize[0],
   });
+
   const maxIndex = Math.floor(total / pageSizeVerified);
 
   if (maxIndex < pageIndex) {

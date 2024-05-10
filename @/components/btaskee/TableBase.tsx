@@ -27,7 +27,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import React from 'react';
+import React, { Fragment } from 'react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -116,10 +116,8 @@ const BTaskeeTable = <TData, TValue>({
           <TableBody>
             {table.getCoreRowModel().rows?.length ? (
               table.getCoreRowModel().rows.map(row => (
-                <>
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}>
+                <Fragment key={row.id}>
+                  <TableRow data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map(cell => (
                       <TableCell key={cell.id}>
                         {flexRender(
@@ -136,7 +134,7 @@ const BTaskeeTable = <TData, TValue>({
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))
             ) : (
               <TableRow>

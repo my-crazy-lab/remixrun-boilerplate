@@ -17,9 +17,11 @@ export const NavigationLink = ({ className, ...props }: NavLinkProps) => {
   return (
     <NavLink
       className={({ isActive }) =>
-        // TODO fix typing for ui
-        // @ts-ignore
-        navigationLinkVariants({ isActive, className })
+        navigationLinkVariants({
+          // @ts-ignore
+          isActive,
+          className,
+        })
       }
       unstable_viewTransition
       {...props}

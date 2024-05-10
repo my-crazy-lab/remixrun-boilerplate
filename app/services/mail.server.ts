@@ -1,14 +1,9 @@
 import nodemailer from 'nodemailer';
+import type Mail from 'nodemailer/lib/mailer';
 
 import { dotenv } from './dotenv.server';
 
-export interface EmailArgs {
-  text: string;
-  subject: string;
-  to: string;
-  from: string;
-}
-export async function sendEmail({ to, from, text, subject }: EmailArgs) {
+export async function sendEmail({ to, from, text, subject }: Mail.Options) {
   try {
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',

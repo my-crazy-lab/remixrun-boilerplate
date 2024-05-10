@@ -1,4 +1,6 @@
-afterAll(async () => {
-  await global.__db?.close();
-  global.__db = undefined;
+afterAll(() => {
+  if (global.__db) {
+    global.__db.mongoClientApp.close();
+    global.__db.mongoClientBE.close();
+  }
 });

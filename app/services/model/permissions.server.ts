@@ -1,7 +1,8 @@
 import { Schema } from 'mongoose';
+import type { Permissions } from '~/types';
 import { mongoClientBE } from '~/utils/db.server';
 
-const PermissionsSchema = new Schema(
+const PermissionsSchema = new Schema<Permissions>(
   {
     _id: {
       $type: String,

@@ -1,5 +1,7 @@
 import AreaBase, { type AreaBaseProps } from '@/components/base/AreaBase';
-import AreaChartBase, { type AreaChartBaseProps } from '@/components/base/AreaChartBase';
+import AreaChartBase, {
+  type AreaChartBaseProps,
+} from '@/components/base/AreaChartBase';
 import CartesianGridBase, {
   type CartesianGridBaseProps,
 } from '@/components/base/CartesianGridBase';

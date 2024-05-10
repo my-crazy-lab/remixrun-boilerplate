@@ -7,14 +7,13 @@
     "build": "remix build",
     "dev": "remix dev -c \"node server.mjs\"",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve build",
-    "typecheck": "tsc",
+    "deploy": "remix-serve ./build/index.js",
+    "type:check": "tsc",
     "prettier": "prettier --write .",
     "cspell": "cspell --config .spellcheckerrc.json \"**\"",
-    "deploy": "cross-env NODE_ENV=production node server.mjs",
     "prepare": "husky",
     "test:local": "jest --config=./jest.config.dev.ts --detectOpenHandles",
-    "test:ci": "jest --config=./jest.config.ci.ts --detectOpenHandles"
+    "test:ci": "jest --config=./jest.config.ci.ts"
   },
   "dependencies": {
     "@hookform/error-message": "^2.0.1",
@@ -93,7 +92,9 @@
     "uuid": "^9.0.1",
     "vaul": "^0.9.0",
     "zod": "^3.22.4",
-    "zustand": "^4.5.2"
+    "zustand": "^4.5.2",
+    "styled-components": "^6.1.8",
+    "aws-sdk": "2.1612.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.3",
@@ -112,6 +113,7 @@
     "@types/lodash": "^4.14.202",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
+    "@types/styled-components": "^5.1.34",
     "autoprefixer": "^10.4.17",
     "babel-jest": "^29.7.0",
     "babel-plugin-module-resolver": "^5.0.0",

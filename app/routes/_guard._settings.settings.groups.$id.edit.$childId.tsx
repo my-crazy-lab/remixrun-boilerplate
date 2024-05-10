@@ -1,108 +1,109 @@
 import { Breadcrumbs, BreadcrumbsLink } from '@/components/btaskee/Breadcrumbs';
+import ErrorMessageBase from '@/components/btaskee/MessageBase';
 import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect, MultiSelectAsync } from '@/components/ui/multi-select';
+import { toast } from '@/components/ui/use-toast';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import {
+  useActionData,
   useLoaderData,
   useNavigation,
   useSearchParams,
   useSubmit,
 } from '@remix-run/react';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ERROR, PERMISSIONS } from '~/constants/common';
+import { ACTION_NAME, PERMISSIONS } from '~/constants/common';
 import { hoc404, hocAction, hocLoader } from '~/hoc/remix';
+import { useConfirm } from '~/hooks/useConfirmation';
 import { getUserSession } from '~/services/helpers.server';
 import {
   getGroupDetail,
-  getRolesOfGroups,
+  getRolesByGroupId,
   isParentOfGroup,
   searchUser,
   updateGroups,
 } from '~/services/role-base-access-control.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import { commitSession, getSession } from '~/services/session.server';
+import type {
+  ActionTypeWithError,
+  Groups,
+  LoaderTypeWithError,
+  Roles,
+  Users,
+} from '~/types';
 
-export const action = hocAction(async ({ params }, { formData }) => {
-  try {
-    const { name, description, userIds, roleIds } = formData;
-    await updateGroups({
+export const action = hocAction(
+  async ({ request, params }, { setInformationActionHistory }) => {
+    const formData = await request.clone().formData();
+
+    const name = formData.get('name')?.toString() || '';
+    const description = formData.get('description')?.toString() || '';
+    const userIds = JSON.parse(formData.get('userIds')?.toString() || '') || [];
+    const roleAssignedIds =
+      JSON.parse(formData.get('roleIds')?.toString() || '') || [];
+
+    const group = await updateGroups({
       name,
       description,
-      userIds: JSON.parse(userIds),
-      roleAssignedIds: JSON.parse(roleIds),
+      userIds,
+      roleAssignedIds,
       groupId: params.childId || '',
     });
+    setInformationActionHistory({
+      action: ACTION_NAME.UPDATE_GROUP,
+    });
 
-    return redirect(`/settings/groups/${params.id}`);
-  } catch (error) {
-    if (error instanceof Error) {
-      return json({ error: error.message });
-    }
-    return json({ error: ERROR.UNKNOWN_ERROR });
-  }
-}, PERMISSIONS.WRITE_GROUP);
+    const session = await getSession(request.headers.get('cookie'));
+    session.flash('flashMessage', `Group ${group?.name} updated`);
 
-interface LoaderData {
-  group: ReturnValueIgnorePromise<
-    typeof getGroupDetail<{
-      _id: string;
-      roleAssigned: Array<{
-        _id: string;
-        name: string;
-        description: string;
-      }>;
-      users: Array<{
-        _id: string;
-        email: string;
-        username: string;
-      }>;
-      children: Array<{
-        _id: string;
-        name?: string;
-        description?: string;
-      }>;
-      name: string;
-      description: string;
-      parent: string;
-      hierarchy: number;
-    }>
-  >;
-  users: ReturnValueIgnorePromise<typeof searchUser>;
-  roles: ReturnValueIgnorePromise<typeof getRolesOfGroups>;
-}
+    const newSession = await commitSession(session);
+
+    return redirect(`/settings/groups/${params.id}`, {
+      headers: {
+        'Set-Cookie': newSession,
+      },
+    });
+  },
+  PERMISSIONS.WRITE_GROUP,
+);
 
 export const loader = hocLoader(
   async ({ params, request }: LoaderFunctionArgs) => {
     const groupId = params.id || '';
     const childId = params.childId || '';
 
-    const roles = await getRolesOfGroups(groupId);
+    const roles = await getRolesByGroupId(groupId);
 
     const url = new URL(request.url);
     const searchText = url.searchParams.get('users') || '';
     const users = await searchUser(searchText);
-    const { userId, isSuperUser } = await getUserSession({ request });
+    const { userId, isSuperUser } = await getUserSession({
+      headers: request.headers,
+    });
 
     const isParent = await isParentOfGroup({
-      userId,
+      parentId: userId,
       groupId: childId,
     });
 
     const group = await hoc404(async () =>
-      getGroupDetail<LoaderData['group']>({
+      getGroupDetail<
+        Pick<Groups, 'name' | 'description'> & {
+          users: Users[];
+          roleAssigned: Roles[];
+        }
+      >({
         projection: {
-          roleAssigned: 1,
-          users: 1,
-          children: 1,
-          parent: 1,
-          hierarchy: 1,
           name: 1,
           description: 1,
-          parents: 1,
+          roleAssigned: 1,
+          users: 1,
         },
         userId,
         groupId: childId,
@@ -131,19 +132,30 @@ interface FormData {
 
 export const handle = {
   breadcrumb: () => (
-    <BreadcrumbsLink to="/settings/groups" label="Edit group" />
+    <BreadcrumbsLink to="/settings/groups" label="EDIT_GROUP" />
   ),
+  i18n: 'user-settings',
 };
 
 export default function Screen() {
-  const { t } = useTranslation(['user-settings']);
+  const { t } = useTranslation('user-settings');
 
-  const { group, roles, users } = useLoaderData<LoaderData>();
+  const { group, roles, users } =
+    useLoaderData<LoaderTypeWithError<typeof loader>>();
+
+  const actionData = useActionData<ActionTypeWithError<typeof action>>();
+  useEffect(() => {
+    if (actionData?.error) {
+      toast({ description: actionData.error });
+    }
+  }, [actionData]);
+
   const navigation = useNavigation();
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
+  const confirm = useConfirm();
 
-  const { register, control, handleSubmit } = useForm<FormData>({
+  const { register, control, handleSubmit, formState } = useForm<FormData>({
     defaultValues: {
       name: group.name,
       description: group.description,
@@ -158,7 +170,7 @@ export default function Screen() {
     },
   });
 
-  const onSubmit = (data: FormData) => {
+  async function onSubmit(data: FormData) {
     const formData = new FormData();
 
     formData.append('name', data.name);
@@ -172,8 +184,13 @@ export default function Screen() {
       JSON.stringify(data.roleIds.map(role => role.value)),
     );
 
-    submit(formData, { method: 'post' });
-  };
+    const isConfirm = await confirm({
+      title: t('CREATE'),
+      body: t('ARE_YOU_SURE_CREATE_NEW_RECORD'),
+    });
+
+    if (isConfirm) submit(formData, { method: 'post' });
+  }
 
   return (
     <>
@@ -181,31 +198,33 @@ export default function Screen() {
         <Typography variant="h3">{t('EDIT_GROUP')}</Typography>
         <Breadcrumbs />
       </div>
-      <form className="gap-4 pb-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid gap-4 py-4 grid-cols-2">
-          <div className="grid items-center gap-4">
+      <form className="gap-4 grid p-0" onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid gap-6 py-4 grid-cols-2">
+          <div className="grid items-center gap-2">
             <Label htmlFor="group" className="text-left">
               {t('GROUP_NAME')}
             </Label>
             <Input
               {...register('name' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               placeholder={t('ENTER_GROUP_NAME')}
             />
+            <ErrorMessageBase errors={formState.errors} name="name" />
           </div>
 
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label htmlFor="description">{t('DESCRIPTION')}</Label>
             <Input
               {...register('description' as const, {
-                required: true,
+                required: t('THIS_FIELD_IS_REQUIRED'),
               })}
               placeholder={t('ENTER_DESCRIPTION')}
             />
+            <ErrorMessageBase errors={formState.errors} name="description" />
           </div>
 
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label>{t('USERS')}</Label>
             <Controller
               control={control}
@@ -227,7 +246,7 @@ export default function Screen() {
               )}
             />
           </div>
-          <div className="grid items-center gap-4">
+          <div className="grid items-center gap-2">
             <Label>{t('ROLES')}</Label>
             <Controller
               control={control}

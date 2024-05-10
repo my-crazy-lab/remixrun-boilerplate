@@ -1,25 +1,29 @@
-import { type LucideIcon } from 'lucide-react';
-import type { TActionPermissionModule } from '~/constants/common';
-import { type Document } from '~/utils/db.server';
+import {
+  type ActionFunction,
+  type LoaderFunction,
+  type TypedResponse,
+} from '@remix-run/node';
 
-export interface AuthenticatorSessionData {
+export type OptionType = {
+  label: string;
+  value: string;
+};
+
+export interface AuthenticatorSessionData
+  extends Pick<
+    Users,
+    'isoCode' | 'cities' | 'email' | 'username' | 'language' | 'avatarUrl'
+  > {
   userId: string;
   isSuperUser: boolean;
-}
-
-export interface NavItem {
-  title: string;
-  href: string;
-  icon: LucideIcon;
-  isChildren?: boolean;
-  children?: NavItem[];
+  isManager: boolean;
 }
 
 export interface ActionsHistory {
   _id: string;
-  userId: string;
+  actorId: string;
   action: string;
-  data: Document;
+  requestFormData: MustBeAny;
   createdAt: Date;
 }
 
@@ -27,6 +31,7 @@ export interface Users {
   _id: string;
   username: string;
   email: string;
+  isoCode: string;
   createdAt: Date;
   status: string;
   cities: Array<string>;
@@ -44,9 +49,9 @@ export interface Users {
     token: string;
     expired: Date;
   };
+  language: string;
+  avatarUrl?: string;
 }
-
-export type IUserType = 'ACTIVE' | 'INACTIVE';
 
 export interface Permissions {
   _id: string;
@@ -72,8 +77,9 @@ export interface Groups {
   name: string;
   description: string;
   userIds: Array<string>;
-  roleIds: Array<string>;
+  roleIds?: Array<string>;
   roleAssignedIds: Array<string>;
+  nearestChildren?: Array<string>;
   genealogy?: Array<string>;
   hierarchy: number;
   createdAt: Date;
@@ -86,28 +92,50 @@ export type MustBeAny = any;
 
 export type NonEmptyArray<T> = [T, ...T[]];
 
-export type AddArguments<
-  F extends (...args: MustBeAny[]) => MustBeAny,
-  Args extends MustBeAny[],
-> = (...args: [...Parameters<F>, ...Args]) => ReturnType<F>;
-
-export interface IActionPermission {
-  module: TActionPermissionModule;
-  actions: Array<{
-    _id: string;
-    name: string;
-    description: string;
-    module: TActionPermissionModule;
-    children?: Array<{ _id: string }>;
-  }>;
-}
-
-export interface CollectionIdString extends Document {
-  _id: string;
-}
-
 export type ReturnValueIgnorePromise<
   T extends (...args: MustBeAny) => MustBeAny,
 > = ReturnType<T> extends Promise<infer A> ? A : never;
 
 export type CommonFunction<T = MustBeAny, R = MustBeAny> = (arg: T) => R;
+
+export type ActionTypeWithError<T extends ActionFunction> = T extends (
+  args: infer ActionArguments,
+) => Promise<
+  | Promise<infer CallbackReturn>
+  | TypedResponse<{
+      error: string;
+    }>
+>
+  ? CallbackReturn extends TypedResponse<infer JsonArguments>
+    ? (
+        args: ActionArguments,
+      ) => Promise<
+        TypedResponse<
+          [JsonArguments] extends [never]
+            ? { error?: string }
+            : JsonArguments & { error?: string }
+        >
+      >
+    : never
+  : never;
+
+export type LoaderTypeWithError<T extends LoaderFunction> = T extends (
+  args: infer Args,
+) => Promise<
+  | Promise<TypedResponse<infer CallbackReturn>>
+  | TypedResponse<{
+      error: string;
+    }>
+>
+  ? (
+      args: Args,
+    ) => Promise<
+      TypedResponse<
+        [CallbackReturn] extends [never]
+          ? { error?: string }
+          : CallbackReturn extends infer JsonReturn
+            ? JsonReturn & { error?: string }
+            : never
+      >
+    >
+  : never;

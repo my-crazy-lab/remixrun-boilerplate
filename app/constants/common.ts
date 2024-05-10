@@ -1,19 +1,25 @@
 export const PERMISSIONS = {
   ROOT: 'root',
-  WRITE_USER: 'write/user-management',
+  MANAGER: 'manager',
   WRITE_ROLE: 'write/role-management',
   READ_ROLE: 'read/role-management',
   WRITE_GROUP: 'write/group-management',
   READ_GROUP: 'read/group-management',
 };
 
-export enum IActionPermissionModule {
-  task = 'task',
-  tasker = 'tasker',
-  special = 'special',
-}
-
-export type TActionPermissionModule = keyof typeof IActionPermissionModule;
+export const ACTION_NAME = {
+  CREATE_GROUP: 'Create group',
+  UPDATE_GROUP: 'Update group',
+  CREATE_ROLE: 'Create role',
+  UPDATE_ROLE: 'Update role',
+  CREATE_USER: 'Create user',
+  LOGIN: 'Login',
+  REMOVE_ROLE: 'Remove role',
+  REMOVE_GROUP: 'Remove group',
+  UPDATE_USER: 'Update user',
+  DELETE_USER: 'Delete user',
+  UPDATE_USER_AVATAR: 'Update user avatar',
+};
 
 export const PIE_CHART_COLOR = [
   '#0088FE',
@@ -43,4 +49,23 @@ export const ERROR = {
   LINK_EXPIRED: 'LINK_EXPIRED',
   PASSWORD_NOT_MATCH: 'PASSWORD_NOT_MATCH',
   PARENT_GROUP_NOT_FOUND: 'PARENT_GROUP_NOT_FOUND',
+};
+
+export const defaultLanguage = 'en';
+
+export const res500 = {
+  status: 500,
+  statusText: 'INTERNAL_SERVER_ERROR',
+};
+export const res404 = {
+  status: 404,
+  statusText: 'PAGE_NOT_FOUND',
+};
+export const res403 = {
+  status: 403,
+  statusText: 'NOT_PERMISSION_TO_ACCESS',
+};
+export const res403GroupParent = {
+  status: 403,
+  statusText: 'NOT_PARENT_OF_GROUP',
 };

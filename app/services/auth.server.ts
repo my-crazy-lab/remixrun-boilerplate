@@ -1,30 +1,18 @@
 import { redirect } from '@remix-run/node';
 import bcrypt from 'bcrypt';
-import { Authenticator } from 'remix-auth';
-import { FormStrategy } from 'remix-auth-form';
 import { v4 as uuidv4 } from 'uuid';
 import { ERROR } from '~/constants/common';
 import ROUTE_NAME from '~/constants/route';
-import UsersModel from '~/model/users.server';
 import {
   EXPIRED_RESET_PASSWORD,
   EXPIRED_VERIFICATION_CODE,
 } from '~/services/constants.server';
 import { dotenv } from '~/services/dotenv.server';
 import { sendEmail } from '~/services/mail.server';
-import { isRoot } from '~/services/role-base-access-control.server';
-import { sessionStorage } from '~/services/session.server';
-import { type AuthenticatorSessionData } from '~/types';
+import UsersModel from '~/services/model/users.server';
+// import '~/services/passports.server';
+import type { Users } from '~/types';
 import { getFutureTimeFromToday, momentTz } from '~/utils/common';
-
-// Create an instance of the authenticator, pass a generic with what
-// strategies will return and will store in the session
-export const authenticator = new Authenticator<AuthenticatorSessionData>(
-  sessionStorage,
-  {
-    throwOnError: true,
-  },
-);
 
 export function hashPassword(password: string) {
   return bcrypt.hashSync(
@@ -57,8 +45,8 @@ export async function verifyAndSendCode({
 
   if (!verified) throw new Error('INCORRECT_ACCOUNT');
 
-  const verificationCode = await sendVerificationCode(user.email);
-  return verificationCode;
+  const verificationToken = await sendVerificationCode(user.email);
+  return { verificationToken, userId: user._id };
 }
 
 export async function sendVerificationCode(email: string) {
@@ -99,7 +87,7 @@ export async function isVerificationCodeExpired({ token }: { token: string }) {
   const account = await UsersModel.findOne({
     'verification.token': token,
     'verification.expired': { $gt: momentTz().toDate() },
-  });
+  }).lean();
 
   return !account?._id;
 }
@@ -108,32 +96,33 @@ export async function isResetPassExpired({ token }: { token: string }) {
   const account = await UsersModel.findOne({
     'resetPassword.token': token,
     'resetPassword.expired': { $gt: momentTz().toDate() },
-  });
+  }).lean();
 
   return !account?._id;
 }
 
-export async function verifyCode(
-  code: string,
-): Promise<AuthenticatorSessionData> {
-  const account = await UsersModel.findOneAndUpdate(
+export async function getUserByUserId({ userId }: { userId: string }) {
+  const account = await UsersModel.findOne({
+    _id: userId,
+  }).lean<Users>();
+
+  return account;
+}
+
+export function updateUser({
+  username,
+  email,
+  cities,
+  userId,
+}: Pick<Users, 'email' | 'username' | 'cities'> & { userId: string }) {
+  return UsersModel.findOneAndUpdate(
     {
-      'verification.expired': { $gt: momentTz().toDate() },
-      'verification.code': code,
+      _id: userId,
     },
     {
-      $set: {
-        'verification.expired': momentTz().toDate(),
-      },
+      $set: { username, email, cities, updatedAt: momentTz().toDate() },
     },
-  );
-  if (!account?._id) {
-    throw new Error('CODE_INCORRECT_OR_EXPIRED');
-  }
-
-  const isSuperUser = await isRoot(account._id);
-
-  return { userId: account._id, isSuperUser };
+  ).lean<Users>();
 }
 
 export async function resetPassword(email: string) {
@@ -155,6 +144,7 @@ export async function resetPassword(email: string) {
       },
     },
   );
+
   if (!account?._id) {
     throw new Error(ERROR.EMAIL_INCORRECT);
   }
@@ -195,22 +185,5 @@ export async function changePassword({
   if (!account?._id) {
     return redirect(ROUTE_NAME.RESET_PASSWORD);
   }
+  return account._id;
 }
-
-// Tell the Authenticator to use the form strategy
-authenticator.use(
-  new FormStrategy(async ({ form }) => {
-    const code = form.get('code')?.toString();
-    if (!code) {
-      throw new Error('Login failure');
-    }
-    const user = await verifyCode(code);
-    // the type of this user must match the type you pass to the Authenticator
-    // the strategy will automatically inherit the type if you instantiate
-    // directly inside the `use` method
-    return user;
-  }),
-  // each strategy has a name and can be changed to use another one
-  // same strategy multiple times, especially useful for the OAuth2 strategy.
-  'user-pass',
-);

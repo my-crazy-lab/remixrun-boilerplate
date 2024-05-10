@@ -1,181 +1,270 @@
+import ActionsHistoryModel from '~/services/model/actionHistory.server';
+import GroupsModel from '~/services/model/groups.server';
+import UsersModel from '~/services/model/users.server';
 import {
+  changeUserAvatar,
   createNewUser,
-  getActionsHistory,
-  getTotalActionsHistory,
-  getTotalUsers,
+  getActionsHistoryManagedByManagerId,
+  getTotalActionsHistoryManageByManagerId,
+  getTotalUsersManagedByManagerId,
   getUserProfile,
-  getUsers,
+  getUsersManagedByManagerId,
+  setUserLanguage,
 } from '~/services/settings.server';
-import type { ActionsHistory, Users } from '~/types';
-import { mongodb } from '~/utils/db.server';
+import type { ActionsHistory, Groups, Users } from '~/types';
 
 describe('Setting page', () => {
+  const managerId = 'manager';
   const mockUserId = 'user-1';
   const mockUserId_2 = 'user-2';
 
   const mockActionId = 'action-history';
   const mockActionId_2 = 'action-history-2';
 
+  const mockGroupId = 'group-1';
+  const mockGroupId_2 = 'group-2';
+
   const mockUsers: Array<Users> = [
     {
       _id: mockUserId,
-      email: 'test1@gmail.com',
-      username: 'Test 1',
-      createdAt: new Date(),
+      username: mockUserId,
       status: 'ACTIVE',
-      cities: ['Hồ Chí Minh'],
+      email: 'user-1@gmail.com',
+      isoCode: 'VN',
+      createdAt: new Date(),
+      cities: ['Hồ Chí Minh', 'Hà Nội'],
+      language: 'vi',
     },
     {
       _id: mockUserId_2,
-      email: 'test2@gmail.com',
-      username: 'Test 2',
-      createdAt: new Date(),
+      username: mockUserId_2,
       status: 'ACTIVE',
-      cities: ['Hồ Chí Minh', 'HN'],
+      email: 'user-2@gmail.com',
+      isoCode: 'VN',
+      createdAt: new Date(),
+      cities: ['Hồ Chí Minh', 'Hà Nội'],
+      language: 'vi',
     },
   ];
 
   const mockActionsHistory: Array<ActionsHistory> = [
     {
       _id: mockActionId,
-      data: {
-        name: 'mkt',
-        description: 'child rooot',
-        userIds: '["65eac266901400e13f73cebf","R5pRgZqKyhTKRX2N22"]',
-        roleIds: '["root"]',
-      },
-      userId: mockUserId,
+      actorId: mockUserId,
       action: 'create',
+      requestFormData: {},
       createdAt: new Date(),
     },
     {
       _id: mockActionId_2,
-      data: {
-        name: 'mkt',
-        description: 'child rooot',
-        userIds: '["65eac266901400e13f73cebf","R5pRgZqKyhTKRX2N22"]',
-        roleIds: '["root"]',
-      },
-      userId: mockUserId,
+      actorId: mockUserId_2,
       action: 'create',
+      requestFormData: {},
       createdAt: new Date(),
     },
   ];
 
+  const mockGroups: Array<Groups> = [
+    {
+      _id: mockGroupId,
+      name: 'Group 1',
+      userIds: [mockUserId],
+      createdAt: new Date(),
+      description: 'group description',
+      roleAssignedIds: [],
+      hierarchy: 2,
+      status: 'ACTIVE',
+      genealogy: [], // group parent
+    },
+    {
+      _id: mockGroupId_2,
+      name: 'Group 2',
+      userIds: [mockUserId_2, mockUserId],
+      createdAt: new Date(),
+      description: 'group description',
+      roleAssignedIds: [],
+      hierarchy: 2,
+      status: 'ACTIVE',
+      genealogy: [mockGroupId], // include group parent id
+    },
+  ];
+
   beforeAll(async () => {
-    await mongodb.collection<Users>('users').insertMany(mockUsers);
-    await mongodb
-      .collection<ActionsHistory>('actionsHistory')
-      .insertMany(mockActionsHistory);
+    await UsersModel.insertMany(mockUsers);
+    await ActionsHistoryModel.insertMany(mockActionsHistory);
+    await GroupsModel.insertMany(mockGroups);
   });
 
   afterAll(async () => {
-    await mongodb.collection<Users>('users').deleteMany({
+    await UsersModel.deleteMany({
       _id: {
         $in: [mockUserId, mockUserId_2],
       },
     });
-    await mongodb.collection<ActionsHistory>('actionsHistory').deleteMany({
+    await ActionsHistoryModel.deleteMany({
       _id: {
         $in: [mockActionId, mockActionId_2],
       },
     });
+    await GroupsModel.deleteMany({
+      _id: {
+        $in: [mockGroupId, mockGroupId_2],
+      },
+    });
   });
 
-  describe('getTotalActionHistory', () => {
+  describe('getTotalActionsHistory', () => {
     it('should return total action history correctly', async () => {
-      const total = await getTotalActionsHistory({ searchText: '' });
-      expect(total).toEqual(mockActionsHistory.length);
+      const result = await getTotalActionsHistoryManageByManagerId({
+        searchText: '',
+        managerId: mockUserId,
+      });
+      expect(result).toEqual(mockActionsHistory.length);
     });
 
     it('should return total action history correctly with search text', async () => {
-      const total = await getTotalActionsHistory({ searchText: 'searchText' });
-      expect(total).toEqual(0);
+      const mockSearchText =
+        mockUsers.find(user => user._id === mockUserId)?.username || '';
+
+      const result = await getTotalActionsHistoryManageByManagerId({
+        searchText: mockSearchText,
+        managerId: mockUserId,
+      });
+
+      expect(result).toEqual(1);
     });
   });
 
   describe('getActionsHistory', () => {
-    it('should return data action history correctly', async () => {
-      const actionsHistory = await getActionsHistory({
+    it('should return data action history correctly with skip and limit', async () => {
+      const skip = 1;
+      const limit = 10;
+      const actionsHistory = await getActionsHistoryManagedByManagerId({
         searchText: '',
-        skip: 0,
-        limit: 4,
+        skip,
+        limit,
         projection: {
           username: '$user.username',
           action: 1,
           data: 1,
           createdAt: 1,
         },
+        managerId: mockUserId,
       });
 
-      expect(actionsHistory).toHaveLength(mockActionsHistory.length);
-      mockActionsHistory.forEach((action, index) => {
-        expect(actionsHistory[index]._id).toEqual(action._id);
-      });
+      expect(actionsHistory).toHaveLength(1);
+      expect(actionsHistory[0]._id).toEqual(mockActionId_2);
     });
-
-    it('should return data action history correctly with search text', async () => {
-      const actionsHistory = await getActionsHistory({
-        searchText: 'abc',
-        skip: 0,
-        limit: 4,
+    it('should not return data action history correctly with searchText', async () => {
+      const randomText = 'randomText';
+      const skip = 1;
+      const limit = 10;
+      const actionsHistory = await getActionsHistoryManagedByManagerId({
+        searchText: randomText,
+        skip,
+        limit,
         projection: {
           username: '$user.username',
           action: 1,
           data: 1,
           createdAt: 1,
         },
+        managerId: mockUserId,
       });
 
       expect(actionsHistory).toHaveLength(0);
     });
   });
 
-  describe('getTotalUsers', () => {
-    it('should return total data user correctly', async () => {
-      const total = await getTotalUsers();
-
-      expect(total).toEqual(mockUsers.length);
-    });
-  });
-
-  describe('getUsers', () => {
-    it('should return data users correctly', async () => {
-      const users = await getUsers({});
-
-      expect(users).toHaveLength(mockUsers.length);
-      expect(users).toEqual(mockUsers);
-    });
-  });
-
   describe('getUserProfile', () => {
     it('should return data user correctly', async () => {
-      mockUsers.forEach(async user => {
-        const userProfile = await getUserProfile(user._id);
-        expect(userProfile).toEqual(user);
-      });
+      const result = await getUserProfile(mockUserId);
+
+      expect(result?._id).toEqual(
+        mockUsers.find(user => user._id === mockUserId)?._id,
+      );
     });
   });
 
   describe('createNewUser', () => {
-    it('should create new user successfully', async () => {
+    test('should create new user successfully', async () => {
+      const mockUsername = 'thienduy.cao';
       const mockParams = {
-        username: 'rootUser',
-        password: '123',
-        email: 'root@gmail.com',
-        cities: ['HCM', 'HN'],
+        username: mockUsername,
+        email: 'thienduy.cao@btaskee.com',
+        cities: ['Hồ Chí Minh', 'Hà Nội'],
+        isoCode: 'VN',
+        groupIds: [mockGroupId],
       };
 
-      await createNewUser(mockParams);
-      const newUser = await mongodb
-        .collection('users')
-        .findOne({ username: mockParams.username });
+      const result = await createNewUser(mockParams);
+      const groups = await GroupsModel.find({
+        _id: { $in: mockParams.groupIds },
+      });
 
-      expect(newUser?.username).toBe(mockParams.username);
+      expect(result.username).toEqual(mockParams.username);
+      expect(result.email).toEqual(mockParams.email);
+      expect(result.cities).toEqual(mockParams.cities);
 
-      await mongodb
-        .collection<Users>('users')
-        .deleteOne({ username: mockParams.username });
+      groups.forEach(group => {
+        expect(group.userIds).toContain(result._id);
+      });
+
+      await UsersModel.deleteOne({
+        username: mockUsername,
+      });
+    });
+  });
+
+  describe('setUserLanguage & changeAvatarUrl', () => {
+    it('Should set user language successfully', async () => {
+      const mockParams = {
+        userId: mockUserId,
+        language: 'en',
+      };
+      await setUserLanguage(mockParams);
+
+      const updatedUser = await UsersModel.findOne({ _id: mockUserId });
+      expect(updatedUser?.language).toEqual(mockParams.language);
+    });
+
+    it('should handle change avatar Url', async () => {
+      const avatarUrl = 'imageUrl';
+
+      await changeUserAvatar({ avatarUrl, userId: mockUserId });
+
+      const updatedUser = await UsersModel.findOne({ _id: mockUserId });
+      expect(updatedUser?.avatarUrl).toEqual(avatarUrl);
+    });
+  });
+
+  describe('getTotalUsersManagedByManagerId', () => {
+    it('should return 0 when manager has no users managed', async () => {
+      const total = await getTotalUsersManagedByManagerId(managerId);
+      expect(total).toEqual(0);
+    });
+
+    it('should return total user managed by manager id', async () => {
+      const total = await getTotalUsersManagedByManagerId(mockUserId);
+      expect(total).toEqual(mockUsers.length);
+    });
+  });
+
+  describe('getUsersManagedByManagerId', () => {
+    it('should return Users Managed By Manager Id', async () => {
+      const skip = 1;
+      const limit = 10;
+      const users = await getUsersManagedByManagerId({
+        skip,
+        limit,
+        projection: {
+          username: 1,
+          createdAt: 1,
+        },
+        managerId: mockUserId,
+      });
+      users.map(user => expect(user.username).toEqual(mockUserId_2));
+      expect(users.length).toEqual(1);
     });
   });
 });

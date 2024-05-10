@@ -14,30 +14,21 @@ import _ from 'lodash';
 import { PERMISSIONS } from '~/constants/common';
 import { hocLoader } from '~/hoc/remix';
 import { getRoleDetail } from '~/services/role-base-access-control.server';
-import { type ReturnValueIgnorePromise } from '~/types';
+import type { LoaderTypeWithError } from '~/types';
 import { groupPermissionsByModule } from '~/utils/common';
 
-interface LoaderData {
-  role: ReturnValueIgnorePromise<typeof getRoleDetail> & {
-    actionPermissions: ReturnType<typeof groupPermissionsByModule>;
-  };
-}
-
-export const loader = hocLoader(
-  async ({ params, request }: LoaderFunctionArgs) => {
-    const role = await getRoleDetail(params.roleId || '');
-    return json({
-      role: {
-        ...role,
-        actionPermissions: groupPermissionsByModule(role.actionPermissions),
-      },
-    });
-  },
-  PERMISSIONS.READ_ROLE,
-);
+export const loader = hocLoader(async ({ params }: LoaderFunctionArgs) => {
+  const role = await getRoleDetail(params.roleId || '');
+  return json({
+    role: {
+      ...role,
+      actionPermissions: groupPermissionsByModule(role.actionPermissions),
+    },
+  });
+}, PERMISSIONS.READ_ROLE);
 
 export default function RolesDetail() {
-  const loaderData = useLoaderData<LoaderData>();
+  const loaderData = useLoaderData<LoaderTypeWithError<typeof loader>>();
 
   return (
     <>
@@ -50,20 +41,20 @@ export default function RolesDetail() {
       <Typography variant="p">{loaderData.role.description}</Typography>
 
       {_.map(loaderData.role.actionPermissions, actionPermission => (
-        <Accordion type="single" collapsible>
+        <Accordion type="single" collapsible key={actionPermission.module}>
           <AccordionItem value={actionPermission.module}>
             <AccordionTrigger className="capitalize">
-              {actionPermission?.module}
+              {actionPermission?.module} permission
             </AccordionTrigger>
             <AccordionContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="flex flex-wrap gap-3">
                 {_.map(actionPermission.actions, action => (
-                  <div key={action._id} className="my-2">
-                    <div className="mt-1 flex items-center gap-2">
-                      <Badge className="text-sm text-blue bg-blue-50 rounded-lg">
-                        {action.name}
-                      </Badge>
-                    </div>
+                  <div
+                    key={action._id}
+                    className="my-2 flex items-center gap-2">
+                    <Badge className="text-sm text-blue bg-blue-50 rounded-md">
+                      {action.name}
+                    </Badge>
                   </div>
                 ))}
               </div>

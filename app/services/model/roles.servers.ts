@@ -1,7 +1,8 @@
 import { Schema } from 'mongoose';
+import type { Roles } from '~/types';
 import { mongoClientBE } from '~/utils/db.server';
 
-const RolesSchema = new Schema(
+const RolesSchema = new Schema<Roles>(
   {
     _id: {
       $type: String,
