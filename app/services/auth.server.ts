@@ -191,6 +191,7 @@ export async function resetPassword(email: string) {
       },
     },
   );
+
   if (!account?._id) {
     throw new Error(ERROR.EMAIL_INCORRECT);
   }
