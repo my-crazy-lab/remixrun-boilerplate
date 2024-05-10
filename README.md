@@ -171,6 +171,8 @@ npm run dev
 
 ## Deployment
 
+### Manually
+
 First, build your app for production:
 
 ```sh
@@ -180,7 +182,10 @@ npm run build
 Then run the app in production mode:
 
 ```sh
-npm start
+npm run deploy
 ```
 
 Now you'll need to pick a host to deploy it to.
+
+### Dockerfile
+We have dockerfile to deploy anywhere you want.
