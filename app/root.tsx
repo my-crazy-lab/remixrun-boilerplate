@@ -5,6 +5,7 @@ import Typography from '@/components/btaskee/Typography';
 import { Button } from '@/components/ui/button';
 import AccessDenied from '@/images/403.svg';
 import NotFound from '@/images/404.svg';
+import ServerError from '@/images/500.svg';
 import type {
   ActionFunctionArgs,
   LinksFunction,
@@ -89,14 +90,32 @@ export function ErrorBoundary() {
               <img
                 className="w-2/3 2xl:w-full text-center m-auto"
                 src={AccessDenied}
-                alt="access-denined-img"
+                alt="access-denied-img"
               />
             </div>
             <Typography className="mt-3" variant="h3">
-              {t('ACCESS_DENINED')}
+              {t('ACCESS_DENIED')}
             </Typography>
             <Typography variant="p" className="text-gray">
               {t('NOT_PERMISSION')}
+            </Typography>
+          </Grid>
+        );
+      case 404:
+        return (
+          <Grid className="text-center">
+            <div className="lg:text-7xl text-4xl">
+              <img
+                className="w-2/3 2xl:w-full text-center m-auto"
+                src={NotFound}
+                alt="not-found-img"
+              />
+            </div>
+            <Typography className="mt-3" variant="h3">
+              {t('PAGE_NOT_FOUND')}
+            </Typography>
+            <Typography variant="p" className="text-gray">
+              {t('PAGE_NOT_FOUND_DESCRIPTION')}
             </Typography>
           </Grid>
         );
@@ -106,8 +125,8 @@ export function ErrorBoundary() {
             <div className="lg:text-7xl text-4xl">
               <img
                 className="w-2/3 2xl:w-full text-center m-auto"
-                src={NotFound}
-                alt="not-found-img"
+                src={ServerError}
+                alt="server-error-img"
               />
             </div>
             <Typography className="mt-3" variant="h3">

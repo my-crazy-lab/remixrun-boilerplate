@@ -21,7 +21,7 @@
   "UPDATE_ROLE": "Cập nhật vai trò",
   "UPDATE_GROUP": "Cập nhật nhóm",
   "EDIT_GROUP": "Chỉnh sửa nhóm",
-  "ACCESS_DENINED": "Truy cập bị từ chối",
+  "ACCESS_DENIED": "Truy cập bị từ chối",
   "NOT_PERMISSION": "Bạn không có quyền truy cập trang này.",
   "PAGE_NOT_FOUND": "Xin lỗi, không tìm thấy trang",
   "PAGE_NOT_FOUND_DESCRIPTION": "Trang bạn đang tìm kiếm không tồn tại!",
