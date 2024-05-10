@@ -1,4 +1,9 @@
-import { getFutureTime, getFutureTimeFromToday, groupPermissionsByModule, momentTz } from "~/utils/common";
+import {
+  getFutureTime,
+  getFutureTimeFromToday,
+  groupPermissionsByModule,
+  momentTz,
+} from '~/utils/common';
 
 describe('Common function', () => {
   describe('getFutureTime', () => {
@@ -35,26 +40,61 @@ describe('Common function', () => {
     // Should group permissions by module correctly when given a valid array of permissions
     it('should group permissions by module correctly when given a valid array of permissions', () => {
       const mockPermissions = [
-        { _id: '1', name: 'Permission 1', description: 'Description 1', module: 'Module 1', 'slug-module': 'Slug 1' },
-        { _id: '2', name: 'Permission 2', description: 'Description 2', module: 'Module 2', 'slug-module': 'Slug 2' },
-        { _id: '3', name: 'Permission 3', description: 'Description 3', module: 'Module 1', 'slug-module': 'Slug 3' },
+        {
+          _id: '1',
+          name: 'Permission 1',
+          description: 'Description 1',
+          module: 'Module 1',
+          'slug-module': 'Slug 1',
+        },
+        {
+          _id: '2',
+          name: 'Permission 2',
+          description: 'Description 2',
+          module: 'Module 2',
+          'slug-module': 'Slug 2',
+        },
+        {
+          _id: '3',
+          name: 'Permission 3',
+          description: 'Description 3',
+          module: 'Module 1',
+          'slug-module': 'Slug 3',
+        },
       ];
 
       const result = groupPermissionsByModule(mockPermissions);
 
       expect(result).toEqual([
         {
-          module: 'Module 1', actions: [
-            { _id: '1', name: 'Permission 1', description: 'Description 1', 'slug-module': 'Slug 1' },
-            { _id: '3', name: 'Permission 3', description: 'Description 3', 'slug-module': 'Slug 3' },
-          ]
+          module: 'Module 1',
+          actions: [
+            {
+              _id: '1',
+              name: 'Permission 1',
+              description: 'Description 1',
+              'slug-module': 'Slug 1',
+            },
+            {
+              _id: '3',
+              name: 'Permission 3',
+              description: 'Description 3',
+              'slug-module': 'Slug 3',
+            },
+          ],
         },
         {
-          module: 'Module 2', actions: [
-            { _id: '2', name: 'Permission 2', description: 'Description 2', 'slug-module': 'Slug 2' },
-          ]
-        }
+          module: 'Module 2',
+          actions: [
+            {
+              _id: '2',
+              name: 'Permission 2',
+              description: 'Description 2',
+              'slug-module': 'Slug 2',
+            },
+          ],
+        },
       ]);
     });
-  })
-})
+  });
+});
