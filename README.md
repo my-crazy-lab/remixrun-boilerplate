@@ -24,8 +24,8 @@
   - [Dashboard advanced](https://tanstack.com/table/latest)
 - :ok_hand: **Unit Test**:
   - Fly safely with unit [Jest](https://jestjs.io/)
-  - 100% coverage. (DOING)
-- :cyclone: **Available CI/CD**: :construction: doing
+  - 100% coverage.
+- :cyclone: **Available CI/CD**
 
 ## Features
 
