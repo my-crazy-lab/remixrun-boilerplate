@@ -32,6 +32,8 @@ const config: Config = {
     '<rootDir>/app/i18n.ts',
     '<rootDir>/app/enums/',
     '<rootDir>/app/constants/',
+    '<rootDir>/app/services/dotenv.server.ts',
+    '<rootDir>/app/utils/db.server.ts',
   ],
 
   // Indicates which provider should be used to instrument code for coverage
