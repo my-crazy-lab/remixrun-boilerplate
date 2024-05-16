@@ -9,6 +9,7 @@ import i18next from '~/i18next.server';
 import { newRecordCommonField } from '~/services/constants.server';
 import { getUserId } from '~/services/helpers.server';
 import ActionsHistoryModel from '~/services/model/actionHistory.server';
+import { httpRequestDurationMicroseconds } from '~/services/prometheus-client.server';
 import { getUserPermissionsIgnoreRoot } from '~/services/role-base-access-control.server';
 import type { MustBeAny } from '~/types';
 
@@ -43,6 +44,11 @@ export function hocAction<A>(
   permission?: string | Array<string>,
 ) {
   async function action(args: ActionFunctionArgs) {
+    const startEpoch = Date.now();
+    const url = new URL(args.request.url);
+    const router = url.pathname;
+    const method = args.request.method;
+
     try {
       const userId = await getUserId({ request: args.request });
 
@@ -51,6 +57,11 @@ export function hocAction<A>(
 
         if (typeof permission === 'string') {
           if (!userPermissions.includes(permission)) {
+            const responseTimeInMs = Date.now() - startEpoch;
+            httpRequestDurationMicroseconds
+              .labels(method, router, '403')
+              .observe(responseTimeInMs);
+
             throw new Response(null, res403);
           }
         } else {
@@ -63,6 +74,11 @@ export function hocAction<A>(
             }
           });
           if (!flag) {
+            const responseTimeInMs = Date.now() - startEpoch;
+            httpRequestDurationMicroseconds
+              .labels(method, router, '403')
+              .observe(responseTimeInMs);
+
             throw new Response(null, res403);
           }
         }
@@ -106,12 +122,27 @@ export function hocAction<A>(
         await newActionHistory.save();
       }
 
+      const responseTimeInMs = Date.now() - startEpoch;
+      httpRequestDurationMicroseconds
+        .labels(method, router, '200')
+        .observe(responseTimeInMs);
+
       return actionResult;
     } catch (error) {
       const t = await i18next.getFixedT(args.request, 'user-settings');
       if (error instanceof Error) {
+        const responseTimeInMs = Date.now() - startEpoch;
+        httpRequestDurationMicroseconds
+          .labels(method, router, '500')
+          .observe(responseTimeInMs);
+
         return json({ error: t(error.message) });
       }
+
+      const responseTimeInMs = Date.now() - startEpoch;
+      httpRequestDurationMicroseconds
+        .labels(method, router, '500')
+        .observe(responseTimeInMs);
 
       return json({ error: t(ERROR.UNKNOWN_ERROR), detail: error });
     }
@@ -128,48 +159,63 @@ export function hocLoader<A>(
   permission?: string | Array<string>,
 ) {
   async function loader(args: LoaderFunctionArgs) {
-    try {
-      const userId = await getUserId({ request: args.request });
-      const userPermissions = await getUserPermissionsIgnoreRoot(userId);
+    const startEpoch = Date.now();
+    const url = new URL(args.request.url);
+    const router = url.pathname;
+    const method = args.request.method;
 
-      if (
-        typeof permission === 'string' &&
-        !userPermissions.includes(permission)
-      ) {
+    const userId = await getUserId({ request: args.request });
+    const userPermissions = await getUserPermissionsIgnoreRoot(userId);
+
+    if (
+      typeof permission === 'string' &&
+      !userPermissions.includes(permission)
+    ) {
+      const responseTimeInMs = Date.now() - startEpoch;
+      httpRequestDurationMicroseconds
+        .labels(method, router, '403')
+        .observe(responseTimeInMs);
+
+      throw new Response(null, res403);
+    }
+
+    if (Array.isArray(permission)) {
+      const permissionsPassed: Array<string> = [];
+      permission.forEach(p => {
+        if (userPermissions.includes(p)) {
+          permissionsPassed.push(p);
+        }
+      });
+      if (!permissionsPassed.length) {
+        const responseTimeInMs = Date.now() - startEpoch;
+        httpRequestDurationMicroseconds
+          .labels(method, router, '403')
+          .observe(responseTimeInMs);
+
         throw new Response(null, res403);
       }
 
-      if (Array.isArray(permission)) {
-        const permissionsPassed: Array<string> = [];
-        permission.forEach(p => {
-          if (userPermissions.includes(p)) {
-            permissionsPassed.push(p);
-          }
-        });
-        if (!permissionsPassed.length) {
-          throw new Response(null, res403);
-        }
-
-        const loaderResult = await callback(args, {
-          permissionsPassed: permissionsPassed,
-        });
-        return loaderResult;
-      }
-
       const loaderResult = await callback(args, {
-        permissionsPassed: permission ? [permission] : [],
+        permissionsPassed: permissionsPassed,
       });
-      return loaderResult;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('DEBUGGER loader: ', error);
-      const t = await i18next.getFixedT(args.request, 'user-settings');
-      if (error instanceof Error) {
-        return json({ error: t(error.message) });
-      }
 
-      return json({ error: t(ERROR.UNKNOWN_ERROR) });
+      const responseTimeInMs = Date.now() - startEpoch;
+      httpRequestDurationMicroseconds
+        .labels(method, router, '200')
+        .observe(responseTimeInMs);
+      return loaderResult;
     }
+
+    const loaderResult = await callback(args, {
+      permissionsPassed: permission ? [permission] : [],
+    });
+
+    const responseTimeInMs = Date.now() - startEpoch;
+    httpRequestDurationMicroseconds
+      .labels(method, router, '200')
+      .observe(responseTimeInMs);
+
+    return loaderResult;
   }
 
   return loader;

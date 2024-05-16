@@ -58,6 +58,7 @@
 2. Mongodb
 
 ### Add hierarchy 1:
+
 ```
 db.getCollection("users").insert(
   {
